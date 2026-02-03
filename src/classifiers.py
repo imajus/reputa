@@ -3,7 +3,6 @@ from typing import Dict, List, Any
 from src.config import Settings
 
 settings = Settings()
-
 POAP_CONTRACT = settings.POAP_CONTRACT.lower()
 ENS_NAMEWRAPPER = settings.ENS_NAMEWRAPPER.lower()
 
@@ -28,7 +27,7 @@ def safelist_status(nft: Dict) -> str:
 
 def is_ens(nft: Dict) -> bool:
     contract_addr = nft.get("contract", {}).get("address", "").lower()
-    name = nft.get("name") or ""  # Fix: handle None case
+    name = nft.get("name") or ""
     return contract_addr == ENS_NAMEWRAPPER or name.endswith(".eth")
 
 def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
@@ -36,7 +35,7 @@ def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     legit_nfts = []
     spam_nfts = []
     ens_domains = []
-
+    
     for nft in nfts:
         nft["classification"] = {
             "is_poap": is_poap(nft),
@@ -44,18 +43,18 @@ def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
             "safelist": safelist_status(nft),
             "is_ens": is_ens(nft)
         }
-
+        
         if is_spam(nft):
             spam_nfts.append(nft)
         elif is_poap(nft):
             poaps.append(nft)
-            legit_nfts.append(nft)  # POAPs are legit
+            legit_nfts.append(nft)
         elif is_ens(nft):
             ens_domains.append(nft)
             legit_nfts.append(nft)
         else:
             legit_nfts.append(nft)
-
+    
     return {
         "all": nfts,
         "poaps": poaps,

@@ -1,186 +1,234 @@
-# On-Chain Credit Scoring System
+# On-Chain Credit Score API
 
-A blockchain-based credit scoring system that analyzes Ethereum wallet activity to generate creditworthiness scores (300-850 range, similar to traditional FICO scores).
+A FastAPI-based credit scoring system that analyzes Ethereum wallet behavior to generate a creditworthiness score (0-850, similar to FICO).
 
-## Overview
+## Score Range
 
-This system fetches on-chain data using Alchemy API and calculates a comprehensive credit score based on:
+- **800-850**: Excellent (A+)
+- **740-799**: Very Good (A)
+- **670-739**: Good (B+)
+- **580-669**: Fair (B)
+- **500-579**: Poor (C)
+- **400-499**: Very Poor (D)
+- **0-399**: Bad (F)
 
-- **Wallet Age**: How long the wallet has been active
-- **Asset Holdings**: ETH, ERC20 tokens, NFTs, and their USD values
-- **Transaction Activity**: Volume, frequency, and recency of transactions
-- **DeFi Participation**: Active positions in DeFi protocols
-- **Community Engagement**: POAPs (Proof of Attendance Protocol badges) from events
-- **Identity**: ENS domain ownership
-- **Risk Factors**: Interactions with known scam addresses or mixers
+## What Affects Your Score
 
-## Features
+### ✅ Positive Factors
 
-- ✅ **Alchemy-Only Integration** - No Etherscan dependency
-- ✅ **Comprehensive Asset Tracking** - Tokens, NFTs, POAPs, ENS
-- ✅ **Scam Detection** - Flags interactions with known malicious addresses
-- ✅ **Mixer Detection** - Identifies privacy mixer usage (Tornado Cash, etc.)
-- ✅ **REST API** - FastAPI-based endpoints for easy integration
-- ✅ **Credit Score (300-850)** - Industry-standard score range with grade (AAA-F)
+#### Payment History (35% weight - Max 298 points)
 
-## Architecture
+- **DeFi Protocol Usage**
+  - Aave interactions: +80 points
+  - Compound interactions: +70 points
+  - 3+ protocols: +50 points
+- **Activity Consistency**
+  - 12+ active months: +60 points
+  - 6-12 active months: +30 points
+- **Balanced Cash Flow**
+  - ETH out/in ratio < 2: +38 points
 
-```
-┌─────────────────┐
-│   Alchemy API   │  ← Single data source
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ DataAggregator  │  ← Fetches wallet data
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ CreditScorer    │  ← Calculates score
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   FastAPI       │  ← REST endpoints
-└─────────────────┘
-```
+#### Amounts Owed (30% weight - Max 255 points)
 
-## Configuration
+- **Stablecoin Holdings**
+  - $10,000+: +100 points
+  - $1,000-$10,000: +60 points
+  - $100-$1,000: +30 points
+- **Total Assets**: Up to +100 points (0.01 \* total USD value)
+- **ETH Balance**
+  - 10+ ETH: +55 points
+  - 1-10 ETH: +35 points
+  - 0.1-1 ETH: +15 points
 
-Create a `.env` file:
+#### Length of History (15% weight - Max 128 points)
 
-```env
-ALCHEMY_API_KEY=your_alchemy_key_here
-```
+- **Wallet Age**: +30 points per year (max 80 points at 2.5+ years)
+- **Transaction Count**: +0.5 points per transaction (max 48 points)
 
-## Usage
+#### New Credit (10% weight - Max 85 points)
 
-### Run the API Server
+- **Recent DeFi Activity**: +20 points per protocol (max 60)
+- **Not Overextended**: +25 points if < 1000 transactions
 
-```bash
-uvicorn src.api:app --reload
-```
+#### Credit Mix (10% weight - Max 85 points)
 
-Server starts at `http://localhost:8000`
+- **Asset Diversification**: +15 points per asset type (tokens, NFTs, stablecoins, ETH)
+- **Protocol Diversity**: +10 points per DeFi protocol (max 25)
 
-### API Endpoints
+#### Reputation Bonuses
 
-#### Get Wallet Credit Score
+- **POAPs**: +3 points each (max 40)
+- **ENS Domain**: +25 points
+- **Verified NFTs**: +5 points each (max 60)
+- **Blue Chip NFTs**: +15 points each (max 50)
+  - Bored Ape Yacht Club
+  - CryptoPunks
+  - Azuki
+  - Mutant Ape Yacht Club
+  - CloneX
 
-```bash
-GET /wallets/{address}/score
-```
+### ❌ Negative Factors (Risk Penalties)
 
-Returns complete wallet profile with credit score, breakdown, and asset summary.
+#### Critical Red Flags
 
-Example:
+- **Mixer Interaction**: -200 points
+  - Tornado Cash or similar privacy protocols
+  - Null address transactions
 
-```bash
-curl http://localhost:8000/wallets/0x0000000000000000000000000000000000000000/score
-```
+#### Suspicious Patterns
 
-#### Get Score Breakdown Only
+- **High Spam NFT Ratio**
+  - > 50% spam: -80 points
+  - 20-50% spam: -40 points
+- **Drainer Pattern** (ETH out >> ETH in)
+  - 10x+ outflow: -150 points
+  - 5-10x outflow: -70 points
+- **Low NFT Verification Rate**
+  - <30% verified + 5+ NFTs: -30 points
 
-```bash
-GET /wallets/{address}/breakdown
-```
+## NFT Quality Assessment
 
-Returns just the score components without full asset details (lighter query).
+### Verified NFTs (Best)
 
-#### Get Wallet Assets
+- `safelistRequestStatus: "verified"`
+- Counts toward reputation
+- Full value in scoring
 
-```bash
-GET /wallets/{address}/assets
-```
+### Not Requested (Neutral)
 
-Returns detailed listing of all assets: tokens, NFTs, POAPs, DeFi positions, and recent transactions.
+- `safelistRequestStatus: "not_requested"`
+- Included in counts but no bonus
+- Typical for smaller projects
 
-### API Documentation
+### Spam NFTs (Negative)
 
-Interactive API documentation available at:
+- `isSpam: true` in contract or NFT metadata
+- Not counted as legitimate
+- Penalizes score if ratio too high
 
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+## DeFi Protocols Tracked
 
-## Scoring Methodology
+### Lending/Borrowing
 
-### Score Components (Max 850 points)
+- Aave V2 & V3
+- Compound V2 & V3
 
-| Component          | Max Points | Description                                      |
-| ------------------ | ---------- | ------------------------------------------------ |
-| Wallet Age         | 100        | Age in days (2+ years = max)                     |
-| Assets             | 200        | ETH, tokens, NFTs value                          |
-| Activity           | 150        | Transaction count, volume, recency               |
-| POAPs              | 100        | Event attendance, categories                     |
-| ENS                | 50         | ENS domain ownership                             |
-| DeFi               | 100        | DeFi protocol participation                      |
-| RWAs               | 50         | Real World Asset holdings                        |
-| **Risk Penalties** | -∞         | Scam interactions (-100 each), mixer usage (-50) |
+### DEX
 
-### Risk Levels
+- Uniswap V2 & V3
+- Curve Finance
 
-| Score Range | Grade | Risk Level |
-| ----------- | ----- | ---------- |
-| 750-850     | AAA-A | Low        |
-| 650-749     | BBB-B | Medium     |
-| 550-649     | CCC-C | High       |
-| 300-549     | D-F   | Very High  |
+## API Endpoints
 
-## Data Sources
+### GET /score
 
-All data fetched from **Alchemy API**:
+Calculates comprehensive credit score for a wallet.
 
-- `eth_getBalance` - ETH balance
-- `alchemy_getTokenBalances` - ERC20 tokens
-- `getNFTsForOwner` - NFTs, POAPs, ENS names
-- `alchemy_getAssetTransfers` - Transaction history
-- `alchemy_getTokenMetadata` - Token information
-
-## Example Response
+**Request:**
 
 ```json
 {
-  "address": "0x0000000000000000000000000000000000000000",
-  "credit_score": 720,
-  "grade": "A",
-  "breakdown": {
-    "wallet_age": 85.0,
-    "assets": 120.0,
-    "activity": 95.0,
-    "poaps": 45.0,
-    "ens": 30.0,
-    "defi": 0.0,
-    "rwa": 0.0,
-    "risk_penalty": 0.0
-  },
-  "total_value": 2547.33,
-  "token_count": 4,
-  "nft_count": 2,
-  "wallet_age_days": 856,
-  "transaction_count": 7
+  "wallet_address": "0x..."
 }
 ```
 
-## Project Structure
+**Response:**
+
+```json
+{
+  "score": 720,
+  "grade": "B+",
+  "max_score": 850,
+  "breakdown": {
+    "payment_history": 180,
+    "amounts_owed": 145,
+    "length_of_history": 95,
+    "new_credit": 60,
+    "credit_mix": 70,
+    "reputation_bonus": 85,
+    "risk_penalty": -15
+  },
+  "details": {
+    "total_assets_usd": 12500.5,
+    "eth_balance": 2.4567,
+    "stablecoin_balance_usd": 5000.0,
+    "wallet_age_days": 856,
+    "tx_count": 342,
+    "active_months": 18,
+    "defi_protocols_used": 3,
+    "verified_nfts": 12,
+    "blue_chip_nfts": 1,
+    "poap_count": 15,
+    "ens_count": 1
+  },
+  "risk_flags": {
+    "mixer_transactions": false,
+    "high_spam_ratio": false,
+    "drainer_pattern": false,
+    "low_nft_verification": false
+  }
+}
+```
+
+## Installation
+
+1. Clone repository
+2. Install dependencies:
+
+```bash
+pip install fastapi uvicorn requests pydantic-settings
+```
+
+3. Create `.env` file:
 
 ```
-.
-├── src/
-│   ├── api.py              # FastAPI REST endpoints
-│   ├── data_aggregator.py  # Alchemy data fetching
-│   ├── credit_scorer.py    # Score calculation logic
-│   └── config.py           # Configuration settings
-├── README.md
-└── requirements.txt
+ALCHEMY_API_KEY=your_key_here
+ALCHEMY_NETWORK=eth-mainnet
 ```
 
-## Requirements
+4. Run:
 
+```bash
+uvicorn app:app --reload
 ```
-fastapi>=0.104.0
-uvicorn>=0.24.0
-aiohttp>=3.9.0
-pydantic>=2.5.0
-python-dotenv>=1.0.0
-```
+
+## Important Notes
+
+### ENS and Credit Score
+
+- **Yes, ENS affects your score** (+25 points bonus)
+- ENS ownership shows:
+  - Identity commitment
+  - Reputation building
+  - Long-term ecosystem participation
+
+### ETH Balance
+
+- **Yes, we check ETH balance** separately from ERC20 tokens
+- Native ETH balance is fetched via `eth_getBalance`
+- ERC20 tokens use `alchemy_getTokenBalances`
+- Both contribute to "Amounts Owed" scoring category
+
+### Stablecoins
+
+- USDC, USDT, DAI tracked separately
+- Shows liquidity and financial stability
+- Major weight in "Amounts Owed" category
+
+## Known Limitations
+
+1. **No liquidation data** - Would require lending protocol event tracking
+2. **Simplified DeFi analysis** - Only checks interactions, not loan health
+3. **Price estimation** - Uses CoinGecko (rate limited) and OpenSea floor prices
+4. **No gas analysis** - Could add commitment scoring
+5. **Static mixer list** - Should integrate blockchain intelligence APIs
+
+## Future Improvements
+
+- [ ] Loan repayment history tracking
+- [ ] Liquidation event detection
+- [ ] Real-time gas spent analysis
+- [ ] GitCoin donation tracking
+- [ ] DAO governance participation
+- [ ] Sybil attack detection
+- [ ] Integration with Chainalysis/TRM Labs
