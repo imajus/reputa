@@ -39,7 +39,7 @@ def calculate_token_value(tokens: List[Dict], prices: Dict[str, float]) -> float
 
 def calculate_nft_value(nfts: List[Dict]) -> float:
     values = estimate_nft_values(nfts)
-    return sum(values.values())
+    return sum(v for v in values.values() if v is not None)
 
 def calculate_credit_score(aggregated: Dict) -> Dict:
     nfts = aggregated["nfts"]

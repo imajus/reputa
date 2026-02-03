@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     ENS_NAMEWRAPPER: str
     API_PORT: int
 
+    COINGECKO_URL: str = "https://api.coingecko.com/api/v3/simple/token_price/ethereum"
+
     @property
     def ALCHEMY_NFT_URL(self) -> str:
         return f"https://eth-mainnet.g.alchemy.com/nft/v3/{self.ALCHEMY_API_KEY}"

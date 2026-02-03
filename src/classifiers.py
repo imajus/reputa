@@ -28,7 +28,8 @@ def safelist_status(nft: Dict) -> str:
 
 def is_ens(nft: Dict) -> bool:
     contract_addr = nft.get("contract", {}).get("address", "").lower()
-    return contract_addr == ENS_NAMEWRAPPER or nft.get("name", "").endswith(".eth")
+    name = nft.get("name") or ""  # Fix: handle None case
+    return contract_addr == ENS_NAMEWRAPPER or name.endswith(".eth")
 
 def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     poaps = []

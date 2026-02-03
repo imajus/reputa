@@ -67,13 +67,11 @@ def fetch_asset_transfers(wallet: str, params: AssetTransferParams, is_from: boo
     return transfers
 
 # === Price Fetchers (Coingecko for tokens, floor for NFTs) ===
-COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/token_price/ethereum"
-
 def fetch_token_prices(contracts: List[str]) -> Dict[str, float]:
     if not contracts:
         return {}
     params = {"contract_addresses": ",".join(contracts), "vs_currencies": "usd"}
-    r = requests.get(COINGECKO_URL, params=params)
+    r = requests.get(settings.COINGECKO_URL, params=params)
     if r.status_code != 200:
         return {}  # Fallback to 0
     prices = {}
@@ -86,7 +84,7 @@ def fetch_token_prices(contracts: List[str]) -> Dict[str, float]:
 def estimate_nft_values(nfts: List[Dict]) -> Dict[str, float]:
     values = {}
     for nft in nfts:
-        floor = nft.get("contract", {}).get("openSeaMetadata", {}).get("floorPrice", 0.0)
+        floor = nft.get("contract", {}).get("openSeaMetadata", {}).get("floorPrice") or 0.0
         token_id = nft.get("tokenId")
         values[f"{nft['contract']['address']}_{token_id}"] = floor
     return values
