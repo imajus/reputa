@@ -7,9 +7,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: str
 
     ALCHEMY_API_KEY: str
-    
+
     API_PORT: int
-    CORS_ORIGINS: list[str] = ["*"]
     
 
 settings = Settings()
