@@ -1,0 +1,71 @@
+# classifiers.py
+from typing import Dict, List, Any
+from src.config import Settings
+
+settings = Settings()
+
+POAP_CONTRACT = settings.POAP_CONTRACT.lower()
+ENS_NAMEWRAPPER = settings.ENS_NAMEWRAPPER.lower()
+
+def is_poap(nft: Dict) -> bool:
+    contract_addr = nft.get("contract", {}).get("address", "").lower()
+    if contract_addr == POAP_CONTRACT:
+        return True
+    token_uri = (nft.get("tokenUri") or nft.get("raw", {}).get("tokenUri", "") or "").lower()
+    if "poap.tech" in token_uri:
+        return True
+    tags = nft.get("raw", {}).get("metadata", {}).get("tags", []) or []
+    if any("poap" in str(t).lower() for t in tags):
+        return True
+    return False
+
+def is_spam(nft: Dict) -> bool:
+    return nft.get("isSpam", False) or nft.get("contract", {}).get("isSpam", False)
+
+def safelist_status(nft: Dict) -> str:
+    osm = nft.get("contract", {}).get("openSeaMetadata", {})
+    return osm.get("safelistRequestStatus", "unknown")
+
+def is_ens(nft: Dict) -> bool:
+    contract_addr = nft.get("contract", {}).get("address", "").lower()
+    return contract_addr == ENS_NAMEWRAPPER or nft.get("name", "").endswith(".eth")
+
+def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
+    poaps = []
+    legit_nfts = []
+    spam_nfts = []
+    ens_domains = []
+
+    for nft in nfts:
+        nft["classification"] = {
+            "is_poap": is_poap(nft),
+            "is_spam": is_spam(nft),
+            "safelist": safelist_status(nft),
+            "is_ens": is_ens(nft)
+        }
+
+        if is_spam(nft):
+            spam_nfts.append(nft)
+        elif is_poap(nft):
+            poaps.append(nft)
+            legit_nfts.append(nft)  # POAPs are legit
+        elif is_ens(nft):
+            ens_domains.append(nft)
+            legit_nfts.append(nft)
+        else:
+            legit_nfts.append(nft)
+
+    return {
+        "all": nfts,
+        "poaps": poaps,
+        "legit_nfts": legit_nfts,
+        "spam_nfts": spam_nfts,
+        "ens_domains": ens_domains,
+        "counts": {
+            "total": len(nfts),
+            "poaps": len(poaps),
+            "legit": len(legit_nfts),
+            "spam": len(spam_nfts),
+            "ens": len(ens_domains)
+        }
+    }
