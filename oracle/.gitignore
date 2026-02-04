@@ -12,3 +12,5 @@ result
 
 # Keep flake.lock - it's essential for reproducibility!
 # DO NOT add flake.lock to .gitignore
+
+/deployment.env
