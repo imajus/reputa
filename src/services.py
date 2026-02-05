@@ -1,6 +1,5 @@
-# services.py (ENHANCED VERSION)
 import requests
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from src.models import AssetTransferParams
 from src.classifiers import classify_nfts
@@ -8,7 +7,24 @@ from src.config import Settings, MIXER_ADDRESSES, DEFI_PROTOCOLS, STABLECOINS, B
 
 settings = Settings()
 
-# === NFT Fetchers ===
+PROTOCOL_ADDRESSES = {
+    "Aave V3": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+    "Lido": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+    "EigenCloud": "0xec53bf9167f50cdeb3ae105f56099aaab9061f83",
+    "Ethena USDe": "0x57e114b691db790c35207b2e685d4a43181e6061",
+}
+
+LENDING_EVENT_SIGNATURES = {
+    "Borrow": "borrow",
+    "Repay": "repay",
+    "Liquidate": "liquidate",
+    "LiquidationCall": "liquidate",
+    "Supply": "supply",
+    "Withdraw": "withdraw",
+    "Deposit": "supply",
+    "Redeem": "withdraw",
+}
+
 def fetch_all_nfts(wallet: str) -> List[Dict]:
     all_nfts = []
     params = {"owner": wallet, "withMetadata": "true", "pageSize": 100}
@@ -22,7 +38,6 @@ def fetch_all_nfts(wallet: str) -> List[Dict]:
         params["pageKey"] = data["pageKey"]
     return all_nfts
 
-# === Token Fetchers ===
 def fetch_token_balances(wallet: str) -> List[Dict]:
     payload = {
         "id": 1,
@@ -57,9 +72,7 @@ def fetch_token_metadata_batch(contract_addresses: List[str]) -> List[Dict]:
         return []
     return r.json().get("contracts", [])
 
-# === ENHANCED: Token Metadata (Individual) ===
 def fetch_token_metadata(contract_address: str) -> Optional[Dict]:
-    """Fetch detailed metadata for a single token using Alchemy"""
     try:
         payload = {
             "jsonrpc": "2.0",
@@ -77,9 +90,7 @@ def fetch_token_metadata(contract_address: str) -> Optional[Dict]:
         print(f"Error fetching metadata for {contract_address}: {e}")
         return None
 
-# === ENHANCED: Alchemy Prices API (Better than CoinGecko) ===
 def fetch_token_price_alchemy(contract_address: str) -> Optional[Dict]:
-    """Fetch current token price using Alchemy Prices API"""
     try:
         url = f"https://api.g.alchemy.com/prices/v1/{settings.ALCHEMY_API_KEY}/tokens/by-address"
         
@@ -110,7 +121,6 @@ def fetch_token_price_alchemy(contract_address: str) -> Optional[Dict]:
         return None
 
 def fetch_historical_prices_alchemy(contract_address: str, days: int = 30) -> Optional[List[Dict]]:
-    """Fetch historical prices for volatility calculation"""
     try:
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=days)
@@ -137,7 +147,6 @@ def fetch_historical_prices_alchemy(contract_address: str, days: int = 30) -> Op
         return None
 
 def calculate_volatility(prices: List[Dict]) -> Optional[float]:
-    """Calculate 30-day price volatility (standard deviation of returns)"""
     if not prices or len(prices) < 2:
         return None
     
@@ -147,7 +156,6 @@ def calculate_volatility(prices: List[Dict]) -> Optional[float]:
         if len(price_values) < 2:
             return None
         
-        # Calculate daily returns
         returns = []
         for i in range(1, len(price_values)):
             if price_values[i-1] and price_values[i] and price_values[i-1] > 0:
@@ -157,7 +165,6 @@ def calculate_volatility(prices: List[Dict]) -> Optional[float]:
         if not returns:
             return None
         
-        # Calculate standard deviation
         mean_return = sum(returns) / len(returns)
         variance = sum((r - mean_return) ** 2 for r in returns) / len(returns)
         
@@ -166,13 +173,11 @@ def calculate_volatility(prices: List[Dict]) -> Optional[float]:
             
         volatility = variance ** 0.5
         
-        return volatility * 100  # Convert to percentage
+        return volatility * 100
     except:
         return None
 
-# === ENHANCED: Enrich Tokens with Prices & Metadata ===
 def enrich_token_data(tokens: List[Dict]) -> List[Dict]:
-    """Enrich token balances with metadata, prices, and volatility"""
     enriched = []
     
     for token in tokens:
@@ -182,17 +187,14 @@ def enrich_token_data(tokens: List[Dict]) -> List[Dict]:
         if not contract_address or not raw_balance:
             continue
         
-        # Convert hex balance
         balance_int = int(raw_balance, 16) if isinstance(raw_balance, str) else raw_balance
         
-        # Get metadata
         metadata = fetch_token_metadata(contract_address)
         
         if not metadata:
-            # Fallback to basic data
             enriched.append({
                 **token,
-                'balance_human': balance_int / (10 ** 18),  # Assume 18 decimals
+                'balance_human': balance_int / (10 ** 18),
                 'current_price_usd': 0,
                 'value_usd': 0,
                 'symbol': 'UNKNOWN',
@@ -200,29 +202,24 @@ def enrich_token_data(tokens: List[Dict]) -> List[Dict]:
             })
             continue
         
-        # Calculate human-readable balance
         decimals = metadata.get('decimals') or 18
         if not isinstance(decimals, int) or decimals < 0:
             decimals = 18
         balance = balance_int / (10 ** decimals)
         
-        # Get price from Alchemy (primary) or fall back to CoinGecko
         price_data = fetch_token_price_alchemy(contract_address)
         
         if price_data:
             current_price = price_data.get('price', 0)
         else:
-            # Fallback to CoinGecko
             prices = fetch_token_prices([contract_address])
             current_price = prices.get(contract_address, 0)
         
         value_usd = balance * current_price
         
-        # Get volatility
         historical = fetch_historical_prices_alchemy(contract_address, days=30)
         volatility = calculate_volatility(historical) if historical else None
         
-        # Categorize token
         category = categorize_token(metadata.get('symbol', ''), contract_address)
         
         enriched.append({
@@ -244,34 +241,27 @@ def enrich_token_data(tokens: List[Dict]) -> List[Dict]:
     return enriched
 
 def categorize_token(symbol: str, address: str) -> str:
-    """Categorize token type"""
     symbol_upper = symbol.upper() if symbol else ''
     address_lower = address.lower()
     
-    # Stablecoins
     stablecoins = ['USDC', 'USDT', 'DAI', 'USDE', 'DEUSD', 'EUSDE', 'FRAX', 'LUSD']
     if symbol_upper in stablecoins or 'USD' in symbol_upper:
         return 'stablecoin'
     
-    # Governance tokens
     governance = ['ENA', 'SENA', 'UNI', 'AAVE', 'COMP', 'MKR', 'CRV', 'BAL']
     if symbol_upper in governance:
         return 'governance'
     
-    # Liquid staking derivatives
     lsd = ['STETH', 'RETH', 'CBETH', 'STDEUSD', 'WSTETH']
     if symbol_upper in lsd or symbol_upper.startswith('ST'):
         return 'liquid_staking'
     
-    # Wrapped assets
     if symbol_upper.startswith('W'):
         return 'wrapped'
     
     return 'unknown'
 
-# === ENHANCED: Portfolio Concentration Analysis ===
 def calculate_portfolio_concentration(enriched_tokens: List[Dict]) -> Dict:
-    """Calculate portfolio concentration metrics"""
     if not enriched_tokens:
         return {
             'herfindahl_index': 0,
@@ -294,18 +284,14 @@ def calculate_portfolio_concentration(enriched_tokens: List[Dict]) -> Dict:
             'num_tokens': len(enriched_tokens)
         }
     
-    # Sort by value
     sorted_tokens = sorted(enriched_tokens, key=lambda x: x.get('value_usd', 0), reverse=True)
     
-    # Calculate Herfindahl Index (sum of squared market shares)
     herfindahl = sum((t.get('value_usd', 0) / total_value) ** 2 for t in enriched_tokens if t.get('value_usd') is not None)
     
-    # Top concentrations
     top_1 = sorted_tokens[0].get('value_usd', 0) / total_value if sorted_tokens else 0
     top_3 = sum(t.get('value_usd', 0) for t in sorted_tokens[:3]) / total_value if len(sorted_tokens) >= 3 else top_1
     top_5 = sum(t.get('value_usd', 0) for t in sorted_tokens[:5]) / total_value if len(sorted_tokens) >= 5 else top_3
     
-    # Diversification score (inverse of concentration, 0-100)
     diversification = (1 - herfindahl) * 100
     
     return {
@@ -318,7 +304,6 @@ def calculate_portfolio_concentration(enriched_tokens: List[Dict]) -> Dict:
         'total_value_usd': total_value
     }
 
-# === Transfer Fetchers ===
 def fetch_asset_transfers(wallet: str, params: AssetTransferParams, is_from: bool = False) -> List[Dict]:
     payload = {
         "id": 1,
@@ -350,7 +335,6 @@ def fetch_asset_transfers(wallet: str, params: AssetTransferParams, is_from: boo
     
     return transfers
 
-# === ENHANCED: DeFi Analysis with Ethena Detection ===
 def check_defi_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
     all_transfers = transfers["incoming"] + transfers["outgoing"]
     
@@ -359,14 +343,13 @@ def check_defi_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
         "compound": False,
         "uniswap": False,
         "curve": False,
-        "ethena": False,  # NEW: Ethena staking
-        "morpho": False,  # NEW: Morpho lending
+        "ethena": False,
+        "morpho": False,
         "total_protocols": 0,
-        "staking_events": 0,  # NEW: Count staking operations
-        "protocol_details": []  # NEW: Detailed protocol interaction list
+        "staking_events": 0,
+        "protocol_details": []
     }
     
-    # Extended protocol list
     EXTENDED_PROTOCOLS = {
         **DEFI_PROTOCOLS,
         'ethena_sena': '0x8be3460a480c80728a8c4d7a5d5303c85ba7b3b9',
@@ -385,7 +368,6 @@ def check_defi_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
         
         for protocol_name, protocol_addr in EXTENDED_PROTOCOLS.items():
             if to_addr == protocol_addr.lower() or from_addr == protocol_addr.lower():
-                # Track protocol category
                 if "aave" in protocol_name:
                     interactions["aave"] = True
                     protocol_addresses.add("aave")
@@ -401,14 +383,12 @@ def check_defi_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
                 elif "ethena" in protocol_name:
                     interactions["ethena"] = True
                     protocol_addresses.add("ethena")
-                    # Count staking if interacting with sENA or eUSDe
                     if 'sena' in protocol_name or 'eusde' in protocol_name or 'stdeusd' in protocol_name:
                         interactions["staking_events"] += 1
                 elif "morpho" in protocol_name:
                     interactions["morpho"] = True
                     protocol_addresses.add("morpho")
                 
-                # Add to detailed list
                 interactions["protocol_details"].append({
                     'protocol': protocol_name,
                     'address': protocol_addr,
@@ -418,7 +398,6 @@ def check_defi_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
                 })
     
     interactions["total_protocols"] = len(protocol_addresses)
-    print("interactions:", interactions)
     return interactions
 
 def check_mixer_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
@@ -440,12 +419,10 @@ def check_mixer_interactions(transfers: Dict[str, List[Dict]]) -> Dict:
     }
 
 def analyze_stablecoin_holdings(tokens: List[Dict]) -> Dict:
-    """ENHANCED: Works with enriched token data"""
     stablecoin_balance = 0.0
     stablecoin_details = []
     
     for token in tokens:
-        # Handle both enriched and raw token data
         if 'category' in token and token['category'] == 'stablecoin':
             balance_usd = token.get('value_usd', 0)
             stablecoin_balance += balance_usd
@@ -455,7 +432,6 @@ def analyze_stablecoin_holdings(tokens: List[Dict]) -> Dict:
                 'balance_human': token.get('balance_human', 0)
             })
         else:
-            # Fallback to old method
             addr = token.get("contractAddress", "").lower()
             if addr in [v.lower() for v in STABLECOINS.values()]:
                 balance = int(token["tokenBalance"], 16) / (10 ** 6)
@@ -467,9 +443,7 @@ def analyze_stablecoin_holdings(tokens: List[Dict]) -> Dict:
         "stablecoin_breakdown": stablecoin_details
     }
 
-# === Price Fetchers (Keep CoinGecko as fallback) ===
 def fetch_token_prices(contracts: List[str]) -> Dict[str, float]:
-    """CoinGecko fallback for price fetching"""
     if not contracts:
         return {}
     params = {"contract_addresses": ",".join(contracts), "vs_currencies": "usd"}
@@ -490,16 +464,13 @@ def estimate_nft_values(nfts: List[Dict]) -> Dict[str, float]:
         token_id = nft.get("tokenId")
         contract_addr = nft.get("contract", {}).get("address", "")
         
-        # Blue chip bonus
         if contract_addr.lower() in [addr.lower() for addr in BLUE_CHIP_NFTS]:
-            floor = max(floor, 0.5)  # Minimum value for blue chips
+            floor = max(floor, 0.5)
         
         values[f"{contract_addr}_{token_id}"] = floor
     return values
 
-# === ENHANCED: Wallet Activity Metrics ===
 def calculate_wallet_metadata(transfers: Dict[str, List[Dict]], wallet_address: str) -> Dict:
-    """Calculate comprehensive wallet metadata"""
     incoming = transfers.get('incoming', [])
     outgoing = transfers.get('outgoing', [])
     
@@ -518,7 +489,6 @@ def calculate_wallet_metadata(transfers: Dict[str, List[Dict]], wallet_address: 
             'error': 'No transaction data available'
         }
     
-    # Extract timestamps
     timestamps = []
     for tx in all_transfers:
         ts = tx.get('metadata', {}).get('blockTimestamp')
@@ -533,7 +503,6 @@ def calculate_wallet_metadata(transfers: Dict[str, List[Dict]], wallet_address: 
             'error': 'No timestamp data available'
         }
     
-    # Parse timestamps
     parsed_timestamps = []
     for ts in timestamps:
         try:
@@ -555,7 +524,6 @@ def calculate_wallet_metadata(transfers: Dict[str, List[Dict]], wallet_address: 
     
     wallet_age = (now - first_tx.replace(tzinfo=None)).days
     
-    # Calculate unique counterparties
     unique_counterparties = set()
     for tx in all_transfers:
         from_addr = tx.get('from', '').lower()
@@ -575,4 +543,313 @@ def calculate_wallet_metadata(transfers: Dict[str, List[Dict]], wallet_address: 
         'outgoing_transactions': len(outgoing),
         'unique_counterparties': len(unique_counterparties),
         'average_txs_per_month': (len(all_transfers) / max(wallet_age / 30, 1))
+    }
+
+def fetch_wallet_events_bitquery(
+    wallet: str,
+    from_date: Optional[str] = None,
+    till_date: Optional[str] = None,
+    page_size: int = 100,  # Smaller size to avoid 402
+    max_results: int = 1000  # Optional cap on total results to fetch
+) -> List[Dict]:
+    if not from_date:
+        from_date = (datetime.utcnow() - timedelta(days=365)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if not till_date:
+        till_date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    query = """
+    query WalletEventsWithinRange(
+      $network: evm_network!
+      $wallet: String!
+      $from: DateTime!
+      $till: DateTime!
+      $limit: Int!
+      $offset: Int!
+    ) {
+      EVM(
+        dataset: archive
+        network: $network
+      ) {
+        Events(
+          limit: { count: $limit, offset: $offset }
+          orderBy: { descendingByField: "Block_Time" }
+          where: {
+            Block: { Time: { since: $from, till: $till } }
+            any: [
+              { Transaction: { From: { is: $wallet } } },
+              { Transaction: { To: { is: $wallet } } },
+              { Topics: { includes: { Hash: { is: $wallet } } } }
+            ]
+          }
+        ) {
+          Block {
+            Number
+            Time
+          }
+          Transaction {
+            Hash
+            From
+            To
+          }
+          Log {
+            Signature {
+              Name
+            }
+            SmartContract
+          }
+          Topics {
+            Hash
+          }
+        }
+      }
+    }
+    """
+    
+    all_events = []
+    offset = 0
+    
+    while True:
+        variables = {
+            "network": "eth",
+            "wallet": wallet,
+            "from": from_date,
+            "till": till_date,
+            "limit": page_size,
+            "offset": offset
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.BITQUERY_TOKEN}",
+            "User-Agent": "curl/8.5.0"
+        }
+        
+        payload = {
+            "query": query,
+            "variables": variables
+        }
+        
+        try:
+            response = requests.post(settings.BITQUERY_URL, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            if "data" in data and "EVM" in data["data"]:
+                events = data["data"]["EVM"]["Events"]
+                all_events.extend(events)
+                
+                if len(events) < page_size:
+                    break  # No more results
+                
+                offset += page_size
+                
+                if len(all_events) >= max_results:
+                    break  # Stop if we've hit the desired total
+            else:
+                break
+        except Exception as e:
+            print(f"Error fetching BitQuery events: {e}")
+            break
+    
+    return all_events
+
+def categorize_lending_event(event_name: str) -> Optional[str]:
+    if not event_name:
+        return None
+    
+    event_name_lower = event_name.lower()
+    
+    for signature, category in LENDING_EVENT_SIGNATURES.items():
+        if signature.lower() in event_name_lower:
+            return category
+    
+    return None
+
+def analyze_protocol_interactions(events: List[Dict]) -> Dict:
+    protocol_map = {addr.lower(): name for name, addr in PROTOCOL_ADDRESSES.items()}
+    
+    protocol_stats = {}
+    event_summary = {
+        "borrow": 0,
+        "repay": 0,
+        "liquidate": 0,
+        "supply": 0,
+        "withdraw": 0,
+        "other": 0
+    }
+    
+    for event in events:
+        log = event.get("Log", {})
+        smart_contract = log.get("SmartContract", "").lower()
+        signature = log.get("Signature", {})
+        event_name = signature.get("Name", "")
+        
+        block = event.get("Block", {})
+        tx = event.get("Transaction", {})
+        
+        protocol_name = protocol_map.get(smart_contract, "Unknown Protocol")
+        
+        if smart_contract not in protocol_stats:
+            protocol_stats[smart_contract] = {
+                "protocol_name": protocol_name,
+                "contract_address": smart_contract,
+                "borrow_count": 0,
+                "repay_count": 0,
+                "liquidate_count": 0,
+                "supply_count": 0,
+                "withdraw_count": 0,
+                "swap_count": 0,
+                "stake_count": 0,
+                "unstake_count": 0,
+                "total_interactions": 0,
+                "first_interaction": None,
+                "last_interaction": None,
+                "transactions": []
+            }
+        
+        event_category = categorize_lending_event(event_name)
+        
+        if event_category:
+            event_summary[event_category] += 1
+            protocol_stats[smart_contract][f"{event_category}_count"] += 1
+        else:
+            event_summary["other"] += 1
+        
+        protocol_stats[smart_contract]["total_interactions"] += 1
+        
+        timestamp = block.get("Time")
+        if timestamp:
+            if not protocol_stats[smart_contract]["first_interaction"]:
+                protocol_stats[smart_contract]["first_interaction"] = timestamp
+            protocol_stats[smart_contract]["last_interaction"] = timestamp
+        
+        protocol_stats[smart_contract]["transactions"].append({
+            "tx_hash": tx.get("Hash"),
+            "event_name": event_name,
+            "event_type": event_category or "other",
+            "block_number": str(block.get("Number")),
+            "timestamp": timestamp
+        })
+    
+    total_borrows = sum(p["borrow_count"] for p in protocol_stats.values())
+    total_repays = sum(p["repay_count"] for p in protocol_stats.values())
+    total_liquidations = sum(p["liquidate_count"] for p in protocol_stats.values())
+    
+    return {
+        "protocols": protocol_stats,
+        "summary": {
+            "total_protocols_interacted": len(protocol_stats),
+            "total_borrow_events": total_borrows,
+            "total_repay_events": total_repays,
+            "total_liquidation_events": total_liquidations,
+            "total_supply_events": event_summary["supply"],
+            "total_withdrawal_events": event_summary["withdraw"],
+            "has_borrowing_activity": total_borrows > 0,
+            "has_repayment_activity": total_repays > 0,
+            "has_liquidation_events": total_liquidations > 0,
+            "event_type_distribution": event_summary
+        },
+        "risk_indicators": {
+            "liquidation_risk": "HIGH" if total_liquidations > 0 else "LOW",
+            "debt_management": "ACTIVE" if total_repays > 0 or total_borrows > 0 else "INACTIVE",
+            "borrowing_activity": "ACTIVE" if total_borrows > 0 else "INACTIVE",
+            "repayment_ratio": total_repays / total_borrows if total_borrows > 0 else 0
+        }
+    }
+
+def calculate_credit_assessment(protocol_analysis: Dict) -> Dict:
+    summary = protocol_analysis.get("summary", {})
+    risk_indicators = protocol_analysis.get("risk_indicators", {})
+    
+    total_borrows = summary.get("total_borrow_events", 0)
+    total_repays = summary.get("total_repay_events", 0)
+    total_liquidations = summary.get("total_liquidation_events", 0)
+    
+    credit_score = 100
+    
+    if total_borrows == 0:
+        credit_score = 50
+    else:
+        repayment_ratio = total_repays / total_borrows
+        
+        if repayment_ratio >= 1.0:
+            credit_score = 100
+        elif repayment_ratio >= 0.8:
+            credit_score = 85
+        elif repayment_ratio >= 0.6:
+            credit_score = 70
+        elif repayment_ratio >= 0.4:
+            credit_score = 55
+        else:
+            credit_score = 40
+        
+        if total_liquidations > 0:
+            credit_score -= (total_liquidations * 15)
+    
+    credit_score = max(0, min(100, credit_score))
+    
+    lending_protocols_used = {}
+    for contract, data in protocol_analysis.get("protocols", {}).items():
+        protocol_name = data.get("protocol_name")
+        lending_protocols_used[protocol_name] = {
+            "borrows": data.get("borrow_count", 0),
+            "repays": data.get("repay_count", 0),
+            "liquidations": data.get("liquidate_count", 0),
+            "repayment_ratio": data.get("repay_count", 0) / max(data.get("borrow_count", 1), 1)
+        }
+    
+    creditworthiness = "POOR"
+    if credit_score >= 90:
+        creditworthiness = "EXCELLENT"
+    elif credit_score >= 75:
+        creditworthiness = "GOOD"
+    elif credit_score >= 60:
+        creditworthiness = "FAIR"
+    
+    return {
+        "credit_score": credit_score,
+        "total_borrowing_events": total_borrows,
+        "total_repayment_events": total_repays,
+        "total_liquidations": total_liquidations,
+        "repayment_ratio": risk_indicators.get("repayment_ratio", 0),
+        "lending_protocols_used": lending_protocols_used,
+        "has_default_history": total_liquidations > 0,
+        "creditworthiness": creditworthiness
+    }
+
+def fetch_protocol_lending_history(wallet: str) -> Dict:
+    events = fetch_wallet_events_bitquery(wallet)
+    
+    if not events:
+        return {
+            "protocol_analysis": {
+                "protocols": {},
+                "summary": {
+                    "total_protocols_interacted": 0,
+                    "total_borrow_events": 0,
+                    "total_repay_events": 0,
+                    "total_liquidation_events": 0,
+                    "has_borrowing_activity": False,
+                    "has_repayment_activity": False,
+                    "has_liquidation_events": False
+                },
+                "risk_indicators": {
+                    "liquidation_risk": "UNKNOWN",
+                    "debt_management": "INACTIVE",
+                    "borrowing_activity": "INACTIVE",
+                    "repayment_ratio": 0
+                }
+            },
+            "credit_assessment": {
+                "credit_score": 50,
+                "creditworthiness": "UNKNOWN"
+            }
+        }
+    
+    protocol_analysis = analyze_protocol_interactions(events)
+    credit_assessment = calculate_credit_assessment(protocol_analysis)
+    
+    return {
+        "protocol_analysis": protocol_analysis,
+        "credit_assessment": credit_assessment
     }

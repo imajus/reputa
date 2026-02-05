@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     ALCHEMY_NETWORK: str = "eth-mainnet"
     ALCHEMY_CORE_URL: str = ""
     ALCHEMY_NFT_URL: str = ""
+    BITQUERY_URL: str = "https://streaming.bitquery.io/graphql"
+    BITQUERY_TOKEN: str
     COINGECKO_URL: str = "https://api.coingecko.com/api/v3/simple/token_price/ethereum"
     POAP_CONTRACT: str = "0x22C1f6050E56d2876009903609a2cC3fEf83B415"
     ENS_NAMEWRAPPER: str = "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401"
