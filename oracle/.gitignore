@@ -1,16 +1,2 @@
-.DS_Store
-*.log
-*.swp
-*.swo
-*~
-
-# Nix build artifacts
-result
-*-image.tar.gz
-.direnv/
-.envrc
-
-# Keep flake.lock - it's essential for reproducibility!
-# DO NOT add flake.lock to .gitignore
-
 /deployment.env
+*.tar.gz

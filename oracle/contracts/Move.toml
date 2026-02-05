@@ -1,9 +1,10 @@
 [package]
-name = "oyster_demo"
+name = "score_oracle"
 edition = "2024.beta"
 
 [dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-oyster_demo = "0x0"
+score_oracle = "0x0"
 enclave = "0x0"
