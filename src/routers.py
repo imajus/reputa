@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from src.models import WalletRequest, AssetTransferParams
 from src.services import (
+    complete_credit_assessment,
     fetch_all_nfts,
     fetch_token_balances,
     fetch_asset_transfers,
@@ -102,9 +103,6 @@ async def aggregate_all_data(request: WalletRequest):
             "lending_history": lending_history
         }
         
-        print("Aggregated Data for Scoring:", aggregated)
-        # Now compute the score using the aggregated data
-        
         return aggregated
     
     except Exception as e:
@@ -116,7 +114,8 @@ async def calculate_score(request: WalletRequest):
     try: 
         aggregated = await aggregate_all_data(request)
         
-        credit_score = calculate_credit_score(aggregated)
+        # credit_score = calculate_credit_score(aggregated)
+        credit_score = complete_credit_assessment(aggregated)
         return credit_score
     
     except Exception as e:

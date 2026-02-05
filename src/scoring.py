@@ -300,16 +300,13 @@ def fetch_protocol_lending_history(wallet: str) -> Dict:
         # Fetch events from last 2 years
         from_date = (datetime.utcnow() - timedelta(days=730)).strftime("%Y-%m-%dT%H:%M:%SZ")
         
-        print(f"Fetching Bitquery events for {wallet}...")
         events = fetch_wallet_events_bitquery(
             wallet=wallet,
             from_date=from_date,
             max_results=2000  # Get more events for lending analysis
         )
-        print(f"Fetched {len(events)} events from Bitquery for {wallet}")
 
         if not events:
-            print(f"No Bitquery events found for {wallet}")
             return {
                 "protocol_analysis": {
                     "protocols": {},
@@ -333,7 +330,6 @@ def fetch_protocol_lending_history(wallet: str) -> Dict:
                 }
             }
         
-        print(f"Analyzing {len(events)} events...")
         protocol_analysis = analyze_protocol_interactions(events)
         
         return {
@@ -342,7 +338,6 @@ def fetch_protocol_lending_history(wallet: str) -> Dict:
         }
         
     except Exception as e:
-        print(f"Error fetching lending history: {e}")
         # Return empty data on error
         return {
             "protocol_analysis": {
