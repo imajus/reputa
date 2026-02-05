@@ -6,14 +6,15 @@ from src.services import (
     fetch_asset_transfers,
     enrich_token_data,
     calculate_portfolio_concentration,
-    fetch_protocol_lending_history,
     check_defi_interactions,
     check_mixer_interactions,
     analyze_stablecoin_holdings,
     calculate_wallet_metadata,
     fetch_eth_balance
 )
+
 from src.classifiers import classify_nfts
+from src.scoring import calculate_credit_score, fetch_protocol_lending_history
 
 api_router = APIRouter()
 
@@ -48,7 +49,7 @@ async def get_transfers(request: WalletRequest, params: AssetTransferParams = As
         return {"incoming": incoming, "outgoing": outgoing}
     except Exception as e:
         raise HTTPException(500, str(e))
-
+    
 @api_router.post("/lending/protocol-history")
 async def get_protocol_lending_history(request: WalletRequest):
     try:
@@ -56,9 +57,11 @@ async def get_protocol_lending_history(request: WalletRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
+# New endpoint for final credit score calculation
 @api_router.post("/aggregate")
-async def aggregate_data(request: WalletRequest):
+async def aggregate_all_data(request: WalletRequest):
     try:
+        # Aggregate data first
         nfts = fetch_all_nfts(request.wallet_address)
         classified_nfts = classify_nfts(nfts)
         
@@ -99,10 +102,22 @@ async def aggregate_data(request: WalletRequest):
             "lending_history": lending_history
         }
         
+        print("Aggregated Data for Scoring:", aggregated)
+        # Now compute the score using the aggregated data
+        
         return aggregated
+    
     except Exception as e:
         raise HTTPException(500, str(e))
+    
 
-@api_router.get("/health")
-async def health_check():
-    return {"status": "healthy", "version": "2.0-with-protocol-lending"}
+@api_router.post("/credit-score")
+async def calculate_score(request: WalletRequest):
+    try: 
+        aggregated = await aggregate_all_data(request)
+        
+        credit_score = calculate_credit_score(aggregated)
+        return credit_score
+    
+    except Exception as e:
+        raise HTTPException(500, str(e))
