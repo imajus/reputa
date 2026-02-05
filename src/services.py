@@ -1,18 +1,16 @@
+from urllib import response
 import requests
+import json
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from src.models import AssetTransferParams
 from src.classifiers import classify_nfts
-from src.config import Settings, MIXER_ADDRESSES, DEFI_PROTOCOLS, STABLECOINS, BLUE_CHIP_NFTS
+from src.config import Settings, MIXER_ADDRESSES, DEFI_PROTOCOLS, STABLECOINS, BLUE_CHIP_NFTS, PROTOCOL_ADDRESSES
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 settings = Settings()
 
-PROTOCOL_ADDRESSES = {
-    "Aave V3": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-    "Lido": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
-    "EigenCloud": "0xec53bf9167f50cdeb3ae105f56099aaab9061f83",
-    "Ethena USDe": "0x57e114b691db790c35207b2e685d4a43181e6061",
-}
 
 LENDING_EVENT_SIGNATURES = {
     "Borrow": "borrow",
@@ -549,8 +547,8 @@ def fetch_wallet_events_bitquery(
     wallet: str,
     from_date: Optional[str] = None,
     till_date: Optional[str] = None,
-    page_size: int = 100,  # Smaller size to avoid 402
-    max_results: int = 1000  # Optional cap on total results to fetch
+    page_size: int = 100,
+    max_results: int = 1000
 ) -> List[Dict]:
     if not from_date:
         from_date = (datetime.utcnow() - timedelta(days=365)).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -558,18 +556,8 @@ def fetch_wallet_events_bitquery(
         till_date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     query = """
-    query WalletEventsWithinRange(
-      $network: evm_network!
-      $wallet: String!
-      $from: DateTime!
-      $till: DateTime!
-      $limit: Int!
-      $offset: Int!
-    ) {
-      EVM(
-        dataset: archive
-        network: $network
-      ) {
+    query WalletEventsWithinRange($network: evm_network!, $wallet: String!, $from: DateTime!, $till: DateTime!, $limit: Int!, $offset: Int!) {
+      EVM(dataset: archive, network: $network) {
         Events(
           limit: { count: $limit, offset: $offset }
           orderBy: { descendingByField: "Block_Time" }
@@ -582,31 +570,33 @@ def fetch_wallet_events_bitquery(
             ]
           }
         ) {
-          Block {
-            Number
-            Time
-          }
-          Transaction {
-            Hash
-            From
-            To
-          }
-          Log {
-            Signature {
-              Name
-            }
-            SmartContract
-          }
-          Topics {
-            Hash
-          }
+          Block { Number Time }
+          Transaction { Hash From To }
+          Log { Signature { Name } SmartContract }
+          Topics { Hash }
         }
       }
     }
     """
     
+    # 1. Setup a Retry Strategy
+    retry_strategy = Retry(
+        total=3, # Try 3 times
+        backoff_factor=2, # Wait 2s, 4s, 8s between retries
+        status_forcelist=[429, 500, 502, 503, 504], # Retry on these errors
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session = requests.Session()
+    session.mount("https://", adapter)
+
     all_events = []
     offset = 0
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {settings.BITQUERY_TOKEN}",
+        "User-Agent": "curl/8.5.0",
+        "Accept": "*/*"
+    }
     
     while True:
         variables = {
@@ -618,39 +608,39 @@ def fetch_wallet_events_bitquery(
             "offset": offset
         }
         
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {settings.BITQUERY_TOKEN}",
-            "User-Agent": "curl/8.5.0"
-        }
-        
-        payload = {
-            "query": query,
-            "variables": variables
-        }
-        
         try:
-            response = requests.post(settings.BITQUERY_URL, json=payload, headers=headers)
+            ## USE LOCAL FILE FOR NOW TO NOT TIRGGER API EVENTSSS!!!!!
+
+            # 2. Increased timeout to 120 seconds
+            response = session.post(
+                settings.BITQUERY_URL, 
+                headers=headers, 
+                data=json.dumps({"query": query, "variables": variables}),
+                timeout=120 
+            )          
+           
             response.raise_for_status()
             data = response.json()
             
             if "data" in data and "EVM" in data["data"]:
                 events = data["data"]["EVM"]["Events"]
+                if not events: break
+                    
                 all_events.extend(events)
-                
-                if len(events) < page_size:
-                    break  # No more results
+                if len(events) < page_size or len(all_events) >= max_results:
+                    break
                 
                 offset += page_size
-                
-                if len(all_events) >= max_results:
-                    break  # Stop if we've hit the desired total
             else:
                 break
-        except Exception as e:
-            print(f"Error fetching BitQuery events: {e}")
+                
+        except requests.exceptions.Timeout:
+            print(f"Request timed out for wallet {wallet} after 120s. The query might be too heavy.")
             break
-    
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+            
     return all_events
 
 def categorize_lending_event(event_name: str) -> Optional[str]:
@@ -755,101 +745,4 @@ def analyze_protocol_interactions(events: List[Dict]) -> Dict:
             "borrowing_activity": "ACTIVE" if total_borrows > 0 else "INACTIVE",
             "repayment_ratio": total_repays / total_borrows if total_borrows > 0 else 0
         }
-    }
-
-def calculate_credit_assessment(protocol_analysis: Dict) -> Dict:
-    summary = protocol_analysis.get("summary", {})
-    risk_indicators = protocol_analysis.get("risk_indicators", {})
-    
-    total_borrows = summary.get("total_borrow_events", 0)
-    total_repays = summary.get("total_repay_events", 0)
-    total_liquidations = summary.get("total_liquidation_events", 0)
-    
-    credit_score = 100
-    
-    if total_borrows == 0:
-        credit_score = 50
-    else:
-        repayment_ratio = total_repays / total_borrows
-        
-        if repayment_ratio >= 1.0:
-            credit_score = 100
-        elif repayment_ratio >= 0.8:
-            credit_score = 85
-        elif repayment_ratio >= 0.6:
-            credit_score = 70
-        elif repayment_ratio >= 0.4:
-            credit_score = 55
-        else:
-            credit_score = 40
-        
-        if total_liquidations > 0:
-            credit_score -= (total_liquidations * 15)
-    
-    credit_score = max(0, min(100, credit_score))
-    
-    lending_protocols_used = {}
-    for contract, data in protocol_analysis.get("protocols", {}).items():
-        protocol_name = data.get("protocol_name")
-        lending_protocols_used[protocol_name] = {
-            "borrows": data.get("borrow_count", 0),
-            "repays": data.get("repay_count", 0),
-            "liquidations": data.get("liquidate_count", 0),
-            "repayment_ratio": data.get("repay_count", 0) / max(data.get("borrow_count", 1), 1)
-        }
-    
-    creditworthiness = "POOR"
-    if credit_score >= 90:
-        creditworthiness = "EXCELLENT"
-    elif credit_score >= 75:
-        creditworthiness = "GOOD"
-    elif credit_score >= 60:
-        creditworthiness = "FAIR"
-    
-    return {
-        "credit_score": credit_score,
-        "total_borrowing_events": total_borrows,
-        "total_repayment_events": total_repays,
-        "total_liquidations": total_liquidations,
-        "repayment_ratio": risk_indicators.get("repayment_ratio", 0),
-        "lending_protocols_used": lending_protocols_used,
-        "has_default_history": total_liquidations > 0,
-        "creditworthiness": creditworthiness
-    }
-
-def fetch_protocol_lending_history(wallet: str) -> Dict:
-    events = fetch_wallet_events_bitquery(wallet)
-    
-    if not events:
-        return {
-            "protocol_analysis": {
-                "protocols": {},
-                "summary": {
-                    "total_protocols_interacted": 0,
-                    "total_borrow_events": 0,
-                    "total_repay_events": 0,
-                    "total_liquidation_events": 0,
-                    "has_borrowing_activity": False,
-                    "has_repayment_activity": False,
-                    "has_liquidation_events": False
-                },
-                "risk_indicators": {
-                    "liquidation_risk": "UNKNOWN",
-                    "debt_management": "INACTIVE",
-                    "borrowing_activity": "INACTIVE",
-                    "repayment_ratio": 0
-                }
-            },
-            "credit_assessment": {
-                "credit_score": 50,
-                "creditworthiness": "UNKNOWN"
-            }
-        }
-    
-    protocol_analysis = analyze_protocol_interactions(events)
-    credit_assessment = calculate_credit_assessment(protocol_analysis)
-    
-    return {
-        "protocol_analysis": protocol_analysis,
-        "credit_assessment": credit_assessment
     }

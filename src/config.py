@@ -1,4 +1,6 @@
 # config.py
+import json
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -53,3 +55,13 @@ BLUE_CHIP_NFTS = [
     "0x60e4d786628fea6478f785a6d7e704777c86a7c6",  # MAYC
     "0x49cf6f5d44e70224e2e23fdcdd2c053f30ada28b",  # CloneX
 ]
+
+def load_protocol_addresses(path: str = "protocol.txt") -> dict:
+    file_path = Path(path)
+    if not file_path.exists():
+        return {}
+
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+PROTOCOL_ADDRESSES = load_protocol_addresses()
