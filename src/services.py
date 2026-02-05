@@ -608,19 +608,18 @@ def fetch_wallet_events_bitquery(
             "offset": offset
         }
         
-        try:
-            ## USE LOCAL FILE FOR NOW TO NOT TIRGGER API EVENTSSS!!!!!
-
+        try:            
             # 2. Increased timeout to 120 seconds
             response = session.post(
                 settings.BITQUERY_URL, 
                 headers=headers, 
                 data=json.dumps({"query": query, "variables": variables}),
                 timeout=120 
-            )          
-           
+            )
+    
             response.raise_for_status()
             data = response.json()
+          
             
             if "data" in data and "EVM" in data["data"]:
                 events = data["data"]["EVM"]["Events"]
