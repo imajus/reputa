@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  evm-score-oracle:
+    image: majus/evm-score-oracle@sha256:9cfc2dfa05379c40b272c0cd8ece42e05811506d6a5f8e14ae67c68640868664
+    container_name: evm-score-oracle
+    restart: unless-stopped
+    init: true
+    network_mode: host
+    volumes:
+      - /app/ecdsa.sec:/app/ecdsa.sec:ro

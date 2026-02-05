@@ -1,10 +1,8 @@
 { pkgs, version, arch ? "amd64" }:
 
 let
-  # Use Node 20 for stability
   nodejs = pkgs.nodejs_20;
 
-  # Filter source to only what is needed for reproducible builds
   src = pkgs.lib.cleanSourceWith {
     src = ./.;
     filter = path: type:
@@ -18,13 +16,11 @@ let
         parentDir == "src";
   };
 
-  # Build the Node.js application with locked dependencies (pure JS only)
   app = pkgs.buildNpmPackage {
-    pname = "sui-price-oracle-node";
+    pname = "evm-score-oracle-node";
     inherit version src nodejs;
 
-    # Hash for dependencies - pure JS only, no native modules
-    npmDepsHash = "sha256-HOZO9+yHJoSu3k653D8PKR/MJnML0jnpuMDnkrzdv9I=";
+    npmDepsHash = "sha256-b7dVqV0ejFySTo/mlLsfjVpc/2w12RF5MCpH1xFJGto=";
 
     dontNpmBuild = true;
     npmInstallFlags = [ "--omit=dev" ];
@@ -41,7 +37,7 @@ in rec {
   inherit app nodejs;
 
   docker = pkgs.dockerTools.buildImage {
-    name = "sui-price-oracle";
+    name = "evm-score-oracle";
     tag = "node-reproducible-${arch}";
     copyToRoot = pkgs.buildEnv {
       name = "image-root";

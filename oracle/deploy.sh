@@ -124,10 +124,10 @@ echo "Loading Docker image..."
 docker load < "$IMAGE_FILE"
 
 # Tag and push
-FULL_IMAGE_NAME="$DOCKER_REGISTRY/sui-price-oracle:$IMAGE_TAG"
+FULL_IMAGE_NAME="$DOCKER_REGISTRY/evm-score-oracle:$IMAGE_TAG"
 echo ""
 echo "Tagging image as: $FULL_IMAGE_NAME"
-docker tag "sui-price-oracle:$IMAGE_TAG" "$FULL_IMAGE_NAME"
+docker tag "evm-score-oracle:$IMAGE_TAG" "$FULL_IMAGE_NAME"
 
 echo "Pushing to registry..."
 docker push "$FULL_IMAGE_NAME"
@@ -144,9 +144,8 @@ fi
 echo "Image digest: $DIGEST"
 
 # Update docker-compose.yml
-echo "Updating enclave_node/docker-compose.yml with digest..."
-cp enclave_node/docker-compose.yml enclave_node/docker-compose.yml.bak
-sed -i "s|^[[:space:]]*image:.*|    image: $DIGEST|" enclave_node/docker-compose.yml
+echo "Updating app/docker-compose.yml with digest..."
+sed -i "s|^[[:space:]]*image:.*|    image: $DIGEST|" app/docker-compose.yml
 
 echo ""
 echo "Deploying to Oyster..."
@@ -154,7 +153,7 @@ echo "Deploying to Oyster..."
 # Deploy with oyster-cvm
 DEPLOY_OUTPUT=$(oyster-cvm deploy \
     --wallet-private-key "$PRIVATE_KEY" \
-    --docker-compose ./enclave_node/docker-compose.yml \
+    --docker-compose ./app/docker-compose.yml \
     --instance-type c6a.xlarge \
     --duration-in-minutes 60 \
     --arch amd64 \
@@ -278,7 +277,7 @@ UPDATE_PCR_OUTPUT=$(sui client call \
     --module enclave \
     --function update_pcrs \
     --args "$ENCLAVE_CONFIG_ID" "$CAP_ID" "0x${PCR0}" "0x${PCR1}" "0x${PCR2}" "0x${PCR16}" \
-    --type-args "${PACKAGE_ID}::oyster_demo::OYSTER_DEMO" \
+    --type-args "${PACKAGE_ID}::score_oracle::SCORE_ORACLE" \
     --gas-budget 10000000 2>&1)
 
 echo "$UPDATE_PCR_OUTPUT"
@@ -299,8 +298,8 @@ REGISTER_OUTPUT=$(bash register_enclave.sh \
     "$PACKAGE_ID" \
     "$ENCLAVE_CONFIG_ID" \
     "$PUBLIC_IP" \
-    oyster_demo \
-    OYSTER_DEMO 2>&1)
+    score_oracle \
+    SCORE_ORACLE 2>&1)
 
 echo "$REGISTER_OUTPUT"
 
@@ -354,8 +353,8 @@ echo "$INIT_OUTPUT"
 
 cd ../..
 
-# Extract ORACLE_ID (shared object with PriceOracle type)
-ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "PriceOracle" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
+# Extract ORACLE_ID (shared object with ScoreOracle type)
+ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "ScoreOracle" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
 
 if [ -z "$ORACLE_ID" ]; then
     # Alternative: look for "Shared(" in Created Objects section
@@ -365,7 +364,7 @@ fi
 if [ -z "$ORACLE_ID" ]; then
     echo ""
     echo "Warning: Could not automatically extract ORACLE_ID from output"
-    read -p "Enter the ORACLE_ID (shared PriceOracle object) from the output: " ORACLE_ID
+    read -p "Enter the ORACLE_ID (shared ScoreOracle object) from the output: " ORACLE_ID
 fi
 
 # Validate ORACLE_ID
@@ -387,16 +386,17 @@ echo ""
 echo "=== Step 4 Complete ==="
 
 echo ""
-echo "Step 5: Update Price (Initial)"
+echo "Step 5: Update Score (Initial)"
 echo "==============================="
 
 # Load deployment variables
 source "$DEPLOYMENT_FILE"
 
-echo "Fetching and submitting initial price..."
+echo "Fetching and submitting initial score..."
 cd contracts/script
 
-UPDATE_OUTPUT=$(bash update_price.sh "$PUBLIC_IP" "$PACKAGE_ID" "$ORACLE_ID" "$ENCLAVE_ID" 2>&1)
+TEST_ADDRESS="0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
+UPDATE_OUTPUT=$(bash update_score.sh "$PUBLIC_IP" "$PACKAGE_ID" "$ORACLE_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
 
 echo "$UPDATE_OUTPUT"
 
@@ -404,10 +404,10 @@ cd ../..
 
 if echo "$UPDATE_OUTPUT" | grep -q "Status: Success"; then
     echo ""
-    echo "Price updated successfully!"
+    echo "Score updated successfully!"
 else
     echo ""
-    echo "Warning: Price update may have failed. Check output above."
+    echo "Warning: Score update may have failed. Check output above."
 fi
 
 echo ""
@@ -423,6 +423,6 @@ echo ""
 cat "$DEPLOYMENT_FILE"
 echo ""
 echo "You can now:"
-echo "  - Query price: cd contracts/script && sh get_price.sh $PUBLIC_IP"
-echo "  - Update price: cd contracts/script && sh update_price.sh $PUBLIC_IP $PACKAGE_ID $ORACLE_ID $ENCLAVE_ID"
+echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $ORACLE_ID"
+echo "  - Update score: cd contracts/script && sh update_score.sh $PUBLIC_IP $PACKAGE_ID $ORACLE_ID $ENCLAVE_ID <ADDRESS>"
 echo ""
