@@ -45,7 +45,7 @@ const Analyzing = () => {
       }
       try {
         const response = await submitQuestionnaireForScoring(
-          ensName || address,
+          address,
           state.questionnaire
         );
         console.log('Oracle response:', response);
