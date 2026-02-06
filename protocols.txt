@@ -1,4 +1,4 @@
-"Aave V3":"0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"
+"Aave V3":"0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"
 "Lido":"0x5a98fcbea516cf06857215779fd812ca3bef1b32"
 "EigenCloud":"0xec53bf9167f50cdeb3ae105f56099aaab9061f83"
 "Ethena USDe":"0x57e114b691db790c35207b2e685d4a43181e6061"
@@ -256,6 +256,7 @@
 "Youves":"tezos:KT1Xobej4mc6XgEjDoJoHtTKgbD1ELMvcQuL"
 "Hypha":"avax:0x69260B9483F9871ca57f81A90D91E2F96c2Cd11d"
 "Bedrock uniETH":"bsc:0xff7d6a96ae471bbcd7713af9cb1feeb16cf56b41"
+"Pendle: Fee Distributor V2":"0x8c237520a8e14d658170a633d96f8e80764433b9"
 "Rhea Dex":"near:token.rhealab.near"
 "dHEDGE Vaults":"0xca1207647ff814039530d7d35df0e1dd2e91fa84"
 "Octus Bridge":"everscale:0:f2679d80b682974e065e03bf42bbee285ce7c587eb153b41d761ebfd954c45e1"

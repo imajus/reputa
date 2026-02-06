@@ -92,7 +92,7 @@ async def aggregate_all_data(request: WalletRequest):
                 "holdings": enriched_tokens,
                 "concentration": concentration
             },
-            "transfers": transfers,
+            # "transfers": transfers, # Do not return all transfers transactions
             "eth_balance": eth_balance,
             "defi_analysis": {
                 "protocol_interactions": defi_interactions,
@@ -104,7 +104,8 @@ async def aggregate_all_data(request: WalletRequest):
         }
         
         return aggregated
-    
+
+        
     except Exception as e:
         raise HTTPException(500, str(e))
     
@@ -113,7 +114,6 @@ async def aggregate_all_data(request: WalletRequest):
 async def calculate_score(request: WalletRequest):
     try: 
         aggregated = await aggregate_all_data(request)
-        
         # credit_score = calculate_credit_score(aggregated)
         credit_score = complete_credit_assessment(aggregated)
         return credit_score

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ALCHEMY_NETWORK: str = "eth-mainnet"
     ALCHEMY_CORE_URL: str = ""
     ALCHEMY_NFT_URL: str = ""
+    ETHERSCAN_API_KEY: str
     BITQUERY_URL: str = "https://streaming.bitquery.io/graphql"
     BITQUERY_TOKEN: str
     COINGECKO_URL: str = "https://api.coingecko.com/api/v3/simple/token_price/ethereum"
