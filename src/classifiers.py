@@ -30,29 +30,52 @@ def is_ens(nft: Dict) -> bool:
     name = nft.get("name") or ""
     return contract_addr == ENS_NAMEWRAPPER or name.endswith(".eth")
 
+def strip_data_image(nft: Dict) -> None:
+    """
+    If an NFT image is stored as data:image/... (on-chain base64),
+    replace image-related fields with nulls.
+    """
+    image = nft.get("image")
+    if not image:
+        return
+
+    for key in ["originalUrl", "cachedUrl", "thumbnailUrl", "pngUrl"]:
+        value = image.get(key)
+        if isinstance(value, str) and value.startswith("data:image"):
+            image[key] = None
+
+    # Optional: also clean raw metadata if present
+    raw = nft.get("raw", {})
+    metadata = raw.get("metadata", {})
+    img = metadata.get("image")
+    if isinstance(img, str) and img.startswith("data:image"):
+        metadata["image"] = None
+
+
 def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     poaps = []
     legit_nfts = []
     spam_nfts = []
     ens_domains = []
-    
+
     for nft in nfts:
+        strip_data_image(nft)
+
         nft["classification"] = {
             "is_poap": is_poap(nft),
             "safelist": safelist_status(nft),
             "is_ens": is_ens(nft)
         }
-        
 
-        if is_poap(nft):
+        if nft["classification"]["is_poap"]:
             poaps.append(nft)
             legit_nfts.append(nft)
-        elif is_ens(nft):
+        elif nft["classification"]["is_ens"]:
             ens_domains.append(nft)
             legit_nfts.append(nft)
         else:
             legit_nfts.append(nft)
-    
+
     return {
         "poaps": poaps,
         "legit_nfts": legit_nfts,
