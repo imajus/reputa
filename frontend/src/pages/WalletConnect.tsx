@@ -39,7 +39,8 @@ const WalletConnect = () => {
     if (!currentAccount) return;
     setTxError(null);
     try {
-      const walletAddressBytes = hexToUint8Array(state.resolvedAddress || state.evmAddress);
+      const walletAddressString = state.resolvedAddress || state.evmAddress;
+      const walletAddressBytes = new TextEncoder().encode(walletAddressString);
       const signatureBytes = hexToUint8Array(state.oracleSignature);
       const tx = new Transaction();
       tx.moveCall({
