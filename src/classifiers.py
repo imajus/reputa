@@ -30,27 +30,40 @@ def is_ens(nft: Dict) -> bool:
     name = nft.get("name") or ""
     return contract_addr == ENS_NAMEWRAPPER or name.endswith(".eth")
 
-def strip_data_image(nft: Dict) -> None:
+def strip_onchain_data_fields(nft: Dict) -> None:
     """
-    If an NFT image is stored as data:image/... (on-chain base64),
-    replace image-related fields with nulls.
+    Removes inline on-chain data payloads (data:...) from image and tokenUri fields.
+    Replaces them with nulls in-place.
     """
+
+    # --- tokenUri (top-level) ---
+    token_uri = nft.get("tokenUri")
+    if isinstance(token_uri, str) and token_uri.startswith("data:"):
+        nft["tokenUri"] = None
+
+    # --- image object ---
     image = nft.get("image")
-    if not image:
-        return
+    if isinstance(image, dict):
+        for key in ("originalUrl", "cachedUrl", "thumbnailUrl", "pngUrl"):
+            value = image.get(key)
+            if isinstance(value, str) and value.startswith("data:image"):
+                image[key] = None
 
-    for key in ["originalUrl", "cachedUrl", "thumbnailUrl", "pngUrl"]:
-        value = image.get(key)
-        if isinstance(value, str) and value.startswith("data:image"):
-            image[key] = None
+    # --- raw section ---
+    raw = nft.get("raw")
+    if isinstance(raw, dict):
 
-    # Optional: also clean raw metadata if present
-    raw = nft.get("raw", {})
-    metadata = raw.get("metadata", {})
-    img = metadata.get("image")
-    if isinstance(img, str) and img.startswith("data:image"):
-        metadata["image"] = None
+        # raw.tokenUri
+        raw_token_uri = raw.get("tokenUri")
+        if isinstance(raw_token_uri, str) and raw_token_uri.startswith("data:"):
+            raw["tokenUri"] = None
 
+        # raw.metadata.image
+        metadata = raw.get("metadata")
+        if isinstance(metadata, dict):
+            img = metadata.get("image")
+            if isinstance(img, str) and img.startswith("data:image"):
+                metadata["image"] = None
 
 def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     poaps = []
@@ -58,8 +71,9 @@ def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     spam_nfts = []
     ens_domains = []
 
+   
     for nft in nfts:
-        strip_data_image(nft)
+        strip_onchain_data_fields(nft)
 
         nft["classification"] = {
             "is_poap": is_poap(nft),
