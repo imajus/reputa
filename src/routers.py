@@ -1,21 +1,21 @@
 from fastapi import APIRouter, HTTPException
 from src.models import WalletRequest, AssetTransferParams
-from src.services import (
-    complete_credit_assessment,
+from src.services.blockchain_service import (
     fetch_all_nfts,
     fetch_token_balances,
     fetch_asset_transfers,
-    enrich_token_data,
-    calculate_portfolio_concentration,
+    fetch_eth_balance
+)
+from src.services.credit_service import complete_credit_assessment
+from src.services.token_service import enrich_token_data, calculate_portfolio_concentration
+from src.classifiers import classify_nfts
+from src.services.wallet_service import calculate_wallet_metadata
+from src.scoring import fetch_protocol_lending_history
+from src.services.defi_service import (
     check_defi_interactions,
     check_mixer_interactions,
     analyze_stablecoin_holdings,
-    calculate_wallet_metadata,
-    fetch_eth_balance
 )
-
-from src.classifiers import classify_nfts
-from src.scoring import calculate_credit_score, fetch_protocol_lending_history
 
 api_router = APIRouter()
 
@@ -114,7 +114,7 @@ async def aggregate_all_data(request: WalletRequest):
 async def calculate_score(request: WalletRequest):
     try: 
         aggregated = await aggregate_all_data(request)
-        # credit_score = calculate_credit_score(aggregated)
+
         credit_score = complete_credit_assessment(aggregated)
         return credit_score
     
