@@ -5,7 +5,6 @@ from src.services.token_service import estimate_nft_values
 
 from src.config import BLUE_CHIP_NFTS
 
-
 def analyze_transfers(transfers: Dict[str, List[Dict]]) -> Dict:
     incoming = transfers["incoming"]
     outgoing = transfers["outgoing"]
