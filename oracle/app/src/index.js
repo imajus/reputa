@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import axios from 'axios';
 import { sign, getPublicKey, hashes } from '@noble/secp256k1';
 import { sha256 } from '@noble/hashes/sha2.js';
@@ -96,6 +97,11 @@ function loadSigningKeyFromFile(path) {
  */
 const app = express();
 
+app.use(cors({
+  origin: ['http://[::]:8080', 'http://localhost:8080', 'http://192.168.0.12:8080']
+}));
+app.use(express.json());
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -120,6 +126,35 @@ app.get('/score', async (req, res) => {
       });
     }
     console.log(`Fetching transaction count for address: ${address}`);
+    const txCount = await fetchTransactionCount(address);
+    const timestampMs = Date.now();
+    console.log(`Transaction count for ${address}: ${txCount}`);
+    const signature = signScoreData(signingKey, txCount, address, timestampMs);
+    res.json({
+      score: txCount,
+      wallet_address: address,
+      timestamp_ms: timestampMs,
+      signature,
+    });
+  } catch (error) {
+    console.error('Failed to process score request:', error);
+    res.status(503).json({
+      error: 'Failed to fetch or sign score',
+      message: error.message,
+    });
+  }
+});
+
+app.post('/score', async (req, res) => {
+  try {
+    const { address, questionnaire } = req.body;
+    if (!address || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
+      return res.status(400).json({
+        error: 'Invalid address format. Expected 0x followed by 40 hex characters'
+      });
+    }
+    console.log(`POST /score - address: ${address}`);
+    console.log('Questionnaire data:', JSON.stringify(questionnaire, null, 2));
     const txCount = await fetchTransactionCount(address);
     const timestampMs = Date.now();
     console.log(`Transaction count for ${address}: ${txCount}`);

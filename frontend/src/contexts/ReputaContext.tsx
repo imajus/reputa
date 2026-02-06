@@ -1,13 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface QuestionnaireAnswers {
-  experience: string;
-  activities: string[];
-  riskTolerance: string;
-  timeHorizon: string;
-  protocols: string[];
-  largestPosition: string;
-  liquidated: string;
+export interface QuestionnaireAnswer {
+  question: string;
+  answer: string;
+  file?: File;
 }
 
 interface ScoreBreakdown {
@@ -21,7 +17,7 @@ interface ScoreBreakdown {
 interface ReputaState {
   evmAddress: string;
   resolvedAddress: string;
-  questionnaire: QuestionnaireAnswers;
+  questionnaire: QuestionnaireAnswer[];
   score: number;
   scoreBreakdown: ScoreBreakdown;
   suiAddress: string;
@@ -32,7 +28,7 @@ interface ReputaContextType {
   state: ReputaState;
   setEvmAddress: (address: string) => void;
   setResolvedAddress: (address: string) => void;
-  updateQuestionnaire: (answers: Partial<QuestionnaireAnswers>) => void;
+  updateQuestionnaire: (answers: QuestionnaireAnswer[]) => void;
   setScore: (score: number, breakdown: ScoreBreakdown) => void;
   setSuiAddress: (address: string) => void;
   setTxHash: (hash: string) => void;
@@ -42,15 +38,7 @@ interface ReputaContextType {
 const initialState: ReputaState = {
   evmAddress: '',
   resolvedAddress: '',
-  questionnaire: {
-    experience: '',
-    activities: [],
-    riskTolerance: '',
-    timeHorizon: '',
-    protocols: [],
-    largestPosition: '',
-    liquidated: '',
-  },
+  questionnaire: [],
   score: 0,
   scoreBreakdown: {
     activity: 0,
@@ -76,11 +64,8 @@ export const ReputaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setState(prev => ({ ...prev, resolvedAddress: address }));
   };
 
-  const updateQuestionnaire = (answers: Partial<QuestionnaireAnswers>) => {
-    setState(prev => ({
-      ...prev,
-      questionnaire: { ...prev.questionnaire, ...answers },
-    }));
+  const updateQuestionnaire = (answers: QuestionnaireAnswer[]) => {
+    setState(prev => ({ ...prev, questionnaire: answers }));
   };
 
   const setScore = (score: number, breakdown: ScoreBreakdown) => {

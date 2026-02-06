@@ -6,6 +6,7 @@ import Layout from '@/components/layout/Layout';
 import ProgressIndicator from '@/components/layout/ProgressIndicator';
 import { useReputa } from '@/contexts/ReputaContext';
 import { cn } from '@/lib/utils';
+import { submitQuestionnaireForScoring } from '@/lib/api';
 
 interface Step {
   id: string;
@@ -22,33 +23,41 @@ const steps: Step[] = [
 
 const Analyzing = () => {
   const navigate = useNavigate();
-  const { setScore } = useReputa();
+  const { state, setScore } = useReputa();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-
   useEffect(() => {
+    const fetchScore = async () => {
+      try {
+        const response = await submitQuestionnaireForScoring(
+          state.resolvedAddress || state.evmAddress,
+          state.questionnaire
+        );
+        const normalizedScore = Math.round((response.score / 100) * 1000);
+        setScore(normalizedScore, {
+          activity: Math.floor(Math.random() * 20) + 75,
+          maturity: Math.floor(Math.random() * 20) + 75,
+          diversity: Math.floor(Math.random() * 30) + 60,
+          riskBehavior: Math.floor(Math.random() * 25) + 70,
+          surveyMatch: Math.floor(Math.random() * 20) + 80,
+        });
+        setTimeout(() => navigate('/score'), 500);
+      } catch (error) {
+        console.error('Failed to get score:', error);
+        alert('Failed to analyze your data. Please try again.');
+        navigate('/questionnaire');
+      }
+    };
     if (currentStep >= steps.length) {
-      // Generate mock score
-      const score = Math.floor(Math.random() * 300) + 650; // 650-950
-      setScore(score, {
-        activity: Math.floor(Math.random() * 20) + 75,
-        maturity: Math.floor(Math.random() * 20) + 75,
-        diversity: Math.floor(Math.random() * 30) + 60,
-        riskBehavior: Math.floor(Math.random() * 25) + 70,
-        surveyMatch: Math.floor(Math.random() * 20) + 80,
-      });
-      
-      setTimeout(() => navigate('/score'), 500);
+      fetchScore();
       return;
     }
-
     const timer = setTimeout(() => {
       setCompletedSteps(prev => [...prev, steps[currentStep].id]);
       setCurrentStep(prev => prev + 1);
     }, steps[currentStep].duration);
-
     return () => clearTimeout(timer);
-  }, [currentStep, navigate, setScore]);
+  }, [currentStep, navigate, setScore, state.evmAddress, state.resolvedAddress, state.questionnaire]);
 
   return (
     <Layout>
