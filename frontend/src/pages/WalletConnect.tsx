@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
+import { bcs } from '@mysten/sui/bcs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -47,9 +48,9 @@ const WalletConnect = () => {
           tx.object(ORACLE_OBJECT_ID),
           tx.object(ENCLAVE_OBJECT_ID),
           tx.pure.u64(state.score),
-          tx.pure(walletAddressBytes),
+          tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(walletAddressBytes))),
           tx.pure.u64(state.oracleTimestamp),
-          tx.pure(signatureBytes),
+          tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(signatureBytes))),
         ],
       });
       signAndExecute(
