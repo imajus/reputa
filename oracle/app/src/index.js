@@ -210,7 +210,10 @@ function loadSigningKeyFromFile(path) {
 const app = express();
 
 app.use(cors({
-  origin: ['http://[::]:8080', 'http://localhost:8080', 'http://192.168.0.12:8080']
+  origin: ['http://[::]:8080', 'http://localhost:8080', 'http://192.168.0.12:8080', 'https://reputa.pages.dev'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.use(express.json());
 

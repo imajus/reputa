@@ -29,7 +29,7 @@ services:
       retries: 3
 
   evm-score-oracle:
-    image: majus/evm-score-oracle@sha256:9cfc2dfa05379c40b272c0cd8ece42e05811506d6a5f8e14ae67c68640868664
+    image: majus/evm-score-oracle@sha256:87ba9819fe01b1debb9c6f15221ef501daaa31e6dd37db5a9f8319d413dad61a
     container_name: evm-score-oracle
     restart: unless-stopped
     init: true
