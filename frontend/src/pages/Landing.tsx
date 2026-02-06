@@ -60,7 +60,7 @@ const Landing = () => {
           </div>
           
           {/* Right Side - Visualization */}
-          <div className="relative hidden flex-1 overflow-hidden bg-gradient-to-br from-secondary/20 via-primary/5 to-background lg:block">
+          <div className="relative hidden flex-1 overflow-hidden lg:block">
             <MigrationVisualization />
           </div>
         </div>

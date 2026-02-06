@@ -4,6 +4,7 @@ import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { bcs } from '@mysten/sui/bcs';
+import { useAccount, useEnsName } from 'wagmi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -19,6 +20,8 @@ const ENCLAVE_OBJECT_ID = import.meta.env.VITE_ENCLAVE_OBJECT_ID;
 const WalletConnect = () => {
   const navigate = useNavigate();
   const { state, setSuiAddress, setTxHash } = useReputa();
+  const { address } = useAccount();
+  const { data: ensName } = useEnsName({ address });
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute, isPending, error } = useSignAndExecuteTransaction();
   const [txError, setTxError] = useState<string | null>(null);
@@ -36,10 +39,10 @@ const WalletConnect = () => {
   }, [currentAccount, setSuiAddress]);
 
   const handleSign = async () => {
-    if (!currentAccount) return;
+    if (!currentAccount || !address) return;
     setTxError(null);
     try {
-      const walletAddressString = state.resolvedAddress || state.evmAddress;
+      const walletAddressString = ensName || address;
       const walletAddressBytes = new TextEncoder().encode(walletAddressString);
       const signatureBytes = hexToUint8Array(state.oracleSignature);
       const tx = new Transaction();

@@ -2,25 +2,20 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lightbulb } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useEnsName } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
 import ProgressIndicator from '@/components/layout/ProgressIndicator';
-import { useReputa } from '@/contexts/ReputaContext';
 
 const AddressInput = () => {
   const navigate = useNavigate();
-  const { setEvmAddress, setResolvedAddress } = useReputa();
   const { address, isConnected } = useAccount();
-  const { data: ensName } = useEnsName({ address });
 
   useEffect(() => {
     if (isConnected && address) {
-      setEvmAddress(ensName || address);
-      setResolvedAddress(address);
       navigate('/questionnaire');
     }
-  }, [isConnected, address, ensName, setEvmAddress, setResolvedAddress, navigate]);
+  }, [isConnected, address, navigate]);
 
   return (
     <Layout>

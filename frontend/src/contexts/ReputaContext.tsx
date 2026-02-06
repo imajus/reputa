@@ -15,8 +15,6 @@ interface ScoreBreakdown {
 }
 
 interface ReputaState {
-  evmAddress: string;
-  resolvedAddress: string;
   questionnaire: QuestionnaireAnswer[];
   score: number;
   scoreBreakdown: ScoreBreakdown;
@@ -28,8 +26,6 @@ interface ReputaState {
 
 interface ReputaContextType {
   state: ReputaState;
-  setEvmAddress: (address: string) => void;
-  setResolvedAddress: (address: string) => void;
   updateQuestionnaire: (answers: QuestionnaireAnswer[]) => void;
   setScore: (score: number, breakdown: ScoreBreakdown) => void;
   setOracleData: (signature: string, timestamp: number) => void;
@@ -39,8 +35,6 @@ interface ReputaContextType {
 }
 
 const initialState: ReputaState = {
-  evmAddress: '',
-  resolvedAddress: '',
   questionnaire: [],
   score: 0,
   scoreBreakdown: {
@@ -60,14 +54,6 @@ const ReputaContext = createContext<ReputaContextType | undefined>(undefined);
 
 export const ReputaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<ReputaState>(initialState);
-
-  const setEvmAddress = (address: string) => {
-    setState(prev => ({ ...prev, evmAddress: address }));
-  };
-
-  const setResolvedAddress = (address: string) => {
-    setState(prev => ({ ...prev, resolvedAddress: address }));
-  };
 
   const updateQuestionnaire = (answers: QuestionnaireAnswer[]) => {
     setState(prev => ({ ...prev, questionnaire: answers }));
@@ -97,8 +83,6 @@ export const ReputaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     <ReputaContext.Provider
       value={{
         state,
-        setEvmAddress,
-        setResolvedAddress,
         updateQuestionnaire,
         setScore,
         setOracleData,

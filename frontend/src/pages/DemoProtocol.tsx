@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Sparkles, Info } from 'lucide-react';
+import { Sparkles, Info, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import Layout from '@/components/layout/Layout';
 import { useReputa } from '@/contexts/ReputaContext';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const tiers = [
@@ -16,15 +16,14 @@ const tiers = [
 
 const DemoProtocol = () => {
   const { state } = useReputa();
-  const [depositAmount, setDepositAmount] = useState('100');
-  
-  const score = state.score || 782;
-  const currentTier = tiers.find(t => score >= t.minScore) || tiers[2];
+  const navigate = useNavigate();
+
+  const hasScore = state.score !== null && state.score !== undefined;
+  const score = state.score;
+  const currentTier = hasScore ? (tiers.find(t => score >= t.minScore) || tiers[2]) : null;
   const baseApy = 5.0;
-  const bonusApy = currentTier.bonus;
+  const bonusApy = currentTier?.bonus ?? 0;
   const totalApy = baseApy + bonusApy;
-  
-  const yearlyEarnings = parseFloat(depositAmount || '0') * (totalApy / 100);
 
   return (
     <Layout>
@@ -34,11 +33,34 @@ const DemoProtocol = () => {
             <CardTitle className="text-2xl">Reputa Demo Yield Protocol</CardTitle>
             <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
               <span className="text-muted-foreground">Your Tier:</span>
-              <span className="font-semibold text-primary">{currentTier.name}</span>
-              <span className="text-muted-foreground">(Score: {score})</span>
+              <span className="font-semibold text-primary">
+                {hasScore ? currentTier.name : 'N/A'}
+              </span>
+              <span className="text-muted-foreground">
+                (Score: {hasScore ? score : 'N/A'})
+              </span>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {!hasScore && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>
+                    Complete the reputation scoring flow to see your personalized tier and APY bonus.
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/analyze')}
+                    className="ml-2"
+                  >
+                    Get Score <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* APY Display */}
             <Card className="border-primary/50 bg-card">
               <CardContent className="p-6 text-center">
@@ -50,52 +72,24 @@ const DemoProtocol = () => {
                   <div className="flex items-center justify-center gap-2 text-primary">
                     <Sparkles className="h-4 w-4" />
                     <span>Your Bonus:</span>
-                    <span className="font-medium">+{bonusApy.toFixed(1)}%</span>
+                    <span className="font-medium">
+                      {hasScore ? `+${bonusApy.toFixed(1)}%` : 'N/A'}
+                    </span>
                   </div>
                   <Separator className="my-2" />
                   <div className="text-2xl font-bold text-foreground">
-                    Total APY: {totalApy.toFixed(1)}%
+                    Total APY: {hasScore ? `${totalApy.toFixed(1)}%` : 'N/A'}
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Deposit Form */}
-            <div className="space-y-4">
-              <label className="text-sm font-medium text-foreground">Deposit Amount</label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Input
-                    type="number"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    className="pr-16"
-                    placeholder="0"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    SUI
-                  </span>
-                </div>
-                <Button variant="outline" onClick={() => setDepositAmount('1000')}>
-                  Max
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-2 rounded-lg bg-primary/5 p-3">
-                <Info className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  You'll earn: <span className="font-medium text-foreground">~{yearlyEarnings.toFixed(2)} SUI/year</span>
-                </span>
-              </div>
-              
-              <Button className="w-full" size="lg">
-                Deposit Now
-              </Button>
-            </div>
-            
+
             {/* Tier Comparison */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">Tier Comparison</h3>
+              <h3 className="text-sm font-medium text-foreground">APY Tier Reference</h3>
+              <p className="text-sm text-muted-foreground">
+                Higher reputation scores unlock better APY rates across integrated DeFi protocols.
+              </p>
               <div className="space-y-2">
                 {tiers.map((tier) => (
                   <div

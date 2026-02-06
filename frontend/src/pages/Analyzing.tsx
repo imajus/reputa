@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, AlertCircle } from 'lucide-react';
-import { useAccount } from 'wagmi';
+import { useAccount, useEnsName } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/layout/Layout';
@@ -26,7 +26,8 @@ const steps: Step[] = [
 const Analyzing = () => {
   const navigate = useNavigate();
   const { state, setScore, setOracleData } = useReputa();
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { data: ensName } = useEnsName({ address });
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -39,12 +40,12 @@ const Analyzing = () => {
 
   useEffect(() => {
     const fetchScore = async () => {
-      if (!isConnected) {
+      if (!isConnected || !address) {
         return;
       }
       try {
         const response = await submitQuestionnaireForScoring(
-          state.resolvedAddress || state.evmAddress,
+          ensName || address,
           state.questionnaire
         );
         console.log('Oracle response:', response);
@@ -81,7 +82,7 @@ const Analyzing = () => {
       setCurrentStep(prev => prev + 1);
     }, steps[currentStep].duration);
     return () => clearTimeout(timer);
-  }, [currentStep, navigate, setScore, setOracleData, state.evmAddress, state.resolvedAddress, state.questionnaire, isConnected]);
+  }, [currentStep, navigate, setScore, setOracleData, state.questionnaire, isConnected, address, ensName]);
 
   return (
     <Layout>
@@ -112,11 +113,36 @@ const Analyzing = () => {
               </div>
             ) : (
               <>
-                {/* Loading Animation */}
-                <div className="flex justify-center py-8">
-                  <div className="relative h-24 w-24">
-                    <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-                    <div className="absolute inset-2 animate-spin rounded-full border-4 border-primary/10 border-b-primary/60" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                {/* Loading Animation with Chain Icons */}
+                <div className="flex items-center justify-between gap-8 py-12 px-4">
+                  {/* Ethereum Side */}
+                  <div className="flex flex-col items-center gap-3 animate-float">
+                    <img
+                      src="/ethereum.png"
+                      alt="Ethereum"
+                      className="h-16 w-16 object-contain"
+                    />
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {ensName || (address ? address.slice(0, 6) + '...' + address.slice(-4) : '')}
+                    </div>
+                  </div>
+
+                  {/* Data Transfer Animation */}
+                  <div className="flex-1 relative h-2">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-full" />
+                    <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-primary to-transparent rounded-full animate-slide-right" />
+                  </div>
+
+                  {/* Sui Side */}
+                  <div className="flex flex-col items-center gap-3 animate-float" style={{ animationDelay: '0.5s' }}>
+                    <img
+                      src="/sui.png"
+                      alt="Sui"
+                      className="h-16 w-16 object-contain"
+                    />
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Sui Network
+                    </div>
                   </div>
                 </div>
 

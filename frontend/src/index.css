@@ -12,7 +12,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 209 40% 96%;
+    /* --background: 209 40% 96%; */
     --foreground: 222 47% 11%;
 
     --card: 210 40% 98%;
@@ -97,7 +97,7 @@ All colors MUST be HSL.
     --spacing: 0.25rem;
   }
 
-  .dark {
+  /* .dark {
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
@@ -147,7 +147,7 @@ All colors MUST be HSL.
     --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
     --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-  }
+  } */
 }
 
 @layer base {
@@ -156,6 +156,45 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* background: linear-gradient(135deg, hsl(220, 40%, 92%) 0%, hsl(260, 50%, 96%) 50%, hsl(200, 45%, 93%) 100%); */
+    min-height: 100vh;
+  }
+
+  /* .dark body {
+    background: linear-gradient(135deg, hsl(222, 47%, 11%) 0%, hsl(260, 50%, 16%) 50%, hsl(200, 45%, 13%) 100%);
+  } */
+}
+
+@layer utilities {
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes slide-right {
+    0% {
+      left: 0;
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      left: calc(100% - 2rem);
+      opacity: 0;
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-right {
+    animation: slide-right 2s ease-in-out infinite;
   }
 }
