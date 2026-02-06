@@ -23,13 +23,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Reputa - DeFi reputation migration system bridging EVM transaction history to Sui blockchain via TEE oracle.
+Reputa - DeFi reputation migration system bridging EVM transaction history to Sui blockchain via TEE oracle with AI-powered creditworthiness scoring.
 
-**User Flow:** EVM Address Input → Questionnaire → Oracle Score → Sui Wallet Connect → On-Chain Recording
+**User Flow:** EVM Address Input → Questionnaire → AI Scoring (Oracle) → Score Review → Sui Wallet Connect → On-Chain Recording
 
 **Components:**
 - `frontend/` - React/TypeScript app (Vite, shadcn/ui)
-- `oracle/` - TEE oracle with Move contracts + Node.js enclave
+- `oracle/` - TEE oracle with Move contracts + Node.js enclave + Ollama AI
+
+**Enhanced Scoring:**
+The oracle analyzes both on-chain activity (via n8n webhook) and user questionnaire responses using Ollama LLM to generate:
+- **Total reputation score** (0-1000): Signed and stored on Sui blockchain
+- **5-dimension breakdown** (each 0-100): Unsigned metadata for frontend display
+  - Transaction Activity - engagement frequency and volume
+  - Account Maturity - age and consistency
+  - Protocol & Token Diversity - DeFi sophistication
+  - Financial Health - liquidation risk and borrow behavior
+  - Intent Alignment - coherence between questionnaire and on-chain activity
 
 Each subdirectory has its own `CLAUDE.md` with detailed architecture and commands.
 
@@ -90,7 +100,17 @@ curl "http://${PUBLIC_IP}:3000/score?address=0xebd69ba1ee65c712db335a2ad4b6cb60d
 **Data Flow:**
 
 ```
-Frontend → Oracle API (/score?address=0x...) → n8n EVM data → Sign in TEE
-   ↓
-Display Score → Connect Sui Wallet → Call update_wallet_score() → Verify & Store
+Frontend → POST /score (address + questionnaire) → Oracle API
+                                                        ↓
+                                            n8n Webhook (rich EVM analytics)
+                                                        ↓
+                            extractWalletFeatures() + formatQuestionnaireForAI()
+                                                        ↓
+                            Ollama AI Scoring (total + 5-dimension breakdown)
+                                                        ↓
+                                Sign score with TEE secp256k1 Key
+                                                        ↓
+                        Return {score, signature, metadata {scoreBreakdown}}
+                                                        ↓
+Display Score Review → Connect Sui Wallet → Call update_wallet_score(score, signature) → Verify & Store
 ```

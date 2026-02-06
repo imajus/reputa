@@ -47,14 +47,24 @@ const Analyzing = () => {
           state.resolvedAddress || state.evmAddress,
           state.questionnaire
         );
-        const normalizedScore = Math.round((response.score / 100) * 1000);
-        setScore(normalizedScore, {
-          activity: Math.floor(Math.random() * 20) + 75,
-          maturity: Math.floor(Math.random() * 20) + 75,
-          diversity: Math.floor(Math.random() * 30) + 60,
-          riskBehavior: Math.floor(Math.random() * 25) + 70,
-          surveyMatch: Math.floor(Math.random() * 20) + 80,
-        });
+        console.log('Oracle response:', response);
+        const scoreBreakdown = response.metadata?.scoreBreakdown || {
+          activity: 50,
+          maturity: 50,
+          diversity: 50,
+          riskBehavior: 50,
+          surveyMatch: 50
+        };
+        if (response.metadata?.reasoning) {
+          console.log('Score reasoning:', response.metadata.reasoning);
+        }
+        if (response.metadata?.risk_factors) {
+          console.log('Risk factors:', response.metadata.risk_factors);
+        }
+        if (response.metadata?.strengths) {
+          console.log('Strengths:', response.metadata.strengths);
+        }
+        setScore(response.score, scoreBreakdown);
         setTimeout(() => navigate('/score'), 500);
       } catch (err) {
         console.error('Failed to get score:', err);

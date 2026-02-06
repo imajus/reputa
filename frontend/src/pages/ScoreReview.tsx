@@ -23,11 +23,11 @@ const ScoreReview = () => {
   const scorePercent = (score / 1000) * 100;
 
   const breakdownItems = [
-    { label: 'Activity Score', value: scoreBreakdown.activity, icon: TrendingUp },
-    { label: 'Maturity Score', value: scoreBreakdown.maturity, icon: Award },
-    { label: 'Diversity Score', value: scoreBreakdown.diversity, icon: Layers },
-    { label: 'Risk Behavior', value: scoreBreakdown.riskBehavior, icon: Shield },
-    { label: 'Survey Match', value: scoreBreakdown.surveyMatch, icon: Target },
+    { label: 'Transaction Activity', value: scoreBreakdown.activity, icon: TrendingUp },
+    { label: 'Account Maturity', value: scoreBreakdown.maturity, icon: Award },
+    { label: 'Protocol & Token Diversity', value: scoreBreakdown.diversity, icon: Layers },
+    { label: 'Financial Health', value: scoreBreakdown.riskBehavior, icon: Shield },
+    { label: 'Intent Alignment', value: scoreBreakdown.surveyMatch, icon: Target },
   ];
 
   return (

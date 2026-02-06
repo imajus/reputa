@@ -40,79 +40,179 @@ const httpClient = axios.create();
 const ollamaClient = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 
 /**
- * Extract transaction features from EVM data for AI scoring
+ * Helper function to sum a specific field across lending protocol objects
  */
-function extractTransactionFeatures(evmData) {
-  const events = evmData?.EVM?.Events || [];
-  if (events.length === 0) {
-    return {
-      totalTransactions: 0,
-      accountAgeDays: 0,
-      recentActivity: { day: 0, week: 0, month: 0 },
-      uniqueContracts: 0,
-      protocolsUsed: [],
-      valueStats: { total: 0, average: 0 }
-    };
+function sumField(protocols, field) {
+  if (!protocols || typeof protocols !== 'object') return 0;
+  return Object.values(protocols).reduce((sum, protocol) => {
+    return sum + (parseInt(protocol[field]) || 0);
+  }, 0);
+}
+
+/**
+ * Format questionnaire responses for AI readability
+ */
+function formatQuestionnaireForAI(questionnaire) {
+  if (!questionnaire || !Array.isArray(questionnaire) || questionnaire.length === 0) {
+    return "No questionnaire data provided.";
   }
-  const now = Date.now();
-  const ONE_DAY = 24 * 60 * 60 * 1000;
-  const ONE_WEEK = 7 * ONE_DAY;
-  const ONE_MONTH = 30 * ONE_DAY;
-  const timestamps = events.map(e => parseInt(e.Block?.Timestamp || 0) * 1000).filter(t => t > 0);
-  const accountAgeDays = timestamps.length > 0 ? (now - Math.min(...timestamps)) / ONE_DAY : 0;
-  const recentDay = timestamps.filter(t => now - t < ONE_DAY).length;
-  const recentWeek = timestamps.filter(t => now - t < ONE_WEEK).length;
-  const recentMonth = timestamps.filter(t => now - t < ONE_MONTH).length;
-  const uniqueContracts = new Set(events.map(e => e.Log?.Address).filter(Boolean)).size;
-  const protocols = new Set();
-  events.forEach(e => {
-    const addr = e.Log?.Address?.toLowerCase();
-    if (addr?.startsWith('0xa0b8')) protocols.add('Uniswap');
-    if (addr?.startsWith('0x7a25')) protocols.add('Aave');
-    if (addr?.startsWith('0x1f98')) protocols.add('Uniswap V3');
-  });
-  const values = events.map(e => parseFloat(e.Transaction?.Value || 0)).filter(v => v > 0);
-  const totalValue = values.reduce((sum, v) => sum + v, 0);
-  const avgValue = values.length > 0 ? totalValue / values.length : 0;
+  return questionnaire.map((item, index) => {
+    const answer = item.answer?.trim() || '';
+    const answerText = answer === '' ? '(not answered)' : answer;
+    return `Q${index + 1}: ${item.question}\nA${index + 1}: ${answerText}`;
+  }).join('\n\n');
+}
+
+/**
+ * Validate and sanitize scoreBreakdown object
+ */
+function validateScoreBreakdown(breakdown) {
+  const defaults = {
+    activity: 50,
+    maturity: 50,
+    diversity: 50,
+    riskBehavior: 50,
+    surveyMatch: 50
+  };
+  if (!breakdown || typeof breakdown !== 'object') {
+    return defaults;
+  }
+  const validated = {};
+  for (const key of Object.keys(defaults)) {
+    const value = parseInt(breakdown[key]);
+    if (isNaN(value)) {
+      validated[key] = defaults[key];
+    } else {
+      validated[key] = Math.max(0, Math.min(100, value));
+    }
+  }
+  return validated;
+}
+
+/**
+ * Generate fallback scoreBreakdown from total score
+ */
+function generateFallbackBreakdown(totalScore) {
   return {
-    totalTransactions: events.length,
-    accountAgeDays: Math.round(accountAgeDays),
-    recentActivity: { day: recentDay, week: recentWeek, month: recentMonth },
-    uniqueContracts,
-    protocolsUsed: Array.from(protocols),
-    valueStats: { total: totalValue, average: avgValue }
+    activity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    maturity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    diversity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    riskBehavior: Math.round(Math.max(0, Math.min(100, totalScore * 0.25 / 10))),
+    surveyMatch: 50
+  };
+}
+
+/**
+ * Extract wallet features from new EVM data structure
+ */
+function extractWalletFeatures(evmData) {
+  const walletMetadata = evmData?.wallet_metadata || {};
+  const defiAnalysis = evmData?.defi_analysis || {};
+  const lendingHistory = evmData?.lending_history || {};
+  const tokens = evmData?.tokens || {};
+  const nfts = evmData?.nfts || {};
+  const protocolInteractions = defiAnalysis.protocol_interactions || {};
+  const protocolNames = Object.keys(protocolInteractions).filter(key =>
+    key !== 'total_protocols' && protocolInteractions[key] === true
+  );
+  const protocols = lendingHistory?.protocol_analysis?.protocols || {};
+  const borrowCount = sumField(protocols, 'borrow_count');
+  const repayCount = sumField(protocols, 'repay_count');
+  const liquidateCount = sumField(protocols, 'liquidate_count');
+  const supplyCount = sumField(protocols, 'supply_count');
+  const withdrawCount = sumField(protocols, 'withdraw_count');
+  const concentration = tokens?.concentration || {};
+  const holdings = tokens?.holdings || [];
+  const poapCount = Array.isArray(nfts?.poaps) ? nfts.poaps.length : 0;
+  const nftCount = Array.isArray(nfts?.legit_nfts) ? nfts.legit_nfts.length : 0;
+  return {
+    walletAge: parseInt(walletMetadata.wallet_age_days) || 0,
+    totalTransactions: parseInt(walletMetadata.total_transactions) || 0,
+    avgTxsPerMonth: parseFloat(walletMetadata.average_txs_per_month) || 0,
+    uniqueCounterparties: parseInt(walletMetadata.unique_counterparties) || 0,
+    protocolsUsed: parseInt(protocolInteractions.total_protocols) || 0,
+    protocolNames: protocolNames,
+    borrowCount,
+    repayCount,
+    liquidateCount,
+    supplyCount,
+    withdrawCount,
+    numTokens: parseInt(concentration.num_tokens) || holdings.length || 0,
+    diversificationScore: parseInt(concentration.diversification_score) || 0,
+    concentrationRisk: parseFloat(concentration.herfindahl_index) || 0,
+    poapCount,
+    nftCount,
+    ethBalance: parseFloat(evmData?.eth_balance) || 0
   };
 }
 
 /**
  * Generate AI-powered reputation score using Ollama
  */
-async function generateAIScore(address, evmData) {
-  const features = extractTransactionFeatures(evmData);
+async function generateAIScore(evmData, questionnaire = []) {
+  const features = extractWalletFeatures(evmData);
+  const questionnaireText = formatQuestionnaireForAI(questionnaire);
   try {
-    const prompt = `You are a DeFi reputation analyzer. Analyze this Ethereum wallet activity and provide a reputation score.
+    const prompt = `You are a DeFi creditworthiness analyzer. Analyze this Ethereum wallet's on-chain activity and questionnaire responses to provide a detailed reputation score.
 
-Wallet: ${address}
+## On-Chain Activity
 
-Activity Summary:
+Wallet Metadata:
+- Account Age: ${features.walletAge} days
 - Total Transactions: ${features.totalTransactions}
-- Account Age: ${features.accountAgeDays} days
-- Recent Activity: ${features.recentActivity.day} (24h), ${features.recentActivity.week} (7d), ${features.recentActivity.month} (30d)
-- Unique Contracts Interacted: ${features.uniqueContracts}
-- DeFi Protocols Used: ${features.protocolsUsed.join(', ') || 'None detected'}
-- Transaction Value: Total=${features.valueStats.total.toFixed(4)} ETH, Avg=${features.valueStats.average.toFixed(4)} ETH
+- Average Transactions/Month: ${features.avgTxsPerMonth.toFixed(1)}
+- Unique Counterparties: ${features.uniqueCounterparties}
 
-Scoring Criteria:
-1. Transaction Volume (0-250 points): More transactions indicate higher engagement
-2. Account Maturity (0-200 points): Older accounts with consistent activity score higher
-3. Protocol Diversity (0-200 points): Interaction with multiple DeFi protocols shows sophistication
-4. Recent Activity (0-200 points): Recent engagement indicates active participation
-5. Value Transacted (0-150 points): Higher value transactions (within normal ranges) show trust
+DeFi Protocol Interactions:
+- Total Protocols Used: ${features.protocolsUsed}
+- Protocol Names: ${features.protocolNames.join(', ') || 'None detected'}
 
-Output Format (JSON):
+Lending History:
+- Borrow Events: ${features.borrowCount}
+- Repay Events: ${features.repayCount}
+- Liquidation Events: ${features.liquidateCount}
+- Supply Events: ${features.supplyCount}
+- Withdraw Events: ${features.withdrawCount}
+
+Token Portfolio:
+- Number of Tokens: ${features.numTokens}
+- Diversification Score: ${features.diversificationScore}/100
+- Concentration Risk (Herfindahl Index): ${features.concentrationRisk.toFixed(3)}
+
+NFTs & POAPs:
+- POAPs: ${features.poapCount}
+- NFTs: ${features.nftCount}
+
+ETH Balance: ${features.ethBalance.toFixed(4)} ETH
+
+## Borrower Profile
+
+${questionnaireText}
+
+## Scoring Instructions
+
+Provide a detailed breakdown across 5 dimensions (each 0-100):
+
+1. **Transaction Activity** (0-100): Transaction count, frequency, monthly average, recent engagement
+2. **Account Maturity** (0-100): Account age, usage consistency over time
+3. **Protocol & Token Diversity** (0-100): Number of protocols, token count, diversification score, unique counterparties
+4. **Risk Behavior / Financial Health** (0-100): Liquidation history, borrow/repay ratio, concentration risk, liability disclosure from questionnaire
+5. **Questionnaire Coherence** (0-100): Alignment between stated intent and on-chain behavior. If no questionnaire provided, default to 50 (neutral)
+
+Calculate total score as weighted average:
+Total Score (0-1000) = (Activity*2 + Maturity*2 + Diversity*2 + RiskBehavior*2.5 + Coherence*1.5)
+
+Output Format (JSON only):
 {
   "score": <integer 0-1000>,
-  "reasoning": "<2-3 sentence explanation>",
+  "scoreBreakdown": {
+    "activity": <integer 0-100>,
+    "maturity": <integer 0-100>,
+    "diversity": <integer 0-100>,
+    "riskBehavior": <integer 0-100>,
+    "surveyMatch": <integer 0-100>
+  },
+  "reasoning": "<2-3 sentence explanation of overall score>",
   "risk_factors": ["<factor1>", "<factor2>"],
   "strengths": ["<strength1>", "<strength2>"]
 }
@@ -124,13 +224,15 @@ Analyze and respond with JSON only.`;
       format: 'json',
       options: {
         temperature: 0.3,
-        num_predict: 500
+        num_predict: 800
       }
     });
     const analysis = JSON.parse(response.response);
     const score = Math.max(0, Math.min(1000, parseInt(analysis.score || 0)));
+    const scoreBreakdown = validateScoreBreakdown(analysis.scoreBreakdown);
     return {
       score,
+      scoreBreakdown,
       reasoning: analysis.reasoning || 'AI analysis complete',
       riskFactors: analysis.risk_factors || [],
       strengths: analysis.strengths || [],
@@ -139,9 +241,11 @@ Analyze and respond with JSON only.`;
   } catch (error) {
     console.error('AI scoring failed, falling back to simple count:', error.message);
     const fallbackScore = Math.min(1000, features.totalTransactions * 10);
+    const scoreBreakdown = generateFallbackBreakdown(fallbackScore);
     return {
       score: fallbackScore,
-      reasoning: 'Fallback: Simple transaction count',
+      scoreBreakdown,
+      reasoning: 'Fallback scoring: AI unavailable',
       riskFactors: ['AI scoring unavailable'],
       strengths: [],
       features
@@ -159,7 +263,7 @@ async function fetchEVMData(address) {
       headers: { 'User-Agent': 'EVM-Score-Oracle/1.0' },
       timeout: 10000
     });
-    if (!response.data?.EVM?.Events) {
+    if (!response.data) {
       throw new Error('Invalid API response structure');
     }
     return response.data;
@@ -252,12 +356,13 @@ app.get('/score', async (req, res) => {
         error: 'Invalid address format. Expected 0x followed by 40 hex characters'
       });
     }
-    console.log(`Fetching EVM data for address: ${address}`);
+    console.log(`GET /score - Fetching EVM data for address: ${address}`);
     const evmData = await fetchEVMData(address);
-    const aiResult = await generateAIScore(address, evmData);
+    const aiResult = await generateAIScore(evmData, []);
     const timestampMs = Date.now();
     console.log(`AI Score for ${address}: ${aiResult.score}`);
     console.log(`Reasoning: ${aiResult.reasoning}`);
+    console.log(`Score Breakdown:`, aiResult.scoreBreakdown);
     const signature = signScoreData(signingKey, aiResult.score, address, timestampMs);
     res.json({
       score: aiResult.score,
@@ -265,6 +370,7 @@ app.get('/score', async (req, res) => {
       timestamp_ms: timestampMs,
       signature,
       metadata: {
+        scoreBreakdown: aiResult.scoreBreakdown,
         reasoning: aiResult.reasoning,
         risk_factors: aiResult.riskFactors,
         strengths: aiResult.strengths,
@@ -282,19 +388,23 @@ app.get('/score', async (req, res) => {
 
 app.post('/score', async (req, res) => {
   try {
-    const { address, questionnaire } = req.body;
+    const { address, questionnaire = [] } = req.body;
     if (!address || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
       return res.status(400).json({
         error: 'Invalid address format. Expected 0x followed by 40 hex characters'
       });
     }
-    console.log(`POST /score - address: ${address}`);
-    console.log('Questionnaire data:', JSON.stringify(questionnaire, null, 2));
+    const hasQuestionnaire = questionnaire && Array.isArray(questionnaire) && questionnaire.length > 0;
+    console.log(`POST /score - address: ${address}, questionnaire: ${hasQuestionnaire ? 'provided' : 'empty'}`);
+    if (hasQuestionnaire) {
+      console.log('Questionnaire data:', JSON.stringify(questionnaire, null, 2));
+    }
     const evmData = await fetchEVMData(address);
-    const aiResult = await generateAIScore(address, evmData);
+    const aiResult = await generateAIScore(evmData, questionnaire);
     const timestampMs = Date.now();
     console.log(`AI Score for ${address}: ${aiResult.score}`);
     console.log(`Reasoning: ${aiResult.reasoning}`);
+    console.log(`Score Breakdown:`, aiResult.scoreBreakdown);
     const signature = signScoreData(signingKey, aiResult.score, address, timestampMs);
     res.json({
       score: aiResult.score,
@@ -302,6 +412,7 @@ app.post('/score', async (req, res) => {
       timestamp_ms: timestampMs,
       signature,
       metadata: {
+        scoreBreakdown: aiResult.scoreBreakdown,
         reasoning: aiResult.reasoning,
         risk_factors: aiResult.riskFactors,
         strengths: aiResult.strengths,

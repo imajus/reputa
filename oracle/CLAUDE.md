@@ -4,17 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EVM Transaction Score Oracle - A Trusted Execution Environment (TEE) oracle that fetches EVM transaction counts from n8n webhook API, signs them inside a TEE enclave, and stores verified scores on the Sui blockchain.
+EVM Transaction Score Oracle - A Trusted Execution Environment (TEE) oracle that analyzes EVM wallet activity and questionnaire responses using AI, signs reputation scores inside a TEE enclave, and stores verified scores on the Sui blockchain.
 
 **Data Flow:**
 ```
-User Query → Enclave API → n8n Webhook → EVM Transaction Data
-                ↓
-         Calculate Score (tx count)
-                ↓
-         Sign with TEE secp256k1 Key
-                ↓
-    Sui Blockchain (signature verified by smart contract)
+Frontend → POST /score (address + questionnaire) → Enclave API
+                                                        ↓
+                                            n8n Webhook (rich EVM data)
+                                                        ↓
+                            extractWalletFeatures() + formatQuestionnaireForAI()
+                                                        ↓
+                            Ollama AI Scoring (5-dimension breakdown)
+                                                        ↓
+                                Sign with TEE secp256k1 Key
+                                                        ↓
+                        Sui Blockchain (signature verified by smart contract)
 ```
 
 ## Build Commands
@@ -59,8 +63,13 @@ After deployment, `deployment.env` contains all object IDs and IP addresses.
 
 2. **Node.js Enclave** (`app/src/index.js`)
    - HTTP server running inside TEE (Oyster CVM)
-   - Endpoints: `/health`, `/public-key`, `/score?address=0x...`
+   - Endpoints:
+     - `GET /health` - Health check with Ollama status
+     - `GET /public-key` - Get enclave's secp256k1 public key
+     - `GET /score?address=0x...` - Get score without questionnaire (backward compatible)
+     - `POST /score` - Get score with optional questionnaire data
    - Fetches data from: `https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address={ADDRESS}`
+   - AI scoring via Ollama (llama3.2:1b model)
 
 3. **Deployment Scripts** (`contracts/script/`)
    - `initialize_oracle.sh` - Create shared ScoreOracle object
@@ -140,18 +149,100 @@ All IDs saved to `deployment.env` for subsequent operations.
 ## Key Technical Details
 
 ### n8n API Response Format
+
+The n8n webhook returns rich analytical data with pre-calculated metrics:
+
 ```json
 {
-  "EVM": {
-    "Events": [
-      { "Block": {...}, "Log": {...}, "Transaction": {...} },
-      ...
-    ]
+  "wallet": "0x...",
+  "wallet_metadata": {
+    "wallet_age_days": 1262,
+    "total_transactions": 2681,
+    "unique_counterparties": 315,
+    "average_txs_per_month": 63.73
+  },
+  "defi_analysis": {
+    "protocol_interactions": {
+      "curve": true,
+      "morpho": true,
+      "total_protocols": 2
+    }
+  },
+  "lending_history": {
+    "protocol_analysis": {
+      "protocols": {
+        "0x...": {
+          "borrow_count": 5,
+          "repay_count": 5,
+          "liquidate_count": 0
+        }
+      }
+    }
+  },
+  "tokens": {
+    "concentration": {
+      "diversification_score": 45,
+      "herfindahl_index": 0.8,
+      "num_tokens": 49
+    }
+  },
+  "nfts": {
+    "poaps": [...],
+    "legit_nfts": [...]
+  },
+  "eth_balance": 0.082
+}
+```
+
+The oracle uses `extractWalletFeatures()` to parse this data and pass it to AI scoring.
+
+### AI Scoring with Questionnaire Integration
+
+The oracle accepts optional questionnaire responses via POST /score:
+
+```json
+{
+  "address": "0x...",
+  "questionnaire": [
+    {"question": "Who controls this wallet?", "answer": "individual"},
+    {"question": "What is the loan for?", "answer": "working capital"}
+  ]
+}
+```
+
+The AI scoring function analyzes both on-chain activity and questionnaire responses to generate:
+- **Total Score** (0-1000): Overall reputation score
+- **Score Breakdown** (5 dimensions, each 0-100):
+  - `activity`: Transaction count, frequency, recent engagement
+  - `maturity`: Account age, usage consistency
+  - `diversity`: Protocol count, token diversification, unique counterparties
+  - `riskBehavior`: Liquidations, borrow/repay ratio, liability disclosure
+  - `surveyMatch`: Coherence between stated intent and on-chain behavior (50 if no questionnaire)
+
+Response format:
+```json
+{
+  "score": 750,
+  "wallet_address": "0x...",
+  "timestamp_ms": 1738742400000,
+  "signature": "0x...",
+  "metadata": {
+    "scoreBreakdown": {
+      "activity": 85,
+      "maturity": 78,
+      "diversity": 62,
+      "riskBehavior": 88,
+      "surveyMatch": 72
+    },
+    "reasoning": "Account shows strong engagement...",
+    "risk_factors": ["High token concentration"],
+    "strengths": ["Consistent repayment history"],
+    "features": { ... }
   }
 }
 ```
 
-Score = `EVM.Events.length` (transaction count).
+**Note:** Only the `score`, `wallet_address`, and `timestamp_ms` are signed and stored on-chain. The `metadata` (including scoreBreakdown) is unsigned and returned for frontend display only.
 
 ### On-Chain Storage
 ```move

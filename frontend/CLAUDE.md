@@ -63,8 +63,8 @@ The `ReputaContext` manages the entire user flow state:
 - `evmAddress` - Original EVM address input
 - `resolvedAddress` - Resolved address (from ENS if applicable)
 - `questionnaire` - User's DeFi experience answers (experience, activities, risk tolerance, etc.)
-- `score` - Overall reputation score (0-100)
-- `scoreBreakdown` - Component scores (activity, maturity, diversity, riskBehavior, surveyMatch)
+- `score` - Overall reputation score (0-1000) from oracle AI analysis
+- `scoreBreakdown` - Component scores (activity, maturity, diversity, riskBehavior, surveyMatch), each 0-100
 - `suiAddress` - Connected Sui wallet address
 - `txHash` - Transaction hash from recording on Sui
 
@@ -90,17 +90,63 @@ Access via `useReputa()` hook in any component.
 
 The frontend integrates with the oracle backend for reputation scoring:
 
-**API Endpoint:** `http://<oracle-ip>:3000/score?address=0x...`
+**API Endpoints:**
+- `GET /score?address=0x...` - Get score without questionnaire (backward compatible)
+- `POST /score` - Get score with questionnaire data
+
+**POST Request Format:**
+```json
+{
+  "address": "0x...",
+  "questionnaire": [
+    {"question": "Who controls this wallet?", "answer": "individual"},
+    {"question": "What is the loan for?", "answer": "working capital"}
+  ]
+}
+```
 
 **Response Format:**
 ```json
 {
-  "score": 42,
-  "walletAddress": "0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba",
+  "score": 750,
+  "wallet_address": "0x...",
+  "timestamp_ms": 1738742400000,
   "signature": "0x...",
-  "publicKey": "0x..."
+  "metadata": {
+    "scoreBreakdown": {
+      "activity": 85,
+      "maturity": 78,
+      "diversity": 62,
+      "riskBehavior": 88,
+      "surveyMatch": 72
+    },
+    "reasoning": "Account shows strong engagement...",
+    "risk_factors": ["High token concentration"],
+    "strengths": ["Consistent repayment history"]
+  }
 }
 ```
+
+**Score Breakdown Parsing:**
+
+The `Analyzing.tsx` page parses the scoreBreakdown from the API response:
+
+```typescript
+const scoreBreakdown = response.metadata?.scoreBreakdown || {
+  activity: 50,
+  maturity: 50,
+  diversity: 50,
+  riskBehavior: 50,
+  surveyMatch: 50
+};
+```
+
+Fallback defaults are provided if the breakdown is missing. The breakdown is then displayed in `ScoreReview.tsx` with descriptive labels:
+- **Transaction Activity**: Transaction count, frequency, recent engagement
+- **Account Maturity**: Account age, usage consistency
+- **Protocol & Token Diversity**: Protocol count, token diversification, unique counterparties
+- **Financial Health**: Liquidations, borrow/repay ratio, liability disclosure
+- **Intent Alignment**: Coherence between stated intent and on-chain behavior
 
 **Sui Wallet Integration:**
 - Uses `@mysten/dapp-kit` for wallet connection

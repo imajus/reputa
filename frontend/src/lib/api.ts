@@ -5,6 +5,19 @@ interface ScoreResponse {
   wallet_address: string;
   timestamp_ms: number;
   signature: string;
+  metadata?: {
+    reasoning?: string;
+    risk_factors?: string[];
+    strengths?: string[];
+    scoreBreakdown?: {
+      activity: number;
+      maturity: number;
+      diversity: number;
+      riskBehavior: number;
+      surveyMatch: number;
+    };
+    features?: any;
+  };
 }
 
 export const submitQuestionnaireForScoring = async (
