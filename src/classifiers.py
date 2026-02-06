@@ -39,14 +39,12 @@ def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
     for nft in nfts:
         nft["classification"] = {
             "is_poap": is_poap(nft),
-            "is_spam": is_spam(nft),
             "safelist": safelist_status(nft),
             "is_ens": is_ens(nft)
         }
         
-        if is_spam(nft):
-            spam_nfts.append(nft)
-        elif is_poap(nft):
+
+        if is_poap(nft):
             poaps.append(nft)
             legit_nfts.append(nft)
         elif is_ens(nft):
@@ -56,10 +54,8 @@ def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
             legit_nfts.append(nft)
     
     return {
-        "all": nfts,
         "poaps": poaps,
         "legit_nfts": legit_nfts,
-        "spam_nfts": spam_nfts,
         "ens_domains": ens_domains,
         "counts": {
             "total": len(nfts),
