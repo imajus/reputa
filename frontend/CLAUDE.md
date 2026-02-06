@@ -27,6 +27,9 @@ npm run preview         # Preview production build
 - **Data Fetching**: TanStack Query (React Query)
 - **Forms**: React Hook Form with Zod validation
 - **Testing**: Vitest with React Testing Library
+- **Blockchain**:
+  - EVM: RainbowKit + wagmi (wallet connection for address input)
+  - Sui: @mysten/dapp-kit + @mysten/sui (wallet connection and transactions)
 
 ### Project Structure
 
@@ -65,10 +68,22 @@ The `ReputaContext` manages the entire user flow state:
 - `questionnaire` - User's DeFi experience answers (experience, activities, risk tolerance, etc.)
 - `score` - Overall reputation score (0-1000) from oracle AI analysis
 - `scoreBreakdown` - Component scores (activity, maturity, diversity, riskBehavior, surveyMatch), each 0-100
+- `oracleSignature` - TEE oracle signature (hex string) for on-chain verification
+- `oracleTimestamp` - Timestamp (ms) when score was signed by oracle
 - `suiAddress` - Connected Sui wallet address
 - `txHash` - Transaction hash from recording on Sui
 
 Access via `useReputa()` hook in any component.
+
+**Methods:**
+- `setEvmAddress(address)` - Store EVM address input
+- `setResolvedAddress(address)` - Store ENS-resolved address
+- `updateQuestionnaire(answers)` - Store questionnaire responses
+- `setScore(score, breakdown)` - Store score and breakdown from oracle
+- `setOracleData(signature, timestamp)` - Store oracle signature and timestamp
+- `setSuiAddress(address)` - Store connected Sui wallet address
+- `setTxHash(hash)` - Store transaction digest
+- `reset()` - Clear all state
 
 ### Styling
 
@@ -148,16 +163,134 @@ Fallback defaults are provided if the breakdown is missing. The breakdown is the
 - **Financial Health**: Liquidations, borrow/repay ratio, liability disclosure
 - **Intent Alignment**: Coherence between stated intent and on-chain behavior
 
-**Sui Wallet Integration:**
-- Uses `@mysten/dapp-kit` for wallet connection
-- Connects to Sui testnet for score recording
-- Transaction calls `update_wallet_score()` entry function
+### Sui Wallet Integration
+
+The application uses `@mysten/dapp-kit` for Sui blockchain integration, enabling users to record their reputation scores on-chain with cryptographic proof from the TEE oracle.
+
+**Architecture:**
+
+```
+Oracle API → Sign (score + address + timestamp) → Frontend
+                                                       ↓
+                                          Sui Wallet Connection
+                                                       ↓
+                                          Transaction Construction
+                                                       ↓
+                                          update_wallet_score()
+                                                       ↓
+                                          On-Chain Verification
+```
+
+**Key Files:**
+- `src/lib/suiNetwork.ts` - Network configuration (testnet/mainnet)
+- `src/lib/oracleService.ts` - Oracle API client and utilities
+- `src/types/oracle.d.ts` - TypeScript interfaces for oracle responses
+- `src/pages/WalletConnect.tsx` - Wallet connection and transaction signing
+- `src/contexts/ReputaContext.tsx` - Stores oracle signature and timestamp
+
+**Transaction Flow:**
+
+1. **Oracle Signing** (`Analyzing.tsx`):
+   - Calls oracle API with EVM address and questionnaire
+   - Receives score, signature, timestamp, and metadata
+   - Stores `oracleSignature` and `oracleTimestamp` in ReputaContext
+
+2. **Wallet Connection** (`WalletConnect.tsx`):
+   - Uses `ConnectButton` from dapp-kit for wallet selection
+   - Supports Sui Wallet, Suiet, Ethos, and other standard wallets
+   - Syncs connected address to ReputaContext automatically
+
+3. **Transaction Construction**:
+   - Builds `Transaction` object with `moveCall` to `update_wallet_score`
+   - Converts wallet address string to UTF-8 bytes (not hex-decoded!)
+   - Converts signature hex to bytes using `hexToUint8Array()`
+   - Uses BCS serialization for `vector<u8>` arguments
+
+4. **Signature Verification On-Chain**:
+   - Move contract verifies TEE signature using enclave public key
+   - Stores score with wallet address and timestamp
+   - Returns transaction digest for explorer link
+
+**Important Implementation Details:**
+
+- **Address Encoding**: The wallet address must be UTF-8 string bytes, NOT hex-decoded bytes
+  ```typescript
+  // Correct - UTF-8 encoding of the string "0xabc..."
+  const addressBytes = new TextEncoder().encode(walletAddressString);
+
+  // Wrong - hex-decoded bytes (causes MoveAbort in string::utf8)
+  const addressBytes = hexToUint8Array(walletAddressString);
+  ```
+
+- **BCS Serialization**: Use `bcs.vector(bcs.u8()).serialize()` for byte arrays
+  ```typescript
+  tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(bytes)))
+  ```
+
+- **Navigation Guards**: `/record` page redirects to `/analyze` if oracle data is missing
+
+**Environment Variables:**
+
+Required variables in `.env.local`:
+
+```bash
+# Oracle API Configuration
+VITE_ORACLE_API_URL=http://3.111.136.41:3000  # TEE oracle endpoint
+
+# Sui Network Configuration
+VITE_SUI_NETWORK=testnet                       # Network (testnet/mainnet)
+VITE_ORACLE_PACKAGE_ID=0xb39cd9c48c27...       # Published Move package ID
+VITE_ORACLE_OBJECT_ID=0xcca4998944cdfd...      # Shared ScoreOracle object
+VITE_ENCLAVE_OBJECT_ID=0xe03cfc8ae573fc...     # Shared Enclave object
+
+# EVM Wallet (RainbowKit)
+VITE_WALLETCONNECT_PROJECT_ID=6e54538f0b06...  # WalletConnect project ID
+```
+
+**How to Get Object IDs:**
+- Package ID: From `sui client publish` output
+- Oracle Object ID: From running oracle deployment script
+- Enclave Object ID: From oracle registration on-chain
 
 ### Common Development Gotchas
 
 - **CORS**: Oracle API must allow requests from `http://[::]:8080`
-- **Wallet Connection**: Browser extension wallet (Sui Wallet) must be installed
+- **Wallet Connection**: Browser extension wallet (Sui Wallet) must be installed for testing
 - **Address Validation**: ENS resolution happens client-side before oracle query
+- **BCS Encoding**: Always use BCS serialization for `vector<u8>` arguments in transactions
+- **String vs Bytes**: Wallet address is UTF-8 string bytes, signature is hex-decoded bytes
+
+### Troubleshooting
+
+**Issue: `CommandArgumentError: InvalidBCSBytes`**
+- **Cause**: Incorrect BCS serialization of transaction arguments
+- **Solution**: Use `bcs.vector(bcs.u8()).serialize(Array.from(bytes))` for byte arrays
+- **Check**: Verify you're passing `Uint8Array` wrapped in BCS serialization
+
+**Issue: `MoveAbort in string::utf8`**
+- **Cause**: Wallet address passed as hex-decoded bytes instead of UTF-8 string bytes
+- **Solution**: Use `new TextEncoder().encode(addressString)` not `hexToUint8Array()`
+- **Explanation**: Move contract calls `to_string()` which requires valid UTF-8
+
+**Issue: Wallet not connecting**
+- **Cause**: No Sui wallet extension installed
+- **Solution**: Install [Sui Wallet](https://chrome.google.com/webstore/detail/sui-wallet/) browser extension
+- **Alternative**: Use Suiet or Ethos Wallet
+
+**Issue: Transaction signature verification fails on-chain**
+- **Cause**: Mismatch between signed data and transaction data
+- **Solution**: Ensure `score`, `wallet_address`, and `timestamp_ms` match oracle response exactly
+- **Check**: Verify oracle signature in ReputaContext matches the one being sent
+
+**Issue: Cannot access `/record` page**
+- **Cause**: Missing oracle signature or score in ReputaContext
+- **Solution**: Complete the flow from `/analyze` → `/questionnaire` → `/analyzing` first
+- **Check**: Navigation guard redirects if `state.score` or `state.oracleSignature` is empty
+
+**Issue: Explorer link doesn't work**
+- **Cause**: Transaction hash not stored or network mismatch
+- **Solution**: Verify `VITE_SUI_NETWORK` matches deployment network (testnet/mainnet)
+- **Check**: Transaction digest should appear in ReputaContext after successful signing
 
 ### Configuration
 

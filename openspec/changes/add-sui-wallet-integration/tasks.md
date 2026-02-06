@@ -54,6 +54,6 @@
 - [x] 8.6 Test navigation guards (direct /record access without data)
 
 ## 9. Documentation
-- [ ] 9.1 Update frontend/CLAUDE.md with Sui integration details
-- [ ] 9.2 Document environment variables in CLAUDE.md
-- [ ] 9.3 Add troubleshooting section for common issues
+- [x] 9.1 Update frontend/CLAUDE.md with Sui integration details
+- [x] 9.2 Document environment variables in CLAUDE.md
+- [x] 9.3 Add troubleshooting section for common issues
