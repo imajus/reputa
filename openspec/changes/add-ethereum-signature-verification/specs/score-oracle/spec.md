@@ -1,0 +1,206 @@
+# Score Oracle Specification
+
+## ADDED Requirements
+
+### Requirement: Ethereum Signature Verification
+
+The system SHALL verify that the transaction submitter owns the Ethereum address being scored by validating an Ethereum wallet signature using EIP-191 format and secp256k1 signature recovery.
+
+#### Scenario: Valid signature from wallet owner
+
+- **WHEN** a user submits a score update transaction
+- **AND** the transaction includes an Ethereum signature for the message "Reputa Score Authorization\nScore: {score}\nTimestamp: {timestamp_ms}\nAddress: {wallet_address}"
+- **AND** the signature was created by the private key corresponding to the wallet address
+- **THEN** the contract recovers the signer's address using `secp256k1_ecrecover` with Keccak256 hash
+- **AND** compares the recovered address with the claimed wallet address (case-insensitive)
+- **AND** the verification succeeds
+
+#### Scenario: Invalid signature from wrong wallet
+
+- **WHEN** a user submits a score update transaction
+- **AND** the Ethereum signature was created by a different wallet than the one being scored
+- **THEN** the contract recovers a different address from the signature
+- **AND** the address comparison fails
+- **AND** the transaction aborts with error code `EEthereumAddressMismatch`
+
+#### Scenario: Malformed signature
+
+- **WHEN** a user submits a score update transaction
+- **AND** the Ethereum signature is not exactly 65 bytes
+- **THEN** the transaction aborts with error code `EInvalidSignatureLength`
+- **AND** no signature verification is attempted
+
+#### Scenario: Signature recovery fails
+
+- **WHEN** the Ethereum signature is well-formed but cryptographically invalid
+- **AND** `secp256k1_ecrecover` cannot recover a valid public key
+- **THEN** the recovered address is zero
+- **AND** the transaction aborts with error code `EInvalidEthereumSignature`
+
+### Requirement: EIP-191 Message Format
+
+The system SHALL construct Ethereum signature verification messages using the EIP-191 personal_sign standard format.
+
+#### Scenario: Message construction
+
+- **WHEN** the contract needs to verify an Ethereum signature
+- **THEN** it constructs the message as: "Reputa Score Authorization\nScore: {score}\nTimestamp: {timestamp_ms}\nAddress: {wallet_address}"
+- **AND** applies the EIP-191 prefix: "\x19Ethereum Signed Message:\n{message_length}{message}"
+- **AND** hashes the prefixed message with Keccak256
+- **AND** uses the hash for signature verification
+
+#### Scenario: Numeric value formatting
+
+- **WHEN** constructing the message with score 850 and timestamp 1707220800000
+- **THEN** the score is converted to ASCII string "850"
+- **AND** the timestamp is converted to ASCII string "1707220800000"
+- **AND** the message reads: "Reputa Score Authorization\nScore: 850\nTimestamp: 1707220800000\nAddress: 0x..."
+
+### Requirement: Dual Signature Verification
+
+The system SHALL verify both TEE (Trusted Execution Environment) signature and Ethereum wallet signature before accepting a score update.
+
+#### Scenario: Both signatures valid
+
+- **WHEN** a score update transaction is submitted
+- **AND** the TEE signature is valid (verified with SHA256 and enclave public key)
+- **AND** the Ethereum signature is valid (verified with Keccak256 and recovered address)
+- **THEN** both verifications pass
+- **AND** the score is stored on-chain
+
+#### Scenario: TEE signature invalid
+
+- **WHEN** a score update transaction is submitted
+- **AND** the TEE signature verification fails
+- **THEN** the transaction aborts with error code `EInvalidSignature`
+- **AND** Ethereum signature verification is not attempted
+- **AND** no score is stored
+
+#### Scenario: Ethereum signature invalid
+
+- **WHEN** a score update transaction is submitted
+- **AND** the TEE signature is valid
+- **AND** the Ethereum signature verification fails
+- **THEN** the transaction aborts with error code `EEthereumAddressMismatch` or `EInvalidEthereumSignature`
+- **AND** no score is stored
+
+### Requirement: Address Comparison
+
+The system SHALL perform case-insensitive hexadecimal comparison when matching recovered Ethereum addresses with claimed addresses.
+
+#### Scenario: Checksummed address matches
+
+- **WHEN** the claimed address is "0xAbC123..." (mixed case, EIP-55 checksummed)
+- **AND** the recovered address bytes represent the same address
+- **THEN** the comparison converts both to lowercase
+- **AND** the match succeeds
+
+#### Scenario: Lowercase address matches
+
+- **WHEN** the claimed address is "0xabc123..." (all lowercase)
+- **AND** the recovered address bytes represent the same address
+- **THEN** the comparison succeeds
+
+#### Scenario: Address format validation
+
+- **WHEN** the claimed address does not start with "0x"
+- **OR** the address is not exactly 42 characters (0x + 40 hex digits)
+- **THEN** the comparison fails
+- **AND** the transaction aborts
+
+### Requirement: Signature Format Compatibility
+
+The Ethereum signature verification SHALL be compatible with signatures generated by standard Ethereum wallets using the personal_sign method.
+
+#### Scenario: MetaMask signature
+
+- **WHEN** a user signs the message using MetaMask's personal_sign
+- **THEN** MetaMask produces a 65-byte signature with v value 27 or 28
+- **AND** the contract normalizes v to recovery ID 0 or 1
+- **AND** the signature verifies successfully
+
+#### Scenario: Foundry cast signature
+
+- **WHEN** the deployment script uses `cast wallet sign --no-hash` to sign the message
+- **THEN** cast produces a 65-byte signature compatible with EIP-191
+- **AND** the contract can verify the signature using the same logic as browser wallets
+- **AND** the signature verifies successfully
+
+## MODIFIED Requirements
+
+### Requirement: Score Update Entry Function
+
+The `update_wallet_score` entry function SHALL accept an Ethereum signature parameter and perform both TEE and Ethereum signature verification before storing the score.
+
+**Previous behavior:** Accepted only TEE signature, verified in internal `update_score` function.
+
+**New behavior:** Accepts both signatures, performs all verification in entry function, calls simplified `update_score` for storage only.
+
+#### Scenario: Function signature updated
+
+- **WHEN** calling `update_wallet_score` entry function
+- **THEN** the function signature is:
+  ```move
+  entry fun update_wallet_score(
+      oracle: &mut ScoreOracle<SCORE_ORACLE>,
+      enclave: &Enclave<SCORE_ORACLE>,
+      score: u64,
+      wallet_address: vector<u8>,
+      timestamp_ms: u64,
+      tee_signature: vector<u8>,
+      eth_signature: vector<u8>,  // NEW PARAMETER
+  )
+  ```
+- **AND** the function performs TEE signature verification
+- **AND** performs Ethereum signature verification
+- **AND** calls internal `update_score` if both succeed
+
+#### Scenario: Verification order
+
+- **WHEN** processing a score update transaction
+- **THEN** TEE signature is verified first
+- **AND** Ethereum signature is verified second
+- **AND** internal `update_score` is called last
+
+### Requirement: Internal Score Storage Function
+
+The internal `update_score` function SHALL only perform data storage operations, with all signature verification removed.
+
+**Previous behavior:** Verified TEE signature before storing data.
+
+**New behavior:** Only stores data, assumes validation already performed by entry function.
+
+#### Scenario: Simplified storage
+
+- **WHEN** the internal `update_score` function is called
+- **THEN** it receives: score, wallet_address (String), timestamp_ms
+- **AND** creates a ScoreData record
+- **AND** stores it in the scores table
+- **AND** updates latest score if timestamp is newer
+- **AND** emits ScoreUpdated event
+- **AND** performs NO signature verification
+
+## ADDED Error Codes
+
+### Requirement: Ethereum Signature Error Codes
+
+The system SHALL define specific error codes for Ethereum signature verification failures.
+
+#### Scenario: Error code definitions
+
+- **WHEN** the contract is compiled
+- **THEN** the following error constants are defined:
+  - `EInvalidEthereumSignature: u64 = 3` - Signature recovery failed or produced zero address
+  - `EEthereumAddressMismatch: u64 = 4` - Recovered address does not match claimed address
+  - `EInvalidSignatureLength: u64 = 5` - Signature is not exactly 65 bytes
+
+#### Scenario: Error code usage
+
+- **WHEN** Ethereum signature verification fails due to length check
+- **THEN** the transaction aborts with `EInvalidSignatureLength`
+
+- **WHEN** signature recovery succeeds but address does not match
+- **THEN** the transaction aborts with `EEthereumAddressMismatch`
+
+- **WHEN** signature recovery fails cryptographically
+- **THEN** the transaction aborts with `EInvalidEthereumSignature`
