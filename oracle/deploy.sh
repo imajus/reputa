@@ -145,7 +145,7 @@ echo "Image digest: $DIGEST"
 
 # Update docker-compose.yml
 echo "Updating app/docker-compose.yml with digest..."
-sed -i "s|^[[:space:]]*image:.*|    image: $DIGEST|" app/docker-compose.yml
+sed -i "/^  evm-score-oracle:/,/^[^ ]/ { /^    image:/ s|^    image:.*|    image: $DIGEST| }" app/docker-compose.yml
 
 echo ""
 echo "Deploying to Oyster..."
