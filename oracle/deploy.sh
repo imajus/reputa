@@ -25,6 +25,9 @@ if ! command -v oyster-cvm &> /dev/null; then
     exit 1
 fi
 
+# Constants
+AWS_INSTANCE=c6a.2xlarge
+
 # Store deployment info
 DEPLOYMENT_FILE="deployment.env"
 rm -f "$DEPLOYMENT_FILE"
@@ -154,7 +157,7 @@ echo "Deploying to Oyster..."
 DEPLOY_OUTPUT=$(oyster-cvm deploy \
     --wallet-private-key "$PRIVATE_KEY" \
     --docker-compose ./app/docker-compose.yml \
-    --instance-type c6a.xlarge \
+    --instance-type $AWS_INSTANCE \
     --duration-in-minutes 60 \
     --arch amd64 \
     --deployment sui 2>&1)
