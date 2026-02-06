@@ -134,6 +134,3 @@ dist
 *.key
 *.pem
 ecdsa.sec
-
-# Marlin
-.marlin
