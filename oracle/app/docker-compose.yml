@@ -1,11 +1,43 @@
 version: "3.8"
 
 services:
+  ollama_server:
+    image: alpine/ollama:0.10.1
+    container_name: ollama_server
+    restart: unless-stopped
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "ollama", "--version"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  ollama_model:
+    image: alpine/ollama:0.10.1
+    container_name: ollama_model
+    network_mode: host
+    depends_on:
+      ollama_server:
+        condition: service_healthy
+    command: ["pull", "llama3.2:1b"]
+    init: true
+    healthcheck:
+      test: ["CMD-SHELL", "ollama", "show", "llama3.2"]
+      start_period: 2m30s
+      interval: 30s
+      retries: 3
+
   evm-score-oracle:
     image: majus/evm-score-oracle@sha256:9cfc2dfa05379c40b272c0cd8ece42e05811506d6a5f8e14ae67c68640868664
     container_name: evm-score-oracle
     restart: unless-stopped
     init: true
     network_mode: host
+    depends_on:
+      ollama_model:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://127.0.0.1:11434
     volumes:
       - /app/ecdsa.sec:/app/ecdsa.sec:ro

@@ -1,6 +1,6 @@
 {
   "name": "evm-score-oracle-node",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "dependencies": {
     "@mysten/bcs": "^1.9.2",
@@ -8,6 +8,7 @@
     "@noble/hashes": "^2.0.1",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ollama": "^0.6.0"
   }
 }

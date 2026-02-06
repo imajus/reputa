@@ -7,6 +7,7 @@ import { hmac } from '@noble/hashes/hmac.js';
 import { createHash } from 'crypto';
 import fs from 'fs';
 import { bcs } from '@mysten/bcs';
+import { Ollama } from 'ollama';
 
 // Configure @noble/secp256k1 to use @noble/hashes for SHA-256
 hashes.sha256 = sha256;
@@ -36,11 +37,122 @@ const INTENT_SCOPE = 0;
 // Application state
 let signingKey = null;
 const httpClient = axios.create();
+const ollamaClient = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 
 /**
- * Fetch transaction count from n8n webhook API
+ * Extract transaction features from EVM data for AI scoring
  */
-async function fetchTransactionCount(address) {
+function extractTransactionFeatures(evmData) {
+  const events = evmData?.EVM?.Events || [];
+  if (events.length === 0) {
+    return {
+      totalTransactions: 0,
+      accountAgeDays: 0,
+      recentActivity: { day: 0, week: 0, month: 0 },
+      uniqueContracts: 0,
+      protocolsUsed: [],
+      valueStats: { total: 0, average: 0 }
+    };
+  }
+  const now = Date.now();
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const ONE_WEEK = 7 * ONE_DAY;
+  const ONE_MONTH = 30 * ONE_DAY;
+  const timestamps = events.map(e => parseInt(e.Block?.Timestamp || 0) * 1000).filter(t => t > 0);
+  const accountAgeDays = timestamps.length > 0 ? (now - Math.min(...timestamps)) / ONE_DAY : 0;
+  const recentDay = timestamps.filter(t => now - t < ONE_DAY).length;
+  const recentWeek = timestamps.filter(t => now - t < ONE_WEEK).length;
+  const recentMonth = timestamps.filter(t => now - t < ONE_MONTH).length;
+  const uniqueContracts = new Set(events.map(e => e.Log?.Address).filter(Boolean)).size;
+  const protocols = new Set();
+  events.forEach(e => {
+    const addr = e.Log?.Address?.toLowerCase();
+    if (addr?.startsWith('0xa0b8')) protocols.add('Uniswap');
+    if (addr?.startsWith('0x7a25')) protocols.add('Aave');
+    if (addr?.startsWith('0x1f98')) protocols.add('Uniswap V3');
+  });
+  const values = events.map(e => parseFloat(e.Transaction?.Value || 0)).filter(v => v > 0);
+  const totalValue = values.reduce((sum, v) => sum + v, 0);
+  const avgValue = values.length > 0 ? totalValue / values.length : 0;
+  return {
+    totalTransactions: events.length,
+    accountAgeDays: Math.round(accountAgeDays),
+    recentActivity: { day: recentDay, week: recentWeek, month: recentMonth },
+    uniqueContracts,
+    protocolsUsed: Array.from(protocols),
+    valueStats: { total: totalValue, average: avgValue }
+  };
+}
+
+/**
+ * Generate AI-powered reputation score using Ollama
+ */
+async function generateAIScore(address, evmData) {
+  const features = extractTransactionFeatures(evmData);
+  try {
+    const prompt = `You are a DeFi reputation analyzer. Analyze this Ethereum wallet activity and provide a reputation score.
+
+Wallet: ${address}
+
+Activity Summary:
+- Total Transactions: ${features.totalTransactions}
+- Account Age: ${features.accountAgeDays} days
+- Recent Activity: ${features.recentActivity.day} (24h), ${features.recentActivity.week} (7d), ${features.recentActivity.month} (30d)
+- Unique Contracts Interacted: ${features.uniqueContracts}
+- DeFi Protocols Used: ${features.protocolsUsed.join(', ') || 'None detected'}
+- Transaction Value: Total=${features.valueStats.total.toFixed(4)} ETH, Avg=${features.valueStats.average.toFixed(4)} ETH
+
+Scoring Criteria:
+1. Transaction Volume (0-250 points): More transactions indicate higher engagement
+2. Account Maturity (0-200 points): Older accounts with consistent activity score higher
+3. Protocol Diversity (0-200 points): Interaction with multiple DeFi protocols shows sophistication
+4. Recent Activity (0-200 points): Recent engagement indicates active participation
+5. Value Transacted (0-150 points): Higher value transactions (within normal ranges) show trust
+
+Output Format (JSON):
+{
+  "score": <integer 0-1000>,
+  "reasoning": "<2-3 sentence explanation>",
+  "risk_factors": ["<factor1>", "<factor2>"],
+  "strengths": ["<strength1>", "<strength2>"]
+}
+
+Analyze and respond with JSON only.`;
+    const response = await ollamaClient.generate({
+      model: 'llama3.2:1b',
+      prompt,
+      format: 'json',
+      options: {
+        temperature: 0.3,
+        num_predict: 500
+      }
+    });
+    const analysis = JSON.parse(response.response);
+    const score = Math.max(0, Math.min(1000, parseInt(analysis.score || 0)));
+    return {
+      score,
+      reasoning: analysis.reasoning || 'AI analysis complete',
+      riskFactors: analysis.risk_factors || [],
+      strengths: analysis.strengths || [],
+      features
+    };
+  } catch (error) {
+    console.error('AI scoring failed, falling back to simple count:', error.message);
+    const fallbackScore = Math.min(1000, features.totalTransactions * 10);
+    return {
+      score: fallbackScore,
+      reasoning: 'Fallback: Simple transaction count',
+      riskFactors: ['AI scoring unavailable'],
+      strengths: [],
+      features
+    };
+  }
+}
+
+/**
+ * Fetch EVM data from n8n webhook API
+ */
+async function fetchEVMData(address) {
   const url = `https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address=${address}`;
   try {
     const response = await httpClient.get(url, {
@@ -50,9 +162,9 @@ async function fetchTransactionCount(address) {
     if (!response.data?.EVM?.Events) {
       throw new Error('Invalid API response structure');
     }
-    return response.data.EVM.Events.length;
+    return response.data;
   } catch (error) {
-    console.error('Failed to fetch transaction count:', error.message);
+    console.error('Failed to fetch EVM data:', error.message);
     throw error;
   }
 }
@@ -103,8 +215,20 @@ app.use(cors({
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: Date.now(),
+    ollama: 'unknown'
+  };
+  try {
+    await ollamaClient.list();
+    health.ollama = 'connected';
+  } catch (error) {
+    health.ollama = 'unavailable';
+    health.status = 'degraded';
+  }
+  res.json(health);
 });
 
 // Get public key endpoint
@@ -125,16 +249,24 @@ app.get('/score', async (req, res) => {
         error: 'Invalid address format. Expected 0x followed by 40 hex characters'
       });
     }
-    console.log(`Fetching transaction count for address: ${address}`);
-    const txCount = await fetchTransactionCount(address);
+    console.log(`Fetching EVM data for address: ${address}`);
+    const evmData = await fetchEVMData(address);
+    const aiResult = await generateAIScore(address, evmData);
     const timestampMs = Date.now();
-    console.log(`Transaction count for ${address}: ${txCount}`);
-    const signature = signScoreData(signingKey, txCount, address, timestampMs);
+    console.log(`AI Score for ${address}: ${aiResult.score}`);
+    console.log(`Reasoning: ${aiResult.reasoning}`);
+    const signature = signScoreData(signingKey, aiResult.score, address, timestampMs);
     res.json({
-      score: txCount,
+      score: aiResult.score,
       wallet_address: address,
       timestamp_ms: timestampMs,
       signature,
+      metadata: {
+        reasoning: aiResult.reasoning,
+        risk_factors: aiResult.riskFactors,
+        strengths: aiResult.strengths,
+        features: aiResult.features
+      }
     });
   } catch (error) {
     console.error('Failed to process score request:', error);
@@ -155,15 +287,23 @@ app.post('/score', async (req, res) => {
     }
     console.log(`POST /score - address: ${address}`);
     console.log('Questionnaire data:', JSON.stringify(questionnaire, null, 2));
-    const txCount = await fetchTransactionCount(address);
+    const evmData = await fetchEVMData(address);
+    const aiResult = await generateAIScore(address, evmData);
     const timestampMs = Date.now();
-    console.log(`Transaction count for ${address}: ${txCount}`);
-    const signature = signScoreData(signingKey, txCount, address, timestampMs);
+    console.log(`AI Score for ${address}: ${aiResult.score}`);
+    console.log(`Reasoning: ${aiResult.reasoning}`);
+    const signature = signScoreData(signingKey, aiResult.score, address, timestampMs);
     res.json({
-      score: txCount,
+      score: aiResult.score,
       wallet_address: address,
       timestamp_ms: timestampMs,
       signature,
+      metadata: {
+        reasoning: aiResult.reasoning,
+        risk_factors: aiResult.riskFactors,
+        strengths: aiResult.strengths,
+        features: aiResult.features
+      }
     });
   } catch (error) {
     console.error('Failed to process score request:', error);

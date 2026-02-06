@@ -206,16 +206,16 @@ PCR values ensure the enclave is running authentic code:
 ### Local Testing
 
 ```bash
-# Install Node.js dependencies
+# Run enclave simulation
 cd app
 npm install
+oyster-cvm simulate --docker-compose docker-compose.yml -p 3000
 
-# Test API endpoint
-curl -s "https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address=0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba" | jq
+# Test API connection
+curl -s "http://localhost:3000/health" | jq
 
-# Build contracts
-cd ../contracts
-sui move build
+# Test scoring system
+curl 'http://localhost:3000/score' -H 'Content-Type: application/json' --data-raw '{"address":"0x1234567890123456789012345678901234567890","questionnaire":[{"question":"Who is this wallet controlled by?","answer":"smart contract protocol"},{"question":"What is the intended use of loan proceeds?","answer":"refinancing"},{"question":"Will this loan generate incremental cash flow, and how?","answer":"balance-sheet reshuffling"},{"question":"Please provide details of any off-chain revenue or cash flow streams","answer":""},{"question":"List any material off-chain liabilities or guarantees not visible on-chain?","answer":""},{"question":"Who is the ultimate beneficiary owner of the borrowing wallet, and how is authority constrained?","answer":""}]}' | jq
 ```
 
 ### Project Structure

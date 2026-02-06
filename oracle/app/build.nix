@@ -20,7 +20,7 @@ let
     pname = "evm-score-oracle-node";
     inherit version src nodejs;
 
-    npmDepsHash = "sha256-b7dVqV0ejFySTo/mlLsfjVpc/2w12RF5MCpH1xFJGto=";
+    npmDepsHash = "sha256-ttzRHsiQAw9aRsCWXzQKDvFip0m9gKyKriWpQAzA/cw=";
 
     dontNpmBuild = true;
     npmInstallFlags = [ "--omit=dev" ];

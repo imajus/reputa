@@ -229,6 +229,26 @@ if ! curl -sf "http://${PUBLIC_IP}:3000/health" > /dev/null; then
     sleep 20
 fi
 
+echo "Waiting for Ollama to be ready..."
+MAX_OLLAMA_RETRIES=30
+OLLAMA_RETRY_COUNT=0
+while [ $OLLAMA_RETRY_COUNT -lt $MAX_OLLAMA_RETRIES ]; do
+    HEALTH_RESPONSE=$(curl -sf "http://${PUBLIC_IP}:3000/health" 2>/dev/null || echo "{}")
+    OLLAMA_STATUS=$(echo "$HEALTH_RESPONSE" | grep -o '"ollama":"connected"' || echo "")
+    if [ -n "$OLLAMA_STATUS" ]; then
+        echo "Ollama is ready and connected!"
+        break
+    fi
+    OLLAMA_RETRY_COUNT=$((OLLAMA_RETRY_COUNT + 1))
+    echo "Ollama not ready yet (attempt $OLLAMA_RETRY_COUNT/$MAX_OLLAMA_RETRIES)..."
+    sleep 10
+done
+
+if [ $OLLAMA_RETRY_COUNT -eq $MAX_OLLAMA_RETRIES ]; then
+    echo "Warning: Ollama health check timeout after ${MAX_OLLAMA_RETRIES} attempts"
+    echo "Service may still work with fallback scoring"
+fi
+
 echo ""
 echo "Getting attestation from enclave..."
 ATTESTATION_HEX=$(curl -s "http://${PUBLIC_IP}:1301/attestation/hex")
