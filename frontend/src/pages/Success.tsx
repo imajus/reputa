@@ -7,7 +7,12 @@ import { useReputa } from '@/contexts/ReputaContext';
 
 const Success = () => {
   const { state } = useReputa();
-  
+
+  const getSuiExplorerUrl = (digest: string) => {
+    const network = import.meta.env.VITE_SUI_NETWORK || 'testnet';
+    return `https://suiscan.xyz/${network}/tx/${digest}`;
+  };
+
   const truncateAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
@@ -68,9 +73,20 @@ const Success = () => {
             
             {/* Actions */}
             <div className="flex justify-center gap-4">
-              <Button variant="outline" size="sm">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View on Explorer
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                disabled={!state.txHash}
+              >
+                <a
+                  href={state.txHash ? getSuiExplorerUrl(state.txHash) : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View on Explorer
+                </a>
               </Button>
               <Button variant="outline" size="sm">
                 <Share2 className="mr-2 h-4 w-4" />

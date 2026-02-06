@@ -25,7 +25,7 @@ const steps: Step[] = [
 
 const Analyzing = () => {
   const navigate = useNavigate();
-  const { state, setScore } = useReputa();
+  const { state, setScore, setOracleData } = useReputa();
   const { isConnected } = useAccount();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
@@ -64,6 +64,7 @@ const Analyzing = () => {
         if (response.metadata?.strengths) {
           console.log('Strengths:', response.metadata.strengths);
         }
+        setOracleData(response.signature, response.timestamp_ms);
         setScore(response.score, scoreBreakdown);
         setTimeout(() => navigate('/score'), 500);
       } catch (err) {
@@ -80,7 +81,7 @@ const Analyzing = () => {
       setCurrentStep(prev => prev + 1);
     }, steps[currentStep].duration);
     return () => clearTimeout(timer);
-  }, [currentStep, navigate, setScore, state.evmAddress, state.resolvedAddress, state.questionnaire, isConnected]);
+  }, [currentStep, navigate, setScore, setOracleData, state.evmAddress, state.resolvedAddress, state.questionnaire, isConnected]);
 
   return (
     <Layout>

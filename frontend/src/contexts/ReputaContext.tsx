@@ -20,6 +20,8 @@ interface ReputaState {
   questionnaire: QuestionnaireAnswer[];
   score: number;
   scoreBreakdown: ScoreBreakdown;
+  oracleSignature: string;
+  oracleTimestamp: number;
   suiAddress: string;
   txHash: string;
 }
@@ -30,6 +32,7 @@ interface ReputaContextType {
   setResolvedAddress: (address: string) => void;
   updateQuestionnaire: (answers: QuestionnaireAnswer[]) => void;
   setScore: (score: number, breakdown: ScoreBreakdown) => void;
+  setOracleData: (signature: string, timestamp: number) => void;
   setSuiAddress: (address: string) => void;
   setTxHash: (hash: string) => void;
   reset: () => void;
@@ -47,6 +50,8 @@ const initialState: ReputaState = {
     riskBehavior: 0,
     surveyMatch: 0,
   },
+  oracleSignature: '',
+  oracleTimestamp: 0,
   suiAddress: '',
   txHash: '',
 };
@@ -72,6 +77,10 @@ export const ReputaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setState(prev => ({ ...prev, score, scoreBreakdown: breakdown }));
   };
 
+  const setOracleData = (signature: string, timestamp: number) => {
+    setState(prev => ({ ...prev, oracleSignature: signature, oracleTimestamp: timestamp }));
+  };
+
   const setSuiAddress = (address: string) => {
     setState(prev => ({ ...prev, suiAddress: address }));
   };
@@ -92,6 +101,7 @@ export const ReputaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setResolvedAddress,
         updateQuestionnaire,
         setScore,
+        setOracleData,
         setSuiAddress,
         setTxHash,
         reset,
