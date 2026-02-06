@@ -1251,7 +1251,6 @@ def complete_credit_assessment(aggregated_data: Dict) -> Dict:
     stress_scenarios = model_stress_scenarios(treasury_nav, debt_coverage)
     
     # - Assessment complete
-    
     assessment = {
         'wallet': aggregated_data['wallet'],
         'assessment_date': datetime.utcnow().isoformat(),
