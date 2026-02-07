@@ -12,7 +12,6 @@ from .lending_service import (
     detect_emergency_repayments,
     analyze_protocol_performance,
     detect_capital_looping,
-    fetch_protocol_lending_history  # Assuming we use this if needed
 )
 from .treasury_service import (
     calculate_treasury_nav,

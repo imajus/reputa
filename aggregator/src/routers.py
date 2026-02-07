@@ -57,7 +57,7 @@ async def get_transfers(request: WalletRequest, params: AssetTransferParams = As
 async def get_protocol_lending_history(request: WalletRequest):
     try:
         transactions = fetch_wallet_events_etherscan(wallet=request.wallet_address)
-        return fetch_protocol_lending_history(request.wallet_address, transactions)
+        return fetch_protocol_lending_history(transactions)
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -86,7 +86,7 @@ async def aggregate_all_data(request: WalletRequest):
         stablecoin_data = analyze_stablecoin_holdings(enriched_tokens)
         wallet_metadata = calculate_wallet_metadata(transfers, request.wallet_address)
         
-        lending_history = fetch_protocol_lending_history(request.wallet_address, transfers)
+        lending_history = fetch_protocol_lending_history(transfers)
         
         aggregated = {
             "wallet": request.wallet_address,
