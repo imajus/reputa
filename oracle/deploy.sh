@@ -376,33 +376,33 @@ echo "$INIT_OUTPUT"
 
 cd ../..
 
-# Extract ORACLE_ID (shared object with ScoreOracle type)
-ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "ScoreOracle" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
+# Extract REGISTRY_ID (shared object with ScoreRegistry type)
+REGISTRY_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "ScoreRegistry" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
 
-if [ -z "$ORACLE_ID" ]; then
+if [ -z "$REGISTRY_ID" ]; then
     # Alternative: look for "Shared(" in Created Objects section
-    ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -A 10 "Created Objects:" | grep -B 3 "Shared(" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
+    REGISTRY_ID=$(echo "$INIT_OUTPUT" | grep -A 10 "Created Objects:" | grep -B 3 "Shared(" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
 fi
 
-if [ -z "$ORACLE_ID" ]; then
+if [ -z "$REGISTRY_ID" ]; then
     echo ""
-    echo "Warning: Could not automatically extract ORACLE_ID from output"
-    read -p "Enter the ORACLE_ID (shared ScoreOracle object) from the output: " ORACLE_ID
+    echo "Warning: Could not automatically extract REGISTRY_ID from output"
+    read -p "Enter the REGISTRY_ID (shared ScoreRegistry object) from the output: " REGISTRY_ID
 fi
 
-# Validate ORACLE_ID
-if [ -z "$ORACLE_ID" ]; then
-    echo "Error: ORACLE_ID is required"
+# Validate REGISTRY_ID
+if [ -z "$REGISTRY_ID" ]; then
+    echo "Error: REGISTRY_ID is required"
     exit 1
 fi
 
 echo ""
-echo "Oracle initialized successfully!"
-echo "  ORACLE_ID: $ORACLE_ID"
+echo "Registry initialized successfully!"
+echo "  REGISTRY_ID: $REGISTRY_ID"
 
 # Append to deployment file
 cat >> "$DEPLOYMENT_FILE" << EOF
-ORACLE_ID=$ORACLE_ID
+REGISTRY_ID=$REGISTRY_ID
 EOF
 
 echo ""
@@ -419,7 +419,7 @@ echo "Fetching and submitting initial score..."
 cd contracts/script
 
 TEST_ADDRESS="0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
-UPDATE_OUTPUT=$(bash update_score.sh "$PUBLIC_IP" "$PACKAGE_ID" "$ORACLE_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
+UPDATE_OUTPUT=$(bash update_score.sh "$PUBLIC_IP" "$PACKAGE_ID" "$REGISTRY_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
 
 echo "$UPDATE_OUTPUT"
 
@@ -446,6 +446,6 @@ echo ""
 cat "$DEPLOYMENT_FILE"
 echo ""
 echo "You can now:"
-echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $ORACLE_ID"
-echo "  - Update score: cd contracts/script && sh update_score.sh $PUBLIC_IP $PACKAGE_ID $ORACLE_ID $ENCLAVE_ID <ADDRESS>"
+echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $REGISTRY_ID"
+echo "  - Update score: cd contracts/script && sh update_score.sh $PUBLIC_IP $PACKAGE_ID $REGISTRY_ID $ENCLAVE_ID <ADDRESS>"
 echo ""

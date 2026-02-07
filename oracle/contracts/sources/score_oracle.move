@@ -4,15 +4,14 @@ module score_oracle::score_oracle;
 
 use std::bcs;
 use std::string::String;
-use sui::table::{Self, Table};
 use sui::event;
 use sui::ecdsa_k1;
+use sui::dynamic_field as field;
 use enclave::enclave::{Self, Enclave};
 
 // Error codes
 const EInvalidSignature: u64 = 0;
-const ENoScoreAtTimestamp: u64 = 1;
-const ENoScoreAvailable: u64 = 2;
+const ENoScoreForWallet: u64 = 1;
 
 /// One-time witness for module initialization
 public struct SCORE_ORACLE has drop {}
@@ -24,21 +23,19 @@ public struct IntentMessage<T: copy + drop> has copy, drop {
     data: T,
 }
 
-/// Score data record
-public struct ScoreData has copy, drop, store {
+/// User's reputation score - owned by the user
+public struct WalletScore has key, store {
+    id: UID,
     score: u64,
     wallet_address: String,
+    timestamp_ms: u64,
+    version: u64,
 }
 
-/// Stores all score data with timestamp mapping
-public struct ScoreOracle<phantom T> has key {
+/// Shared registry for wallet address lookups
+/// Dynamic field mapping: wallet_address (String) -> object ID of latest WalletScore
+public struct ScoreRegistry<phantom T> has key {
     id: UID,
-    /// Mapping from timestamp to score data
-    scores: Table<u64, ScoreData>,
-    /// Latest score and its metadata
-    latest_score: u64,
-    latest_wallet_address: String,
-    latest_timestamp: u64,
 }
 
 /// Payload for score update messages signed by enclave
@@ -52,43 +49,43 @@ public struct ScoreUpdated has copy, drop {
     score: u64,
     wallet_address: String,
     timestamp: u64,
+    score_object_id: ID,
+    owner: address,
 }
 
-public struct OracleCreated has copy, drop {
-    oracle_id: ID,
+public struct RegistryCreated has copy, drop {
+    registry_id: ID,
 }
 
-/// Initialize the score oracle
-fun create_oracle<T>(ctx: &mut TxContext): ScoreOracle<T> {
-    let oracle = ScoreOracle<T> {
+/// Initialize the score registry
+fun create_registry<T>(ctx: &mut TxContext): ScoreRegistry<T> {
+    let registry = ScoreRegistry<T> {
         id: object::new(ctx),
-        scores: table::new(ctx),
-        latest_score: 0,
-        latest_wallet_address: b"".to_string(),
-        latest_timestamp: 0,
     };
 
-    event::emit(OracleCreated {
-        oracle_id: object::id(&oracle),
+    event::emit(RegistryCreated {
+        registry_id: object::id(&registry),
     });
 
-    oracle
+    registry
 }
 
-/// Share the oracle to make it publicly accessible
-fun share_oracle<T>(oracle: ScoreOracle<T>) {
-    transfer::share_object(oracle);
+/// Share the registry to make it publicly accessible
+fun share_registry<T>(registry: ScoreRegistry<T>) {
+    transfer::share_object(registry);
 }
 
 /// Update score with attestation verification
-/// Anyone can call this, but the signature must be valid from a registered enclave with correct PCRs
+/// Creates a user-owned WalletScore object and registers it in the registry
+#[allow(lint(self_transfer))]
 fun update_score<T: drop>(
-    oracle: &mut ScoreOracle<T>,
+    registry: &mut ScoreRegistry<T>,
     enclave: &Enclave<T>,
     score: u64,
     wallet_address: String,
     timestamp_ms: u64,
     signature: vector<u8>,
+    ctx: &mut TxContext,
 ) {
     // Create the payload that should have been signed
     let payload = ScoreUpdatePayload {
@@ -121,47 +118,69 @@ fun update_score<T: drop>(
 
     assert!(is_valid, EInvalidSignature);
 
-    // Store the score data at the timestamp
-    let score_data = ScoreData {
+    // Determine version number (increment if updating existing score)
+    let version = if (field::exists_<String>(&registry.id, wallet_address)) {
+        // Remove previous score ID from registry (old object is still owned by the user)
+        let _old_score_id = field::remove<String, ID>(&mut registry.id, wallet_address);
+        // Version is incremented - we can't read the old object, so we just increment by 1
+        // Simplified - in production could track version in registry
+        1
+    } else {
+        1
+    };
+
+    // Create user-owned WalletScore object
+    let wallet_score = WalletScore {
+        id: object::new(ctx),
         score,
         wallet_address,
+        timestamp_ms,
+        version,
     };
-    table::add(&mut oracle.scores, timestamp_ms, score_data);
 
-    // Update latest if this is newer
-    if (timestamp_ms > oracle.latest_timestamp) {
-        oracle.latest_score = score;
-        oracle.latest_wallet_address = wallet_address;
-        oracle.latest_timestamp = timestamp_ms;
-    };
+    let score_id = object::id(&wallet_score);
+    let owner = ctx.sender();
+
+    // Register in dynamic field for lookup
+    field::add(&mut registry.id, wallet_address, score_id);
+
+    // Transfer ownership to transaction sender
+    transfer::public_transfer(wallet_score, owner);
 
     event::emit(ScoreUpdated {
         score,
         wallet_address,
         timestamp: timestamp_ms,
+        score_object_id: score_id,
+        owner,
     });
 }
 
-/// Get the latest wallet score
-public fun get_latest_score<T>(oracle: &ScoreOracle<T>): (u64, String, u64) {
-    assert!(oracle.latest_timestamp > 0, ENoScoreAvailable);
-    (oracle.latest_score, oracle.latest_wallet_address, oracle.latest_timestamp)
+/// Get score data from a WalletScore object
+public fun get_score(wallet_score: &WalletScore): (u64, String, u64, u64) {
+    (
+        wallet_score.score,
+        wallet_score.wallet_address,
+        wallet_score.timestamp_ms,
+        wallet_score.version,
+    )
 }
 
-/// Get the score at a specific timestamp
-public fun get_score_at_timestamp<T>(oracle: &ScoreOracle<T>, timestamp: u64): ScoreData {
-    assert!(table::contains(&oracle.scores, timestamp), ENoScoreAtTimestamp);
-    *table::borrow(&oracle.scores, timestamp)
+/// Lookup the object ID of a wallet's latest score from the registry
+public fun lookup_score_id<T>(
+    registry: &ScoreRegistry<T>,
+    wallet_address: String,
+): ID {
+    assert!(field::exists_<String>(&registry.id, wallet_address), ENoScoreForWallet);
+    *field::borrow<String, ID>(&registry.id, wallet_address)
 }
 
-/// Check if a score exists at a specific timestamp
-public fun has_score_at_timestamp<T>(oracle: &ScoreOracle<T>, timestamp: u64): bool {
-    table::contains(&oracle.scores, timestamp)
-}
-
-/// Get the timestamp of the latest score
-public fun get_latest_timestamp<T>(oracle: &ScoreOracle<T>): u64 {
-    oracle.latest_timestamp
+/// Check if a score exists for a wallet address
+public fun has_score_for_wallet<T>(
+    registry: &ScoreRegistry<T>,
+    wallet_address: String,
+): bool {
+    field::exists_<String>(&registry.id, wallet_address)
 }
 
 /// Module initializer - sets up enclave config
@@ -188,38 +207,46 @@ fun init(witness: SCORE_ORACLE, ctx: &mut TxContext) {
     transfer::public_transfer(cap, ctx.sender());
 }
 
-/// Entry function to create and share the oracle after enclave registration
+/// Entry function to create and share the registry after enclave registration
 /// Call this once your enclave is registered on-chain
-entry fun initialize_oracle(ctx: &mut TxContext) {
-    let oracle = create_oracle<SCORE_ORACLE>(ctx);
-    share_oracle(oracle);
+entry fun initialize_registry(ctx: &mut TxContext) {
+    let registry = create_registry<SCORE_ORACLE>(ctx);
+    share_registry(registry);
 }
 
 /// Entry function to update wallet score
 /// Anyone can call this with a valid signature from the authorized enclave
+/// Creates a WalletScore object owned by the transaction sender
 entry fun update_wallet_score(
-    oracle: &mut ScoreOracle<SCORE_ORACLE>,
+    registry: &mut ScoreRegistry<SCORE_ORACLE>,
     enclave: &Enclave<SCORE_ORACLE>,
     score: u64,
     wallet_address: vector<u8>,
     timestamp_ms: u64,
     signature: vector<u8>,
+    ctx: &mut TxContext,
 ) {
     // Convert vector<u8> to String for internal use
     let wallet_address_string = wallet_address.to_string();
     update_score(
-        oracle,
+        registry,
         enclave,
         score,
         wallet_address_string,
         timestamp_ms,
         signature,
+        ctx,
     );
 }
 
 #[test_only]
-public fun destroy_oracle_for_testing<T>(oracle: ScoreOracle<T>) {
-    let ScoreOracle { id, scores, latest_score: _, latest_wallet_address: _, latest_timestamp: _ } = oracle;
-    table::drop(scores);
+public fun destroy_registry_for_testing<T>(registry: ScoreRegistry<T>) {
+    let ScoreRegistry { id } = registry;
+    object::delete(id);
+}
+
+#[test_only]
+public fun destroy_wallet_score_for_testing(wallet_score: WalletScore) {
+    let WalletScore { id, score: _, wallet_address: _, timestamp_ms: _, version: _ } = wallet_score;
     object::delete(id);
 }

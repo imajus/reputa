@@ -1,45 +1,53 @@
 #!/bin/bash
 
 if [ $# -ne 2 ]; then
-    echo "Usage: $0 <PACKAGE_ID> <ORACLE_ID>"
+    echo "Usage: $0 <PACKAGE_ID> <REGISTRY_ID>"
+    echo ""
+    echo "Query all WalletScore objects owned by the current Sui address."
     exit 1
 fi
 
 PACKAGE_ID=$1
-ORACLE_ID=$2
+REGISTRY_ID=$2
 
-echo "Querying score oracle on-chain state..."
+echo "Querying all WalletScore objects owned by current Sui address..."
 echo ""
 
-# Get the oracle object data
-ORACLE_DATA=$(sui client object "$ORACLE_ID" --json 2>/dev/null)
+# Get current Sui address
+SUI_ADDRESS=$(sui client active-address 2>/dev/null)
 
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to fetch oracle object"
+if [ -z "$SUI_ADDRESS" ]; then
+    echo "Error: Failed to get active Sui address"
     exit 1
 fi
 
-# Extract latest score data from the object fields
-LATEST_SCORE=$(echo "$ORACLE_DATA" | jq -r '.content.fields.latest_score')
-LATEST_WALLET=$(echo "$ORACLE_DATA" | jq -r '.content.fields.latest_wallet_address')
-LATEST_TIMESTAMP=$(echo "$ORACLE_DATA" | jq -r '.content.fields.latest_timestamp')
+# Query all WalletScore objects owned by this address
+OWNED_OBJECTS=$(sui client objects --json 2>/dev/null | jq -r ".[] | select(.data.type == \"${PACKAGE_ID}::score_oracle::WalletScore\") | .data.objectId")
 
-if [ -z "$LATEST_SCORE" ] || [ "$LATEST_SCORE" = "null" ]; then
-    echo "Error: Could not parse oracle data"
-    echo "Raw data:"
-    echo "$ORACLE_DATA" | jq
-    exit 1
-fi
-
-# Check if any score has been recorded
-if [ "$LATEST_TIMESTAMP" = "0" ]; then
-    echo "No scores recorded yet in the oracle."
+if [ -z "$OWNED_OBJECTS" ]; then
+    echo "No WalletScore objects found for address: $SUI_ADDRESS"
     exit 0
 fi
 
-echo "=== Latest Score Data ==="
-echo "Score:       $LATEST_SCORE"
-echo "Wallet:      $LATEST_WALLET"
-echo "Timestamp:   $LATEST_TIMESTAMP ms"
-echo "Date:        $(date -d @$((LATEST_TIMESTAMP / 1000)) '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -r $((LATEST_TIMESTAMP / 1000)) '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'N/A')"
+echo "=== WalletScore Objects Owned by $SUI_ADDRESS ==="
 echo ""
+
+# Fetch and display each score object
+for OBJECT_ID in $OWNED_OBJECTS; do
+    OBJECT_DATA=$(sui client object "$OBJECT_ID" --json 2>/dev/null)
+
+    if [ $? -eq 0 ]; then
+        SCORE=$(echo "$OBJECT_DATA" | jq -r '.content.fields.score')
+        WALLET=$(echo "$OBJECT_DATA" | jq -r '.content.fields.wallet_address')
+        TIMESTAMP=$(echo "$OBJECT_DATA" | jq -r '.content.fields.timestamp_ms')
+        VERSION=$(echo "$OBJECT_DATA" | jq -r '.content.fields.version')
+
+        echo "Object ID:   $OBJECT_ID"
+        echo "Score:       $SCORE"
+        echo "Wallet:      $WALLET"
+        echo "Version:     $VERSION"
+        echo "Timestamp:   $TIMESTAMP ms"
+        echo "Date:        $(date -d @$((TIMESTAMP / 1000)) '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -r $((TIMESTAMP / 1000)) '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'N/A')"
+        echo ""
+    fi
+done

@@ -1,12 +1,13 @@
-import { Sparkles, Info, ArrowRight } from 'lucide-react';
+import { Sparkles, Info, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Layout from '@/components/layout/Layout';
-import { useReputa } from '@/contexts/ReputaContext';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useSuiScore } from '@/hooks/useSuiScore';
+import { useAccount } from 'wagmi';
 
 const tiers = [
   { name: 'Premium', minScore: 800, bonus: 2.0, apy: 7.0 },
@@ -15,11 +16,13 @@ const tiers = [
 ];
 
 const DemoProtocol = () => {
-  const { state } = useReputa();
   const navigate = useNavigate();
+  const { address: evmAddress } = useAccount();
 
-  const hasScore = state.score !== null && state.score !== undefined;
-  const score = state.score;
+  const { data: onChainScore, isLoading } = useSuiScore(evmAddress);
+
+  const hasScore = onChainScore !== null && onChainScore !== undefined;
+  const score = onChainScore?.score ?? null;
   const currentTier = hasScore ? (tiers.find(t => score >= t.minScore) || tiers[2]) : null;
   const baseApy = 5.0;
   const bonusApy = currentTier?.bonus ?? 0;
@@ -34,7 +37,7 @@ const DemoProtocol = () => {
             <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
               <span className="text-muted-foreground">Your Tier:</span>
               <span className="font-semibold text-primary">
-                {hasScore ? currentTier.name : 'N/A'}
+                {hasScore && currentTier ? currentTier.name : 'N/A'}
               </span>
               <span className="text-muted-foreground">
                 (Score: {hasScore ? score : 'N/A'})
@@ -42,7 +45,16 @@ const DemoProtocol = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!hasScore && (
+            {isLoading && (
+              <Alert>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <AlertDescription>
+                  Loading your on-chain reputation score...
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!isLoading && !hasScore && (
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription className="flex items-center justify-between">
@@ -96,7 +108,7 @@ const DemoProtocol = () => {
                     key={tier.name}
                     className={cn(
                       'flex items-center justify-between rounded-lg border p-3 transition-all',
-                      tier.name === currentTier.name
+                      tier.name === currentTier?.name
                         ? 'border-primary bg-primary/5'
                         : 'border-border/50'
                     )}
@@ -104,7 +116,7 @@ const DemoProtocol = () => {
                     <div className="flex items-center gap-2">
                       <span className={cn(
                         'font-medium',
-                        tier.name === currentTier.name ? 'text-primary' : 'text-foreground'
+                        tier.name === currentTier?.name ? 'text-primary' : 'text-foreground'
                       )}>
                         {tier.name}
                       </span>
@@ -114,7 +126,7 @@ const DemoProtocol = () => {
                     </div>
                     <span className={cn(
                       'font-semibold',
-                      tier.name === currentTier.name ? 'text-primary' : 'text-foreground'
+                      tier.name === currentTier?.name ? 'text-primary' : 'text-foreground'
                     )}>
                       {tier.apy.toFixed(1)}% APY
                     </span>
