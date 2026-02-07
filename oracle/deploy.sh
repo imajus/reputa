@@ -154,16 +154,25 @@ sed -i "/^  evm-score-oracle:/,/^[^ ]/ { /^    image:/ s|^    image:.*|    image
 echo ""
 echo "Deploying to Oyster..."
 
-# Deploy with oyster-cvm
-DEPLOY_OUTPUT=$(oyster-cvm deploy \
+# Deploy with oyster-cvm (show output in real-time and capture it)
+DEPLOY_OUTPUT_FILE=$(mktemp)
+if ! oyster-cvm deploy \
     --wallet-private-key "$PRIVATE_KEY" \
     --docker-compose ./app/docker-compose.yml \
     --instance-type $AWS_INSTANCE \
     --duration-in-minutes 60 \
     --arch amd64 \
-    --deployment sui)
+    --deployment sui 2>&1 | tee "$DEPLOY_OUTPUT_FILE"; then
+    echo ""
+    echo "Error: oyster-cvm deploy command failed"
+    echo "Output was:"
+    cat "$DEPLOY_OUTPUT_FILE"
+    rm -f "$DEPLOY_OUTPUT_FILE"
+    exit 1
+fi
 
-echo "$DEPLOY_OUTPUT"
+DEPLOY_OUTPUT=$(cat "$DEPLOY_OUTPUT_FILE")
+rm -f "$DEPLOY_OUTPUT_FILE"
 
 # Parse OYSTER_JOB_ID from output
 JOB_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Job created with ID: "\K[0-9]+' | head -1)
