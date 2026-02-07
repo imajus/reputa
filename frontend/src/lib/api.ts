@@ -22,7 +22,9 @@ interface ScoreResponse {
 
 export const submitQuestionnaireForScoring = async (
   address: string,
-  questionnaire: QuestionnaireAnswer[]
+  questionnaire: QuestionnaireAnswer[],
+  signature: string,
+  timestamp: number
 ): Promise<ScoreResponse> => {
   const apiUrl = import.meta.env.VITE_ORACLE_API_URL || 'http://localhost:3000';
   const requestBody = {
@@ -32,7 +34,9 @@ export const submitQuestionnaireForScoring = async (
       .map(({ question, answer }) => ({
         question,
         answer
-      }))
+      })),
+    signature,
+    timestamp
   };
   const response = await fetch(`${apiUrl}/score`, {
     method: 'POST',

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Loader2, AlertCircle, Lightbulb } from "lucide-react";
-import { useAccount, useEnsName } from "wagmi";
+import { useAccount, useEnsName, useSignMessage } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,17 +33,46 @@ const Analyzing = () => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  const [authSignature, setAuthSignature] = useState<string | null>(null);
+  const [authTimestamp, setAuthTimestamp] = useState<number | null>(null);
+  const { signMessage } = useSignMessage();
 
   const handleRetry = () => {
     setError(null);
     setCurrentStep(0);
     setCompletedSteps([]);
     fetchedRef.current = false;
+    setAuthSignature(null);
+    setAuthTimestamp(null);
   };
 
   useEffect(() => {
+    if (!isConnected || !address || authSignature) {
+      return;
+    }
+    const timestamp = Date.now();
+    const message = `Reputa Score Authorization\nTimestamp: ${timestamp}\nAddress: ${address}`;
+    signMessage(
+      {
+        account: address,
+        message,
+      },
+      {
+        onSuccess: (signature) => {
+          setAuthSignature(signature);
+          setAuthTimestamp(timestamp);
+        },
+        onError: (error) => {
+          console.error("Failed to sign message:", error);
+          setError("Failed to sign authorization message. Please try again.");
+        },
+      },
+    );
+  }, [isConnected, address, authSignature, signMessage, setError]);
+
+  useEffect(() => {
     const fetchScore = async () => {
-      if (!isConnected || !address) {
+      if (!isConnected || !address || !authSignature || !authTimestamp) {
         return;
       }
       if (fetchedRef.current) {
@@ -54,6 +83,8 @@ const Analyzing = () => {
         const response = await submitQuestionnaireForScoring(
           address,
           state.questionnaire,
+          authSignature,
+          authTimestamp,
         );
         console.log("Oracle response:", response);
         const scoreBreakdown = response.metadata?.scoreBreakdown || {
@@ -81,6 +112,9 @@ const Analyzing = () => {
         fetchedRef.current = false;
       }
     };
+    if (!authSignature) {
+      return;
+    }
     if (currentStep >= steps.length) {
       fetchScore();
       return;
@@ -99,6 +133,8 @@ const Analyzing = () => {
     isConnected,
     address,
     ensName,
+    authSignature,
+    authTimestamp,
   ]);
 
   if (!isConnected || !address) {
@@ -125,9 +161,44 @@ const Analyzing = () => {
               <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
                 <Lightbulb className="h-5 w-5 shrink-0 text-primary" />
                 <p className="text-sm text-muted-foreground">
-                  We'll analyze your transaction history across Ethereum,
-                  Arbitrum, Optimism, and other major L2s to build your
-                  reputation score.
+                  After connecting, you'll need to sign an authorization message
+                  to verify wallet ownership. Then we'll analyze your
+                  transaction history across Ethereum, Arbitrum, Optimism, and
+                  other major L2s.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!authSignature) {
+    return (
+      <Layout>
+        <div className="container max-w-2xl py-8">
+          <ProgressIndicator currentStep={2} />
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">
+                Sign Authorization Message
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Please sign the message in your wallet to verify ownership
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              </div>
+
+              <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
+                <Lightbulb className="h-5 w-5 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Check your wallet for a signature request. This authorization
+                  is needed to securely access your on-chain data.
                 </p>
               </div>
             </CardContent>
