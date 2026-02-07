@@ -1,21 +1,21 @@
 #!/bin/bash
 
 if [ $# -ne 5 ]; then
-    echo "Usage: $0 <ENCLAVE_IP> <PACKAGE_ID> <REGISTRY_ID> <ENCLAVE_ID> <ADDRESS>"
+    echo "Usage: $0 <ENCLAVE_URL> <PACKAGE_ID> <REGISTRY_ID> <ENCLAVE_ID> <ADDRESS>"
     exit 1
 fi
 
-ENCLAVE_IP=$1
+ENCLAVE_URL=$1
 PACKAGE_ID=$2
 REGISTRY_ID=$3
 ENCLAVE_ID=$4
 ADDRESS=$5
 
 # Fetch signed score from enclave
-RESPONSE=$(curl -s "http://${ENCLAVE_IP}:3000/score?address=${ADDRESS}")
+RESPONSE=$(curl -s "${ENCLAVE_URL}/score" -H 'Content-Type: application/json' --data-raw "{\"address\":\"$ADDRESS\",\"questionnaire\":[]}")
 
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to fetch score from enclave"
+    echo "Error: Failed to post score to enclave"
     exit 1
 fi
 

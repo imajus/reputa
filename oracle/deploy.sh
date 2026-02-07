@@ -27,6 +27,7 @@ fi
 
 # Constants
 AWS_INSTANCE=c6a.2xlarge
+PORT=8880
 
 # Store deployment info
 DEPLOYMENT_FILE="deployment.env"
@@ -160,7 +161,7 @@ DEPLOY_OUTPUT=$(oyster-cvm deploy \
     --instance-type $AWS_INSTANCE \
     --duration-in-minutes 60 \
     --arch amd64 \
-    --deployment sui 2>&1)
+    --deployment sui)
 
 echo "$DEPLOY_OUTPUT"
 
@@ -201,6 +202,7 @@ echo ""
 echo "Enclave deployed successfully!"
 echo "  JOB_ID: $JOB_ID"
 echo "  PUBLIC_IP: $PUBLIC_IP"
+echo "  PORT: $PORT"
 
 # Append to deployment file
 cat >> "$DEPLOYMENT_FILE" << EOF
@@ -227,7 +229,7 @@ sleep 10
 
 # Test enclave health
 echo "Testing enclave health endpoint..."
-if ! curl -sf "http://${PUBLIC_IP}:3000/health" > /dev/null; then
+if ! curl -sf "http://${PUBLIC_IP}:$PORT/health" > /dev/null; then
     echo "Warning: Enclave health check failed. Waiting 20 more seconds..."
     sleep 20
 fi
@@ -236,7 +238,7 @@ echo "Waiting for Ollama to be ready..."
 MAX_OLLAMA_RETRIES=30
 OLLAMA_RETRY_COUNT=0
 while [ $OLLAMA_RETRY_COUNT -lt $MAX_OLLAMA_RETRIES ]; do
-    HEALTH_RESPONSE=$(curl -sf "http://${PUBLIC_IP}:3000/health" 2>/dev/null || echo "{}")
+    HEALTH_RESPONSE=$(curl -sf "http://${PUBLIC_IP}:$PORT/health" 2>/dev/null || echo "{}")
     OLLAMA_STATUS=$(echo "$HEALTH_RESPONSE" | grep -o '"ollama":"connected"' || echo "")
     if [ -n "$OLLAMA_STATUS" ]; then
         echo "Ollama is ready and connected!"
@@ -419,7 +421,7 @@ echo "Fetching and submitting initial score..."
 cd contracts/script
 
 TEST_ADDRESS="0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
-UPDATE_OUTPUT=$(bash update_score.sh "$PUBLIC_IP" "$PACKAGE_ID" "$REGISTRY_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
+UPDATE_OUTPUT=$(bash update_score.sh "http://${PUBLIC_IP}:$PORT" "$PACKAGE_ID" "$REGISTRY_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
 
 echo "$UPDATE_OUTPUT"
 
@@ -447,5 +449,5 @@ cat "$DEPLOYMENT_FILE"
 echo ""
 echo "You can now:"
 echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $REGISTRY_ID"
-echo "  - Update score: cd contracts/script && sh update_score.sh $PUBLIC_IP $PACKAGE_ID $REGISTRY_ID $ENCLAVE_ID <ADDRESS>"
+echo "  - Update score: cd contracts/script && sh update_score.sh http://$PUBLIC_IP:$PORT $PACKAGE_ID $REGISTRY_ID $ENCLAVE_ID <ADDRESS>"
 echo ""

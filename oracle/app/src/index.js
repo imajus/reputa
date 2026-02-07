@@ -443,7 +443,7 @@ async function main() {
   console.log('Signing key loaded successfully');
   const publicKey = getPublicKey(signingKey, true);
   console.log(`Public key (hex): ${Buffer.from(publicKey).toString('hex')}`);
-  const port = 3000;
+  const port = 8880;
   const host = '0.0.0.0';
   app.listen(port, host, () => {
     console.log(`Starting server on ${host}:${port}`);
