@@ -192,7 +192,7 @@ def fetch_token_prices(contracts: List[str]) -> Dict[str, float]:
 
 def fetch_wallet_events_etherscan(
     wallet: str,
-    start_block: int = 0,
+    start_block: int = 26000000,
     end_block: str = "latest",
     page: int = 1,
     offset: int = 1000,
