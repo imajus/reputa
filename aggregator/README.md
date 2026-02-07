@@ -1,234 +1,202 @@
-# On-Chain Credit Score API
+# On-Chain Credit Assessment System
 
-A FastAPI-based credit scoring system that analyzes Ethereum wallet behavior to generate a creditworthiness score (0-850, similar to FICO).
+Comprehensive credit analysis for Ethereum wallets. Scores range from 300-850 (similar to FICO), combining behavioral patterns with institutional-grade assessment across lending, treasury, capital usage, and cash flows.
 
-## Score Range
+**Grades:** S-tier (800+), A-tier (700-799), B-tier (600-699), C-tier (500-599), D-tier (300-499)
 
-- **800-850**: Excellent (A+)
-- **740-799**: Very Good (A)
-- **670-739**: Good (B+)
-- **580-669**: Fair (B)
-- **500-579**: Poor (C)
-- **400-499**: Very Poor (D)
-- **0-399**: Bad (F)
+---
 
-## What Affects Your Score
+## Assessment Framework
 
-### ✅ Positive Factors
+### 1. Past Credit Performance (35%)
 
-#### Payment History (35% weight - Max 298 points)
+**Repayment History**
+- Borrow and repay event tracking across Aave, Compound, Morpho
+- Repayment ratio and timeline analysis
+- Liquidation and default detection
 
-- **DeFi Protocol Usage**
-  - Aave interactions: +80 points
-  - Compound interactions: +70 points
-  - 3+ protocols: +50 points
-- **Activity Consistency**
-  - 12+ active months: +60 points
-  - 6-12 active months: +30 points
-- **Balanced Cash Flow**
-  - ETH out/in ratio < 2: +38 points
+**Behavioral Patterns**
+- Punctuality scoring (early/on-time/late repayments)
+- Emergency repayment detection (< 24hr turnaround)
+- Borrowing frequency and trend analysis
+- Protocol performance comparison
 
-#### Amounts Owed (30% weight - Max 255 points)
+**Market Stress Response**
+- Crisis behavior tracking
+- Multi-protocol diversification
+- Lending venue performance consistency
 
-- **Stablecoin Holdings**
-  - $10,000+: +100 points
-  - $1,000-$10,000: +60 points
-  - $100-$1,000: +30 points
-- **Total Assets**: Up to +100 points (0.01 \* total USD value)
-- **ETH Balance**
-  - 10+ ETH: +55 points
-  - 1-10 ETH: +35 points
-  - 0.1-1 ETH: +15 points
+---
 
-#### Length of History (15% weight - Max 128 points)
+### 2. Balance Sheet Analysis (25%)
 
-- **Wallet Age**: +30 points per year (max 80 points at 2.5+ years)
-- **Transaction Count**: +0.5 points per transaction (max 48 points)
+**Portfolio Composition**
+- Full token inventory with categorization (stables, governance, LSDs, wrapped)
+- NFT holdings with floor price valuation
+- Treasury NAV calculation
 
-#### New Credit (10% weight - Max 85 points)
+**Risk Metrics**
+- Volatility analysis (30-day historical)
+- Concentration risk (Herfindahl index)
+- Asset-liability alignment
+- Liquidity buffer measurement
 
-- **Recent DeFi Activity**: +20 points per protocol (max 60)
-- **Not Overextended**: +25 points if < 1000 transactions
+**Stress Testing**
+- Price shock scenarios (-30%, -50%, -70%)
+- Market downturn resilience
+- Expected runway calculation
 
-#### Credit Mix (10% weight - Max 85 points)
+---
 
-- **Asset Diversification**: +15 points per asset type (tokens, NFTs, stablecoins, ETH)
-- **Protocol Diversity**: +10 points per DeFi protocol (max 25)
+### 3. Use of Proceeds (20%)
 
-#### Reputation Bonuses
+**Capital Allocation**
+- Leverage pattern detection
+- Recursive borrowing identification (supply → borrow loops)
+- Capital efficiency analysis
 
-- **POAPs**: +3 points each (max 40)
-- **ENS Domain**: +25 points
-- **Verified NFTs**: +5 points each (max 60)
-- **Blue Chip NFTs**: +15 points each (max 50)
-  - Bored Ape Yacht Club
-  - CryptoPunks
-  - Azuki
-  - Mutant Ape Yacht Club
-  - CloneX
+**Strategy Classification**
+- Productive vs. speculative usage
+- Protocol interaction patterns
+- Leverage strategy type
 
-### ❌ Negative Factors (Risk Penalties)
+---
 
-#### Critical Red Flags
+### 4. Cash Flow Analysis (20%)
 
-- **Mixer Interaction**: -200 points
-  - Tornado Cash or similar privacy protocols
-  - Null address transactions
+**Debt Service Capacity**
+- Coverage ratio estimation
+- Revenue proxy calculation
+- Payment capacity assessment
 
-#### Suspicious Patterns
+**Resilience Modeling**
+- Revenue stress scenarios
+- Solvency breakpoint analysis
+- Cash flow sustainability
 
-- **High Spam NFT Ratio**
-  - > 50% spam: -80 points
-  - 20-50% spam: -40 points
-- **Drainer Pattern** (ETH out >> ETH in)
-  - 10x+ outflow: -150 points
-  - 5-10x outflow: -70 points
-- **Low NFT Verification Rate**
-  - <30% verified + 5+ NFTs: -30 points
+---
 
-## NFT Quality Assessment
+## Scoring Components
 
-### Verified NFTs (Best)
+### Payment History (298 pts)
+- Lending track record: 150 pts
+- Protocol usage (Aave +20, Compound +15, Morpho +10): 80 pts
+- Consistent activity (12+ months, 5+ tx/mo): 60 pts
 
-- `safelistRequestStatus: "verified"`
-- Counts toward reputation
-- Full value in scoring
+### Amounts Owed (255 pts)
+- Stablecoin liquidity (20-50% optimal): 100 pts
+- Total assets ($1 = 0.01 pts): 100 pts
+- ETH balance (10+ ETH max): 55 pts
 
-### Not Requested (Neutral)
+### Credit History (128 pts)
+- Wallet age (30 pts/year): 80 pts
+- Transaction count (0.5 pts/tx): 48 pts
 
-- `safelistRequestStatus: "not_requested"`
-- Included in counts but no bonus
-- Typical for smaller projects
+### Diversification (85 pts)
+- Protocol mix: 60 pts
+- Asset variety: 25 pts
 
-### Spam NFTs (Negative)
+### Credit Mix (85 pts)
+- Portfolio Herfindahl index: 40 pts
+- DeFi engagement: 45 pts
 
-- `isSpam: true` in contract or NFT metadata
-- Not counted as legitimate
-- Penalizes score if ratio too high
+### Reputation Signals (200 pts)
+- POAPs: +3 each (max 40)
+- ENS ownership: +25
+- Verified NFTs: +5 each (max 60)
+- Blue chips (BAYC, Punks, Azuki, MAYC, CloneX): +15 each (max 50)
+- Active staking: +5 each (max 30)
+- Clean lending history: +40
 
-## DeFi Protocols Tracked
+### Risk Penalties
+- Mixer interactions (Tornado Cash): -200
+- Portfolio concentration (>50% single asset): -100
+- High volatility exposure: -80
+- Spam NFT ratio: -80
+- Drainer pattern (10x+ ETH outflow): -150
+- Liquidation history: -30 per event
 
-### Lending/Borrowing
+---
 
-- Aave V2 & V3
-- Compound V2 & V3
+## Data Sources
 
-### DEX
+**Alchemy:** Token balances, NFT inventory, prices, transfer history  
+**Etherscan:** Transaction history, function signatures  
+**OpenSea:** NFT floor prices, verification status
 
-- Uniswap V2 & V3
-- Curve Finance
+---
+
+## Tracked Protocols
+
+**Lending:** Aave V2/V3, Compound V2/V3, Morpho Blue, Spark  
+**Staking:** Ethena (USDe, deUSD), Lido (stETH)  
+**DEX:** Uniswap, Curve  
+**Privacy:** Tornado Cash detection
+
+---
 
 ## API Endpoints
 
-### GET /score
+### POST /score
+Quick behavioral score (0-850).
 
-Calculates comprehensive credit score for a wallet.
+Returns: Score, grade, breakdown, portfolio analysis, credit history, risk flags
+
+### POST /assessment
+Institutional credit assessment (300-850).
+
+Returns: Detailed analysis across 4 categories with timelines, punctuality metrics, stress tests, looping detection, and DSCR calculations
 
 **Request:**
-
 ```json
-{
-  "wallet_address": "0x..."
-}
+{"wallet_address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"}
 ```
 
-**Response:**
-
-```json
-{
-  "score": 720,
-  "grade": "B+",
-  "max_score": 850,
-  "breakdown": {
-    "payment_history": 180,
-    "amounts_owed": 145,
-    "length_of_history": 95,
-    "new_credit": 60,
-    "credit_mix": 70,
-    "reputation_bonus": 85,
-    "risk_penalty": -15
-  },
-  "details": {
-    "total_assets_usd": 12500.5,
-    "eth_balance": 2.4567,
-    "stablecoin_balance_usd": 5000.0,
-    "wallet_age_days": 856,
-    "tx_count": 342,
-    "active_months": 18,
-    "defi_protocols_used": 3,
-    "verified_nfts": 12,
-    "blue_chip_nfts": 1,
-    "poap_count": 15,
-    "ens_count": 1
-  },
-  "risk_flags": {
-    "mixer_transactions": false,
-    "high_spam_ratio": false,
-    "drainer_pattern": false,
-    "low_nft_verification": false
-  }
-}
-```
+---
 
 ## Installation
 
-1. Clone repository
-2. Install dependencies:
-
 ```bash
-pip install fastapi uvicorn requests pydantic-settings
+pip install fastapi uvicorn requests pydantic-settings web3
 ```
 
-3. Create `.env` file:
-
-```
-ALCHEMY_API_KEY=your_key_here
+**.env:**
+```env
+ALCHEMY_API_KEY=your_key
+ETHERSCAN_API_KEY=your_key
 ALCHEMY_NETWORK=eth-mainnet
 ```
 
-4. Run:
-
+**Run:**
 ```bash
 uvicorn app:app --reload
 ```
 
-## Important Notes
+---
 
-### ENS and Credit Score
+## Response Fields
 
-- **Yes, ENS affects your score** (+25 points bonus)
-- ENS ownership shows:
-  - Identity commitment
-  - Reputation building
-  - Long-term ecosystem participation
+### Quick Score
+- `score` (0-850)
+- `grade` (AAA to F)
+- `breakdown` (payment, amounts, history, mix, reputation, penalties)
+- `credit_history` (borrows, repays, liquidations, protocols)
+- `portfolio_analysis` (diversification, concentration, volatility)
+- `risk_flags` (mixer, spam, drainer, concentration, liquidations)
 
-### ETH Balance
+### Institutional Assessment
+- `credit_score` (300-850 with component breakdown)
+- `1_past_credit_performance` (timelines, punctuality, frequency, emergencies, protocol performance)
+- `2_balance_sheet` (NAV, liquidity buffers, stress tests)
+- `3_use_of_proceeds` (looping detection, leverage strategy)
+- `4_cash_flows` (DSCR, stress scenarios, resilience)
 
-- **Yes, we check ETH balance** separately from ERC20 tokens
-- Native ETH balance is fetched via `eth_getBalance`
-- ERC20 tokens use `alchemy_getTokenBalances`
-- Both contribute to "Amounts Owed" scoring category
+---
 
-### Stablecoins
+**Built for:** DeFi lending protocols, credit underwriters, risk analysts  
+**Best for:** Behavioral screening, pattern detection, portfolio analysis  
+**Use with:** On-chain data enrichment for comprehensive credit decisions
 
-- USDC, USDT, DAI tracked separately
-- Shows liquidity and financial stability
-- Major weight in "Amounts Owed" category
+---
 
-## Known Limitations
-
-1. **No liquidation data** - Would require lending protocol event tracking
-2. **Simplified DeFi analysis** - Only checks interactions, not loan health
-3. **Price estimation** - Uses CoinGecko (rate limited) and OpenSea floor prices
-4. **No gas analysis** - Could add commitment scoring
-5. **Static mixer list** - Should integrate blockchain intelligence APIs
-
-## Future Improvements
-
-- [ ] Loan repayment history tracking
-- [ ] Liquidation event detection
-- [ ] Real-time gas spent analysis
-- [ ] GitCoin donation tracking
-- [ ] DAO governance participation
-- [ ] Sybil attack detection
-- [ ] Integration with Chainalysis/TRM Labs
+*Experimental research software. Not financial advice.*
