@@ -61,7 +61,6 @@ async def get_protocol_lending_history(request: WalletRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 # New endpoint for final credit score calculation
 @api_router.post("/aggregate")
 async def aggregate_all_data(request: WalletRequest):
