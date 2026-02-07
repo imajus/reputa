@@ -11,7 +11,8 @@ from .lending_service import (
     analyze_borrowing_frequency,
     detect_emergency_repayments,
     analyze_protocol_performance,
-    detect_capital_looping
+    detect_capital_looping,
+    fetch_protocol_lending_history  # Assuming we use this if needed
 )
 from .treasury_service import (
     calculate_treasury_nav,
@@ -21,6 +22,10 @@ from .treasury_service import (
     model_stress_scenarios
 )
 
+from .wallet_service import analyze_transaction_patterns
+from .token_service import analyze_token_velocity
+from .blockchain_service import analyze_contract_interactions, analyze_approval_behavior, fetch_wallet_events_etherscan
+
 
 def complete_credit_assessment(aggregated_data: Dict) -> Dict:
     protocol_analysis = aggregated_data['lending_history']['protocol_analysis']
@@ -28,7 +33,11 @@ def complete_credit_assessment(aggregated_data: Dict) -> Dict:
     wallet_metadata = aggregated_data['wallet_metadata']
     eth_balance = aggregated_data['eth_balance']
     stablecoin_data = aggregated_data['defi_analysis']['stablecoins']
-        
+    wallet_address = aggregated_data['wallet']
+
+    # Fetch transactions once to avoid repeats
+    transactions = fetch_wallet_events_etherscan(wallet_address)
+
     # - Analyzing credit performance
     repayment_timelines = extract_repayment_timelines(protocol_analysis)
     punctuality = measure_repayment_punctuality(repayment_timelines)
@@ -48,6 +57,12 @@ def complete_credit_assessment(aggregated_data: Dict) -> Dict:
     debt_coverage = calculate_debt_service_coverage(protocol_analysis, treasury_nav, wallet_metadata)
     stress_scenarios = model_stress_scenarios(treasury_nav, debt_coverage)
     
+    # Pass shared transactions to functions that need them
+    tx_patterns = analyze_transaction_patterns(wallet_address, transactions=transactions)
+    contract_interactions = analyze_contract_interactions(wallet_address, transactions=transactions)
+    token_velocity = analyze_token_velocity(wallet_address, enriched_tokens)  # Assumes internal fix for asset transfers
+    approval_behavior = analyze_approval_behavior(wallet_address)
+
     # - Assessment complete
     assessment = {
         'wallet': aggregated_data['wallet'],
@@ -74,14 +89,20 @@ def complete_credit_assessment(aggregated_data: Dict) -> Dict:
         '4_cash_flows': {
             'debt_service_coverage': debt_coverage,
             'stress_scenarios': stress_scenarios
-        }
+        },
+        
+        '5_wallet_behavior': {
+            'transaction_patterns': tx_patterns,
+            'contract_interactions': contract_interactions,
+            'token_velocity': token_velocity,
+            'approval_behavior': approval_behavior
+        },
     }
     
     credit_score = calculate_credit_score_comprehensive(assessment, aggregated_data)
     assessment['credit_score'] = credit_score
 
     return assessment
-
 
 def calculate_credit_score_comprehensive(assessment: Dict, aggregated_data: Dict) -> Dict:
     perf = assessment['1_past_credit_performance']

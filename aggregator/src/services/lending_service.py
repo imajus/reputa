@@ -128,11 +128,8 @@ def analyze_protocol_interactions(transactions: List[Dict]) -> Dict:
     }
 
 
-def fetch_protocol_lending_history(wallet: str) -> Dict:
+def fetch_protocol_lending_history(wallet: str, transactions: List[Dict]) -> Dict:
     try:
-        transactions = fetch_wallet_events_etherscan(wallet=wallet)
-        print("transactions", transactions)
-
         if not transactions:
             print(f"No transactions found for wallet {wallet}")
             return {

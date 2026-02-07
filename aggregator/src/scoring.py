@@ -246,10 +246,9 @@ def calculate_credit_assessment(protocol_analysis: Dict) -> Dict:
         "has_borrowing_activity": total_borrows > 0
     }
 
-def fetch_protocol_lending_history(wallet: str) -> Dict:
+def fetch_protocol_lending_history(wallet: str, transactions: List[Dict]) -> Dict:
     try:
-        transactions = fetch_wallet_events_etherscan(wallet=wallet)
-
+        
         if not transactions:
             return {
                 "protocol_analysis": {

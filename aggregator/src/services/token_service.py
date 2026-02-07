@@ -187,3 +187,54 @@ def estimate_nft_values(nfts: List[Dict]) -> Dict[str, float]:
         
         values[f"{contract_addr}_{token_id}"] = floor
     return values
+
+
+def analyze_token_velocity(wallet_address: str, enriched_tokens: List[Dict]) -> Dict:
+    """
+    Analyze how quickly tokens move through the wallet
+    """
+    from .blockchain_service import fetch_asset_transfers
+    from src.models import AssetTransferParams
+    
+    params = AssetTransferParams()
+    incoming = fetch_asset_transfers(wallet_address, params, is_from=False)
+    outgoing = fetch_asset_transfers(wallet_address, params, is_from=True)
+    
+    # Calculate token-specific velocity
+    token_flows = {}
+    
+    for tx in incoming + outgoing:
+        token = tx.get('asset', 'ETH')
+        value = float(tx.get('value', 0))
+        
+        if token not in token_flows:
+            token_flows[token] = {'inflow': 0, 'outflow': 0, 'net': 0}
+        
+        if tx in incoming:
+            token_flows[token]['inflow'] += value
+        else:
+            token_flows[token]['outflow'] += value
+        
+        token_flows[token]['net'] = token_flows[token]['inflow'] - token_flows[token]['outflow']
+    
+    # Calculate velocity (turnover ratio)
+    for token in token_flows:
+        total_flow = token_flows[token]['inflow'] + token_flows[token]['outflow']
+        current_balance = next((t['balance_human'] for t in enriched_tokens 
+                               if t.get('symbol') == token), 0)
+        
+        if current_balance > 0:
+            token_flows[token]['velocity'] = total_flow / current_balance
+        else:
+            token_flows[token]['velocity'] = 0
+    
+    avg_velocity = sum(t['velocity'] for t in token_flows.values()) / max(len(token_flows), 1)
+    
+    return {
+        'token_flows': token_flows,
+        'average_velocity': avg_velocity,
+        'velocity_health': 'healthy' if 2 <= avg_velocity <= 10 else 
+                          'low' if avg_velocity < 2 else 'high',
+        'net_positive_tokens': sum(1 for t in token_flows.values() if t['net'] > 0),
+        'net_negative_tokens': sum(1 for t in token_flows.values() if t['net'] < 0)
+    }

@@ -4,7 +4,8 @@ from src.services.blockchain_service import (
     fetch_all_nfts,
     fetch_token_balances,
     fetch_asset_transfers,
-    fetch_eth_balance
+    fetch_eth_balance,
+    fetch_wallet_events_etherscan
 )
 from src.services.credit_service import complete_credit_assessment
 from src.services.token_service import enrich_token_data, calculate_portfolio_concentration
@@ -16,6 +17,7 @@ from src.services.defi_service import (
     check_mixer_interactions,
     analyze_stablecoin_holdings,
 )
+
 
 api_router = APIRouter()
 
@@ -54,7 +56,8 @@ async def get_transfers(request: WalletRequest, params: AssetTransferParams = As
 @api_router.post("/lending/protocol-history")
 async def get_protocol_lending_history(request: WalletRequest):
     try:
-        return fetch_protocol_lending_history(request.wallet_address)
+        transactions = fetch_wallet_events_etherscan(wallet=request.wallet_address)
+        return fetch_protocol_lending_history(request.wallet_address, transactions)
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -83,7 +86,7 @@ async def aggregate_all_data(request: WalletRequest):
         stablecoin_data = analyze_stablecoin_holdings(enriched_tokens)
         wallet_metadata = calculate_wallet_metadata(transfers, request.wallet_address)
         
-        lending_history = fetch_protocol_lending_history(request.wallet_address)
+        lending_history = fetch_protocol_lending_history(request.wallet_address, transfers)
         
         aggregated = {
             "wallet": request.wallet_address,

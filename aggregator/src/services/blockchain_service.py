@@ -280,3 +280,118 @@ def fetch_wallet_events_etherscan(
             break
     
     return all_transactions
+
+# Add to blockchain_service.py
+def fetch_internal_transactions(wallet: str, start_block: int = 0) -> List[Dict]:
+    """
+    Fetch internal transactions (contract interactions) from Etherscan
+    """
+    params = {
+        "chainid": 1,
+        "module": "account",
+        "action": "txlistinternal",
+        "address": wallet,
+        "startblock": start_block,
+        "endblock": "latest",
+        "sort": "asc",
+        "apikey": settings.ETHERSCAN_API_KEY
+    }
+    
+    response = requests.get(settings.ETHERSCAN_API_URL, params=params)
+    response.raise_for_status()
+    data = response.json()
+    
+    if data.get("status") == "1":
+        return data.get("result", [])
+    return []
+
+def analyze_contract_interactions(wallet_address: str, transactions: List[Dict]) -> Dict:
+    """
+    Analyze smart contract interaction patterns
+    """
+    normal_txs = transactions
+    internal_txs = fetch_internal_transactions(wallet_address)
+    
+    # Count contract interactions
+    contract_interactions = [tx for tx in normal_txs if tx.get('to', '') and 
+                            tx.get('input', '0x') != '0x']
+    
+    unique_contracts = set(tx.get('to', '').lower() for tx in contract_interactions)
+    
+    # Categorize by function calls
+    function_signatures = {}
+    for tx in contract_interactions:
+        input_data = tx.get('input', '0x')
+        if len(input_data) >= 10:
+            func_sig = input_data[:10]
+            function_signatures[func_sig] = function_signatures.get(func_sig, 0) + 1
+    
+    return {
+        'total_contract_interactions': len(contract_interactions),
+        'unique_contracts_interacted': len(unique_contracts),
+        'internal_transactions': len(internal_txs),
+        'contract_to_eoa_ratio': len(contract_interactions) / max(len(normal_txs), 1),
+        'unique_function_signatures': len(function_signatures),
+        'most_common_functions': sorted(function_signatures.items(), 
+                                       key=lambda x: x[1], reverse=True)[:5]
+    }
+
+# Add to blockchain_service.py
+def fetch_token_approvals(wallet: str) -> List[Dict]:
+    """
+    Fetch ERC20 approval events using Etherscan logs
+    """
+    # ERC20 Approval event signature
+    approval_topic = "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+    
+    params = {
+        "chainid": 1,
+        "module": "logs",
+        "action": "getLogs",
+        "address": wallet,
+        "topic0": approval_topic,
+        "fromBlock": "0",
+        "toBlock": "latest",
+        "apikey": settings.ETHERSCAN_API_KEY
+    }
+    
+    response = requests.get(settings.ETHERSCAN_API_URL, params=params)
+    response.raise_for_status()
+    data = response.json()
+    
+    if data.get("status") == "1":
+        return data.get("result", [])
+    return []
+
+def analyze_approval_behavior(wallet_address: str) -> Dict:
+    """
+    Analyze token approval patterns for security scoring
+    """
+    approvals = fetch_token_approvals(wallet_address)
+    
+    # Parse approval amounts
+    unlimited_approvals = 0
+    limited_approvals = 0
+    
+    for approval in approvals:
+        # Check if approval amount is max uint256 (unlimited)
+        amount = int(approval.get('data', '0x'), 16)
+        max_uint256 = 2**256 - 1
+        
+        if amount >= max_uint256 * 0.9:  # Consider near-max as unlimited
+            unlimited_approvals += 1
+        else:
+            limited_approvals += 1
+    
+    unique_spenders = set(approval.get('topics', [])[2] for approval in approvals 
+                         if len(approval.get('topics', [])) > 2)
+    
+    return {
+        'total_approvals': len(approvals),
+        'unlimited_approvals': unlimited_approvals,
+        'limited_approvals': limited_approvals,
+        'unique_approved_spenders': len(unique_spenders),
+        'approval_prudence_score': (limited_approvals / max(len(approvals), 1)) * 100,
+        'security_risk_level': 'high' if unlimited_approvals > 10 else 
+                               'medium' if unlimited_approvals > 5 else 'low'
+    }

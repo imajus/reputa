@@ -65,22 +65,35 @@ def strip_onchain_data_fields(nft: Dict) -> None:
             if isinstance(img, str) and img.startswith("data:image"):
                 metadata["image"] = None
 
-def classify_nfts(nfts: List[Dict]) -> Dict[str, Any]:
+def classify_nfts(nfts: list[dict]) -> dict[str, any]:
     poaps = []
     legit_nfts = []
     spam_nfts = []
     ens_domains = []
 
-   
     for nft in nfts:
+        # Skip invalid NFTs (not dict)
+        if not isinstance(nft, dict):
+            continue
+
+        # Clean NFT data
         strip_onchain_data_fields(nft)
 
-        nft["classification"] = {
-            "is_poap": is_poap(nft),
-            "safelist": safelist_status(nft),
-            "is_ens": is_ens(nft)
-        }
+        # Safe classification
+        try:
+            nft["classification"] = {
+                "is_poap": is_poap(nft),
+                "safelist": safelist_status(nft),
+                "is_ens": is_ens(nft)
+            }
+        except Exception as e:
+            nft["classification"] = {
+                "is_poap": False,
+                "safelist": False,
+                "is_ens": False
+            }
 
+        # Append to appropriate lists
         if nft["classification"]["is_poap"]:
             poaps.append(nft)
             legit_nfts.append(nft)
