@@ -55,7 +55,7 @@ const rightCards: FloatingCard[] = [
     id: "sui2",
     label: "Tier",
     value: "Premium",
-    x: 65,
+    x: 58,
     y: 40,
     delay: 1.5,
     side: "right",

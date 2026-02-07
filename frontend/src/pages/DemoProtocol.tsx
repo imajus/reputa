@@ -64,7 +64,7 @@ const DemoProtocol = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/analyze')}
+                    onClick={() => navigate('/questionnaire')}
                     className="ml-2"
                   >
                     Get Score <ArrowRight className="ml-1 h-3 w-3" />

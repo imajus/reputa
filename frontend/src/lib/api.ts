@@ -27,10 +27,12 @@ export const submitQuestionnaireForScoring = async (
   const apiUrl = import.meta.env.VITE_ORACLE_API_URL || 'http://localhost:3000';
   const requestBody = {
     address,
-    questionnaire: questionnaire.map(({ question, answer }) => ({
-      question,
-      answer
-    }))
+    questionnaire: questionnaire
+      .filter(({ answer }) => answer && answer.trim() !== '')
+      .map(({ question, answer }) => ({
+        question,
+        answer
+      }))
   };
   const response = await fetch(`${apiUrl}/score`, {
     method: 'POST',
