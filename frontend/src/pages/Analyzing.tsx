@@ -71,20 +71,20 @@ const Analyzing = () => {
   }, [isConnected, address, authSignature, signMessage, setError]);
 
   useEffect(() => {
+    if (!authSignature || !isConnected || !address) {
+      return;
+    }
+    if (fetchedRef.current) {
+      return;
+    }
+    fetchedRef.current = true;
     const fetchScore = async () => {
-      if (!isConnected || !address || !authSignature || !authTimestamp) {
-        return;
-      }
-      if (fetchedRef.current) {
-        return;
-      }
-      fetchedRef.current = true;
       try {
         const response = await submitQuestionnaireForScoring(
           address,
           state.questionnaire,
           authSignature,
-          authTimestamp,
+          authTimestamp!,
         );
         console.log("Oracle response:", response);
         const scoreBreakdown = response.metadata?.scoreBreakdown || {
@@ -105,18 +105,27 @@ const Analyzing = () => {
         }
         setOracleData(response.signature, response.timestamp_ms);
         setScore(response.score, scoreBreakdown);
-        setTimeout(() => navigate("/score"), 500);
+        navigate("/score");
       } catch (err) {
         console.error("Failed to get score:", err);
         setError("Failed to analyze your data. Please try again.");
         fetchedRef.current = false;
       }
     };
-    if (!authSignature) {
-      return;
-    }
-    if (currentStep >= steps.length) {
-      fetchScore();
+    fetchScore();
+  }, [
+    navigate,
+    setScore,
+    setOracleData,
+    state.questionnaire,
+    isConnected,
+    address,
+    authSignature,
+    authTimestamp,
+  ]);
+
+  useEffect(() => {
+    if (!authSignature || currentStep >= steps.length) {
       return;
     }
     const timer = setTimeout(() => {
@@ -124,18 +133,7 @@ const Analyzing = () => {
       setCurrentStep((prev) => prev + 1);
     }, steps[currentStep].duration);
     return () => clearTimeout(timer);
-  }, [
-    currentStep,
-    navigate,
-    setScore,
-    setOracleData,
-    state.questionnaire,
-    isConnected,
-    address,
-    ensName,
-    authSignature,
-    authTimestamp,
-  ]);
+  }, [authSignature, currentStep]);
 
   if (!isConnected || !address) {
     return (

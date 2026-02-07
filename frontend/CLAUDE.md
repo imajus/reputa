@@ -238,7 +238,6 @@ Required variables in `.env.local`:
 VITE_ORACLE_API_URL=http://3.111.136.41:3000  # TEE oracle endpoint
 
 # Sui Network Configuration
-VITE_SUI_NETWORK=testnet                       # Network (testnet/mainnet)
 VITE_ORACLE_PACKAGE_ID=0xb39cd9c48c27...       # Published Move package ID
 VITE_REGISTRY_OBJECT_ID=0xcca4998944cdfd...    # Shared ScoreRegistry object (refactored from ORACLE_OBJECT_ID)
 VITE_ENCLAVE_OBJECT_ID=0xe03cfc8ae573fc...     # Shared Enclave object
@@ -289,7 +288,6 @@ VITE_WALLETCONNECT_PROJECT_ID=6e54538f0b06...  # WalletConnect project ID
 
 **Issue: Explorer link doesn't work**
 - **Cause**: Transaction hash not stored or network mismatch
-- **Solution**: Verify `VITE_SUI_NETWORK` matches deployment network (testnet/mainnet)
 - **Check**: Transaction digest should appear in ReputaContext after successful signing
 
 ### Configuration

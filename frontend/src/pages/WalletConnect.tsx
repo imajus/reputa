@@ -43,7 +43,7 @@ const WalletConnect = () => {
     if (currentAccount?.address) {
       setSuiAddress(currentAccount.address);
     }
-  }, [currentAccount, setSuiAddress]);
+  }, [currentAccount]);
 
   const handleSign = async () => {
     if (!currentAccount || !address) return;
