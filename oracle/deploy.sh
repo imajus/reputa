@@ -28,6 +28,7 @@ fi
 # Constants
 AWS_INSTANCE=c6a.2xlarge
 PORT=8880
+DURATION=30
 
 # Store deployment info
 DEPLOYMENT_FILE="deployment.env"
@@ -106,13 +107,9 @@ echo "Detected architecture: $ARCH (building for $BUILD_ARCH)"
 
 # Check for Docker registry username
 if [ -z "$DOCKER_REGISTRY" ]; then
-    echo ""
-    echo "Docker registry username not set."
-    read -p "Enter your Docker Hub username (or registry): " DOCKER_REGISTRY
-    if [ -z "$DOCKER_REGISTRY" ]; then
-        echo "Error: Docker registry username is required"
-        exit 1
-    fi
+    echo "Error: DOCKER_REGISTRY environment variable is not set"
+    echo "Set it with: export DOCKER_REGISTRY=your_dockerhub_username"
+    exit 1
 fi
 
 echo ""
@@ -160,7 +157,7 @@ if ! oyster-cvm deploy \
     --wallet-private-key "$PRIVATE_KEY" \
     --docker-compose ./app/docker-compose.yml \
     --instance-type $AWS_INSTANCE \
-    --duration-in-minutes 60 \
+    --duration-in-minutes $DURATION \
     --arch amd64 \
     --deployment sui 2>&1 | tee "$DEPLOY_OUTPUT_FILE"; then
     echo ""
@@ -179,7 +176,9 @@ JOB_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Job created with ID: "\K[0-9]+' | hea
 
 if [ -z "$JOB_ID" ]; then
     echo ""
-    echo "Warning: Could not extract JOB_ID from output"
+    echo "Error: Could not extract JOB_ID from deployment output"
+    echo "Deployment may have failed. Check the output above for errors."
+    exit 1
 fi
 
 # Parse PUBLIC_IP from output
@@ -197,13 +196,8 @@ fi
 
 if [ -z "$PUBLIC_IP" ]; then
     echo ""
-    echo "Warning: Could not automatically extract PUBLIC_IP from output"
-    read -p "Enter the PUBLIC_IP from the deployment output: " PUBLIC_IP
-fi
-
-# Validate PUBLIC_IP
-if [ -z "$PUBLIC_IP" ]; then
-    echo "Error: PUBLIC_IP is required"
+    echo "Error: Could not extract PUBLIC_IP from deployment output"
+    echo "Deployment may have failed. Check the output above for errors."
     exit 1
 fi
 
@@ -344,13 +338,8 @@ ENCLAVE_ID=$(echo "$REGISTER_OUTPUT" | grep -oP 'ObjectID:\s*\K0x[a-f0-9]+' | gr
 
 if [ -z "$ENCLAVE_ID" ]; then
     echo ""
-    echo "Warning: Could not automatically extract ENCLAVE_ID from output"
-    read -p "Enter the ENCLAVE_ID from the registration output: " ENCLAVE_ID
-fi
-
-# Validate ENCLAVE_ID
-if [ -z "$ENCLAVE_ID" ]; then
-    echo "Error: ENCLAVE_ID is required"
+    echo "Error: Could not extract ENCLAVE_ID from registration output"
+    echo "Check the output above for errors."
     exit 1
 fi
 
@@ -397,13 +386,8 @@ fi
 
 if [ -z "$REGISTRY_ID" ]; then
     echo ""
-    echo "Warning: Could not automatically extract REGISTRY_ID from output"
-    read -p "Enter the REGISTRY_ID (shared ScoreRegistry object) from the output: " REGISTRY_ID
-fi
-
-# Validate REGISTRY_ID
-if [ -z "$REGISTRY_ID" ]; then
-    echo "Error: REGISTRY_ID is required"
+    echo "Error: Could not extract REGISTRY_ID from initialization output"
+    echo "Check the output above for errors."
     exit 1
 fi
 
