@@ -10,9 +10,9 @@ import { useSuiScore } from '@/hooks/useSuiScore';
 import { useAccount } from 'wagmi';
 
 const tiers = [
-  { name: 'Premium', minScore: 800, bonus: 2.0, apy: 7.0 },
-  { name: 'Standard', minScore: 600, bonus: 1.0, apy: 6.0 },
-  { name: 'Basic', minScore: 0, bonus: 0, apy: 5.0 },
+  { name: 'Premium', minScore: 800, apy: 4.5 },
+  { name: 'Standard', minScore: 600, apy: 6.0 },
+  { name: 'Basic', minScore: 0, apy: 8.0 },
 ];
 
 const DemoProtocol = () => {
@@ -23,21 +23,19 @@ const DemoProtocol = () => {
 
   const hasScore = onChainScore !== null && onChainScore !== undefined;
   const score = onChainScore?.score ?? null;
-  const currentTier = hasScore ? (tiers.find(t => score >= t.minScore) || tiers[2]) : null;
-  const baseApy = 5.0;
-  const bonusApy = currentTier?.bonus ?? 0;
-  const totalApy = baseApy + bonusApy;
+  const currentTier = hasScore ? (tiers.find(t => score >= t.minScore) || tiers[2]) : tiers[2];
+  const borrowRate = currentTier.apy;
 
   return (
     <Layout>
       <div className="container max-w-2xl py-8">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reputa Demo Yield Protocol</CardTitle>
+            <CardTitle className="text-2xl">Reputa Demo Lending Protocol</CardTitle>
             <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
               <span className="text-muted-foreground">Your Tier:</span>
               <span className="font-semibold text-primary">
-                {hasScore && currentTier ? currentTier.name : 'N/A'}
+                {currentTier.name}
               </span>
               <span className="text-muted-foreground">
                 (Score: {hasScore ? score : 'N/A'})
@@ -59,7 +57,7 @@ const DemoProtocol = () => {
                 <Info className="h-4 w-4" />
                 <AlertDescription className="flex items-center justify-between">
                   <span>
-                    Complete the reputation scoring flow to see your personalized tier and APY bonus.
+                    Complete the reputation scoring flow to see your personalized tier and borrowing rate.
                   </span>
                   <Button
                     variant="outline"
@@ -73,34 +71,33 @@ const DemoProtocol = () => {
               </Alert>
             )}
 
-            {/* APY Display */}
+            {/* Borrowing Rate Display */}
             <Card className="border-primary/50 bg-card">
               <CardContent className="p-6 text-center">
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <span>Base APY:</span>
-                    <span className="font-medium text-foreground">{baseApy.toFixed(1)}%</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-primary">
                     <Sparkles className="h-4 w-4" />
-                    <span>Your Bonus:</span>
-                    <span className="font-medium">
-                      {hasScore ? `+${bonusApy.toFixed(1)}%` : 'N/A'}
+                    <span>Your Tier:</span>
+                    <span className="font-medium text-foreground">
+                      {currentTier.name}
                     </span>
                   </div>
                   <Separator className="my-2" />
                   <div className="text-2xl font-bold text-foreground">
-                    Total APY: {hasScore ? `${totalApy.toFixed(1)}%` : 'N/A'}
+                    Borrowing Rate: {borrowRate.toFixed(1)}%
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    {hasScore ? 'Better reputation = lower rates' : 'Default rate - get scored for better rates'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Tier Comparison */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">APY Tier Reference</h3>
+              <h3 className="text-sm font-medium text-foreground">Borrowing Rate Tiers</h3>
               <p className="text-sm text-muted-foreground">
-                Higher reputation scores unlock better APY rates across integrated DeFi protocols.
+                Higher reputation scores unlock lower borrowing rates across integrated lending protocols.
               </p>
               <div className="space-y-2">
                 {tiers.map((tier) => (
@@ -128,7 +125,7 @@ const DemoProtocol = () => {
                       'font-semibold',
                       tier.name === currentTier?.name ? 'text-primary' : 'text-foreground'
                     )}>
-                      {tier.apy.toFixed(1)}% APY
+                      {tier.apy.toFixed(1)}%
                     </span>
                   </div>
                 ))}
