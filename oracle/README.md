@@ -33,7 +33,7 @@ User Query → Enclave API → n8n Webhook → EVM Transaction Data
 
 ## API Endpoints
 
-### Enclave Service (Port 3000)
+### Enclave Service (Port 8880)
 
 - `GET /health` - Health check
 - `GET /public-key` - Get enclave's compressed secp256k1 public key
@@ -135,7 +135,7 @@ cd contracts/script
 
 ### Query Score from Enclave
 ```bash
-curl "http://<PUBLIC_IP>:3000/score?address=0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
+curl "http://<PUBLIC_IP>:8880/score?address=0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
 ```
 
 ### Query Score from Blockchain
@@ -209,13 +209,20 @@ PCR values ensure the enclave is running authentic code:
 # Run enclave simulation
 cd app
 npm install
-oyster-cvm simulate --docker-compose docker-compose.yml -p 3000
+DOCKER_REGISTRY=<yout_docker_username>
+docker build -t evm-score-oracle:dev .
+FULL_IMAGE_NAME=$DOCKER_REGISTRY/evm-score-oracle:node-reproducible-amd64
+docker tag evm-score-oracle:dev $FULL_IMAGE_NAME
+docker push $FULL_IMAGE_NAME
+DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $FULL_IMAGE_NAME)
+sed -i "/^  evm-score-oracle:/,/^[^ ]/ { /^    image:/ s|^    image:.*|    image: $DIGEST| }" app/docker-compose.yml
+oyster-cvm simulate --docker-compose docker-compose.yml -p 8880
 
 # Test API connection
-curl -s "http://localhost:3000/health" | jq
+curl -s "http://localhost:8880/health" | jq
 
 # Test scoring system
-curl 'http://localhost:3000/score' -H 'Content-Type: application/json' --data-raw '{"address":"0x1234567890123456789012345678901234567890","questionnaire":[{"question":"Who is this wallet controlled by?","answer":"smart contract protocol"},{"question":"What is the intended use of loan proceeds?","answer":"refinancing"},{"question":"Will this loan generate incremental cash flow, and how?","answer":"balance-sheet reshuffling"},{"question":"Please provide details of any off-chain revenue or cash flow streams","answer":""},{"question":"List any material off-chain liabilities or guarantees not visible on-chain?","answer":""},{"question":"Who is the ultimate beneficiary owner of the borrowing wallet, and how is authority constrained?","answer":""}]}' | jq
+curl 'http://localhost:8880/score' -H 'Content-Type: application/json' --data-raw '{"address":"0x1234567890123456789012345678901234567890","questionnaire":[{"question":"Who is this wallet controlled by?","answer":"smart contract protocol"},{"question":"What is the intended use of loan proceeds?","answer":"refinancing"},{"question":"Will this loan generate incremental cash flow, and how?","answer":"balance-sheet reshuffling"},{"question":"Please provide details of any off-chain revenue or cash flow streams","answer":""},{"question":"List any material off-chain liabilities or guarantees not visible on-chain?","answer":""},{"question":"Who is the ultimate beneficiary owner of the borrowing wallet, and how is authority constrained?","answer":""}]}' | jq
 ```
 
 ### Project Structure

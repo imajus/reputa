@@ -379,7 +379,7 @@ cd app && npm install
 source deployment.env
 
 # Query enclave directly
-curl "http://${PUBLIC_IP}:3000/score?address=0x..."
+curl "http://${PUBLIC_IP}:8880/score?address=0x..."
 
 # Query blockchain state
 ./contracts/script/get_score.sh $PACKAGE_ID $REGISTRY_ID
@@ -392,7 +392,7 @@ curl "http://${PUBLIC_IP}:3000/score?address=0x..."
 
 ### Signature Verification Fails
 - Check BCS field order matches between Move and JavaScript
-- Verify enclave public key matches: `curl http://$PUBLIC_IP:3000/public-key`
+- Verify enclave public key matches: `curl http://$PUBLIC_IP:8880/public-key`
 - Confirm PCR values in contract match deployed image
 
 ### Nix Build Hash Mismatch
