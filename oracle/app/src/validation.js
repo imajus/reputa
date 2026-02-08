@@ -2,12 +2,11 @@ import Ajv from 'ajv';
 
 /**
  * AI Response JSON Schema
- * Defines expected structure, types, and ranges for AI-generated scores
+ * Defines expected structure, types, and ranges for AI-generated breakdown
  */
 export const reponseSchema = Object.freeze({
   type: 'object',
   properties: {
-    score: { type: 'integer', minimum: 0, maximum: 1000 },
     scoreBreakdown: {
       type: 'object',
       properties: {
@@ -23,14 +22,14 @@ export const reponseSchema = Object.freeze({
     risk_factors: { type: 'array', items: { type: 'string' } },
     strengths: { type: 'array', items: { type: 'string' } }
   },
-  required: ['score', 'scoreBreakdown', 'reasoning', 'risk_factors', 'strengths']
+  required: ['scoreBreakdown', 'reasoning', 'risk_factors', 'strengths']
 });
 
 const ajv = new Ajv();
 const validateAIResponse = ajv.compile(reponseSchema);
 
 /**
- * Validate AI response against schema and cross-validate weighted formula
+ * Validate AI response against schema
  *
  * @param {Object} analysis - AI response object to validate
  * @returns {Object} Validation result: { valid: boolean, error?: string, details?: Object }
@@ -41,19 +40,21 @@ export function validateAIResponseData(analysis) {
     console.error('Schema validation failed:', validateAIResponse.errors);
     return { valid: false, error: 'Schema validation failed', details: validateAIResponse.errors };
   }
-  const breakdown = analysis.scoreBreakdown;
-  const calculatedScore = Math.round(
+  return { valid: true };
+}
+
+/**
+ * Calculate total score from breakdown using weighted formula
+ *
+ * @param {Object} breakdown - Score breakdown object
+ * @returns {number} Total score (0-1000)
+ */
+export function calculateTotalScore(breakdown) {
+  return Math.round(
     (breakdown.activity * 2.0) +
     (breakdown.maturity * 2.0) +
     (breakdown.diversity * 2.0) +
     (breakdown.riskBehavior * 2.5) +
     (breakdown.surveyMatch * 1.5)
   );
-  const tolerance = Math.max(2, Math.round(calculatedScore * 0.02));
-  const scoreDiff = Math.abs(analysis.score - calculatedScore);
-  if (scoreDiff > tolerance) {
-    console.error(`Cross-validation failed: score=${analysis.score}, calculated=${calculatedScore}, diff=${scoreDiff}, tolerance=${tolerance}`);
-    return { valid: false, error: 'Cross-validation failed: total score does not match weighted breakdown', details: { score: analysis.score, calculated: calculatedScore, difference: scoreDiff } };
-  }
-  return { valid: true };
 }

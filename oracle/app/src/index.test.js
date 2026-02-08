@@ -1,10 +1,9 @@
 import { describe, test, expect } from 'vitest';
-import { validateAIResponseData } from './validation.js';
+import { validateAIResponseData, calculateTotalScore } from './validation.js';
 
 describe('Schema Validation', () => {
   test('validates a correct AI response', () => {
     const validResponse = {
-      score: 778,
       scoreBreakdown: {
         activity: 85,
         maturity: 78,
@@ -22,7 +21,6 @@ describe('Schema Validation', () => {
 
   test('rejects response missing required field', () => {
     const invalidResponse = {
-      score: 750,
       scoreBreakdown: {
         activity: 85,
         maturity: 78,
@@ -37,27 +35,8 @@ describe('Schema Validation', () => {
     expect(result.error).toBe('Schema validation failed');
   });
 
-  test('rejects score outside valid range', () => {
-    const invalidResponse = {
-      score: 1200,
-      scoreBreakdown: {
-        activity: 85,
-        maturity: 78,
-        diversity: 62,
-        riskBehavior: 88,
-        surveyMatch: 72
-      },
-      reasoning: 'Account shows strong engagement.',
-      risk_factors: [],
-      strengths: []
-    };
-    const result = validateAIResponseData(invalidResponse);
-    expect(result.valid).toBe(false);
-  });
-
   test('rejects breakdown dimension outside 0-100 range', () => {
     const invalidResponse = {
-      score: 750,
       scoreBreakdown: {
         activity: 150,
         maturity: 78,
@@ -75,7 +54,6 @@ describe('Schema Validation', () => {
 
   test('rejects reasoning too short', () => {
     const invalidResponse = {
-      score: 750,
       scoreBreakdown: {
         activity: 85,
         maturity: 78,
@@ -94,7 +72,6 @@ describe('Schema Validation', () => {
   test('rejects reasoning too long', () => {
     const longReasoning = 'x'.repeat(501);
     const invalidResponse = {
-      score: 750,
       scoreBreakdown: {
         activity: 85,
         maturity: 78,
@@ -111,67 +88,75 @@ describe('Schema Validation', () => {
   });
 });
 
-describe('Cross-Validation', () => {
-  test('accepts score matching weighted formula', () => {
-    const response = {
-      score: 778,
-      scoreBreakdown: {
-        activity: 85,
-        maturity: 78,
-        diversity: 62,
-        riskBehavior: 88,
-        surveyMatch: 72
-      },
-      reasoning: 'Account shows strong engagement with consistent repayment behavior.',
-      risk_factors: ['High token concentration'],
-      strengths: ['Consistent repayment history']
+describe('Score Calculation', () => {
+  test('calculates correct total score from breakdown', () => {
+    const breakdown = {
+      activity: 85,
+      maturity: 78,
+      diversity: 62,
+      riskBehavior: 88,
+      surveyMatch: 72
     };
-    const result = validateAIResponseData(response);
-    expect(result.valid).toBe(true);
+    const score = calculateTotalScore(breakdown);
+    expect(score).toBe(778);
   });
 
-  test('rejects score not matching weighted formula', () => {
-    const response = {
-      score: 500,
-      scoreBreakdown: {
-        activity: 85,
-        maturity: 78,
-        diversity: 62,
-        riskBehavior: 88,
-        surveyMatch: 72
-      },
-      reasoning: 'Account shows strong engagement with consistent repayment behavior.',
-      risk_factors: [],
-      strengths: []
+  test('calculates minimum score', () => {
+    const breakdown = {
+      activity: 0,
+      maturity: 0,
+      diversity: 0,
+      riskBehavior: 0,
+      surveyMatch: 0
     };
-    const result = validateAIResponseData(response);
-    expect(result.valid).toBe(false);
-    expect(result.error).toContain('Cross-validation failed');
+    const score = calculateTotalScore(breakdown);
+    expect(score).toBe(0);
   });
 
-  test('accepts score within 2% tolerance', () => {
-    const response = {
-      score: 765,
-      scoreBreakdown: {
-        activity: 85,
-        maturity: 78,
-        diversity: 62,
-        riskBehavior: 88,
-        surveyMatch: 72
-      },
-      reasoning: 'Account shows strong engagement with consistent repayment behavior.',
-      risk_factors: [],
-      strengths: []
+  test('calculates maximum score', () => {
+    const breakdown = {
+      activity: 100,
+      maturity: 100,
+      diversity: 100,
+      riskBehavior: 100,
+      surveyMatch: 100
     };
-    const result = validateAIResponseData(response);
-    expect(result.valid).toBe(true);
+    const score = calculateTotalScore(breakdown);
+    expect(score).toBe(1000);
+  });
+
+  test('applies correct weights to each dimension', () => {
+    const breakdown = {
+      activity: 100,
+      maturity: 0,
+      diversity: 0,
+      riskBehavior: 0,
+      surveyMatch: 0
+    };
+    expect(calculateTotalScore(breakdown)).toBe(200);
+    expect(calculateTotalScore({ ...breakdown, activity: 0, maturity: 100 })).toBe(200);
+    expect(calculateTotalScore({ ...breakdown, activity: 0, diversity: 100 })).toBe(200);
+    expect(calculateTotalScore({ ...breakdown, activity: 0, riskBehavior: 100 })).toBe(250);
+    expect(calculateTotalScore({ ...breakdown, activity: 0, surveyMatch: 100 })).toBe(150);
+  });
+
+  test('rounds score to nearest integer', () => {
+    const breakdown = {
+      activity: 33,
+      maturity: 33,
+      diversity: 33,
+      riskBehavior: 33,
+      surveyMatch: 33
+    };
+    const score = calculateTotalScore(breakdown);
+    expect(Number.isInteger(score)).toBe(true);
+    expect(score).toBe(330);
   });
 });
 
 describe('Edge Cases', () => {
-  test('validates minimum score', () => {
+  test('validates minimum breakdown', () => {
     const response = {
-      score: 0,
       scoreBreakdown: {
         activity: 0,
         maturity: 0,
@@ -187,9 +172,8 @@ describe('Edge Cases', () => {
     expect(result.valid).toBe(true);
   });
 
-  test('validates maximum score', () => {
+  test('validates maximum breakdown', () => {
     const response = {
-      score: 1000,
       scoreBreakdown: {
         activity: 100,
         maturity: 100,
@@ -207,7 +191,6 @@ describe('Edge Cases', () => {
 
   test('validates empty arrays for risk_factors and strengths', () => {
     const response = {
-      score: 500,
       scoreBreakdown: {
         activity: 50,
         maturity: 50,
