@@ -1,0 +1,1043 @@
+{
+  "wallet": "0x58eadaba33e311dbbb4b108b6fb9c85ed46199ae",
+  "nfts": {
+    "poaps": [],
+    "legit_nfts": [
+      {
+        "contract": {
+          "address": "0x53aFab1a400C0f4bd1201de92a876a9784Df419A",
+          "name": "Unisocks NFT",
+          "symbol": "Unisocks",
+          "totalSupply": "50000",
+          "tokenType": "ERC1155",
+          "contractDeployer": "0xc2c219F9B31dA4d4b40226e88021E40000000000",
+          "deployedBlockNumber": 24190691,
+          "openSeaMetadata": {
+            "floorPrice": 0.0,
+            "collectionName": "0x53afab1a400c0f4bd1201de92a876a9784df419a",
+            "collectionSlug": "0x53afab1a400c0f4bd1201de92a876a9784df419a",
+            "safelistRequestStatus": "not_requested",
+            "imageUrl": "https://i2c.seadn.io/ethereum/0x8f33cd79fd0685e16cef4c2004eb4cd0d27899d4/48690f00828ce53d00e915ab2acf77/3c48690f00828ce53d00e915ab2acf77.png",
+            "description": null,
+            "externalUrl": null,
+            "twitterUsername": null,
+            "discordUrl": null,
+            "bannerImageUrl": null,
+            "lastIngestedAt": "2026-02-07T05:57:14.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "1",
+        "tokenType": "ERC1155",
+        "name": "Unisocks NFT",
+        "description": "$SOCKS is a token that entitles you to 1 real pair of limited edition socks, shipped anywhere in the world. You can redeem and sell the token back at any time. You can get the real socks for free. For more information, visit https://financeunisocks.xyz",
+        "tokenUri": "https://ipfs.io/ipfs/bafkreidygpe2bvl6jmjcnxfdh6irkvuk34ae66vldnarz4hmjajcxbr4kq",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/df928e0f53dcd23ac83495aeeb254209",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/df928e0f53dcd23ac83495aeeb254209",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/df928e0f53dcd23ac83495aeeb254209",
+          "contentType": "image/png",
+          "size": 248571,
+          "originalUrl": "https://ipfs.io/ipfs/QmTAvWsiNpxFu8cbm27TG2iWLAnCCNXL7HWwVgvB37PfkG"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://quicknode.quicknode-ipfs.com/ipfs/bafkreidygpe2bvl6jmjcnxfdh6irkvuk34ae66vldnarz4hmjajcxbr4kq",
+          "metadata": {
+            "name": "Unisocks NFT",
+            "description": "$SOCKS is a token that entitles you to 1 real pair of limited edition socks, shipped anywhere in the world. You can redeem and sell the token back at any time. You can get the real socks for free. For more information, visit https://financeunisocks.xyz",
+            "image": "ipfs://QmTAvWsiNpxFu8cbm27TG2iWLAnCCNXL7HWwVgvB37PfkG",
+            "external_url": "https://ethereum.org",
+            "attributes": [
+              { "value": "Deep Pink on Crème", "trait_type": "Color" },
+              { "value": "Cotton blend", "trait_type": "Material" },
+              { "value": "USA", "trait_type": "Made In" },
+              { "value": "400 / 500", "trait_type": "Rarity" },
+              { "value": "2500", "trait_type": "USD Value" }
+            ],
+            "background_color": "ffffff"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "0x53afab1a400c0f4bd1201de92a876a9784df419a",
+          "slug": "0x53afab1a400c0f4bd1201de92a876a9784df419a",
+          "externalUrl": null,
+          "bannerImageUrl": null
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T09:49:38.735Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "not_requested",
+          "is_ens": false
+        }
+      },
+      {
+        "contract": {
+          "address": "0xC36442b4a4522E871399CD717aBDD847Ab11FE88",
+          "name": "Uniswap V3 Positions NFT-V1",
+          "symbol": "UNI-V3-POS",
+          "totalSupply": "1087603",
+          "tokenType": "ERC721",
+          "contractDeployer": "0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9",
+          "deployedBlockNumber": 12369651,
+          "openSeaMetadata": {
+            "floorPrice": 0.01,
+            "collectionName": "Uniswap V3 Positions",
+            "collectionSlug": "uniswap-v3-positions",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/ethereum/ef3d33fd5f4a493e866aa407c5814637/6514c7d0033df8f5633e30b61afd7c/216514c7d0033df8f5633e30b61afd7c.png",
+            "description": null,
+            "externalUrl": null,
+            "twitterUsername": "@Uniswap",
+            "discordUrl": "https://discord.gg/FCfyBSbCU5",
+            "bannerImageUrl": "https://i2c.seadn.io/ethereum/ef3d33fd5f4a493e866aa407c5814637/c93e2fc4c1b00c59420b074ff75b02/d0c93e2fc4c1b00c59420b074ff75b02.png?fit=inside",
+            "lastIngestedAt": "2026-02-05T05:23:28.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "1188597",
+        "tokenType": "ERC721",
+        "name": "Uniswap - 0.05% - USDT/XAUt - 4396.6<>5274.1",
+        "description": "This NFT represents a liquidity position in a Uniswap V3 USDT-XAUt pool. The owner of this NFT can modify or redeem the position.\n\nPool Address: 0x6546055f46e866a4b9a4a13e81273e3152bae5da\nUSDT Address: 0xdac17f958d2ee523a2206206994597c13d831ec7\nXAUt Address: 0x68749665ff8d2d112fa859aa293f07a622782f38\nFee Tier: 0.05%\nToken ID: 1188597\n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.",
+        "tokenUri": null,
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/087aa01538ff1c8a5269a7d9e0c63aad",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/087aa01538ff1c8a5269a7d9e0c63aad",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/087aa01538ff1c8a5269a7d9e0c63aad",
+          "contentType": "image/svg+xml",
+          "size": 9118,
+          "originalUrl": null
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": null,
+          "metadata": {
+            "name": "Uniswap - 0.05% - USDT/XAUt - 4396.6<>5274.1",
+            "description": "This NFT represents a liquidity position in a Uniswap V3 USDT-XAUt pool. The owner of this NFT can modify or redeem the position.\n\nPool Address: 0x6546055f46e866a4b9a4a13e81273e3152bae5da\nUSDT Address: 0xdac17f958d2ee523a2206206994597c13d831ec7\nXAUt Address: 0x68749665ff8d2d112fa859aa293f07a622782f38\nFee Tier: 0.05%\nToken ID: 1188597\n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.",
+            "image": null
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "Uniswap V3 Positions",
+          "slug": "uniswap-v3-positions",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/ethereum/ef3d33fd5f4a493e866aa407c5814637/c93e2fc4c1b00c59420b074ff75b02/d0c93e2fc4c1b00c59420b074ff75b02.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": "0x58eadaba33e311dbbb4b108b6fb9c85ed46199ae",
+          "blockNumber": 24361050,
+          "timestamp": "2026-02-01T09:14:35Z",
+          "transactionHash": "0x7c2754658635ed54fd8177ad4e8a1d0b63e8e4746347f34ca4485fa62a2df732"
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-01T09:14:38.078Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": false
+        }
+      }
+    ],
+    "ens_domains": [],
+    "counts": { "total": 2, "poaps": 0, "legit": 2, "spam": 0, "ens": 0 }
+  },
+  "tokens": {
+    "holdings": [
+      {
+        "contractAddress": "0x015396e1f286289ae23a762088e863b3ec465145",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000ecb9c2aa6b443aa5df",
+        "contract_address": "0x015396e1f286289ae23a762088e863b3ec465145",
+        "symbol": "variableDebtEthUSDe",
+        "name": "Aave Ethereum Variable Debt USDe",
+        "decimals": 18,
+        "balance_human": 4366.817049815636,
+        "balance_raw": 4366817049815635633631,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Aave Ethereum Variable Debt USDe",
+          "symbol": "variableDebtEthUSDe"
+        }
+      },
+      {
+        "contractAddress": "0x059b2051bc369a52dfa4bcbaa77388483279320c",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000004563918244f40000",
+        "contract_address": "0x059b2051bc369a52dfa4bcbaa77388483279320c",
+        "symbol": "UniLife",
+        "name": "UniLife",
+        "decimals": 18,
+        "balance_human": 5.0,
+        "balance_raw": 5000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "UniLife",
+          "symbol": "UniLife"
+        }
+      },
+      {
+        "contractAddress": "0x0a6e7ba5042b38349e437ec6db6214aec7b35676",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000015b8bda7a2c272a80",
+        "contract_address": "0x0a6e7ba5042b38349e437ec6db6214aec7b35676",
+        "symbol": "SWELL",
+        "name": "Swell Network",
+        "decimals": 18,
+        "balance_human": 25.043350371185404,
+        "balance_raw": 25043350371185404544,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/24924.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/24924.png",
+          "name": "Swell Network",
+          "symbol": "SWELL"
+        }
+      },
+      {
+        "contractAddress": "0x1a88df1cfe15af22b3c4c783d4e6f7f9e0c1885d",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000a2754254502130",
+        "contract_address": "0x1a88df1cfe15af22b3c4c783d4e6f7f9e0c1885d",
+        "symbol": "stkGHO",
+        "name": "stk GHO",
+        "decimals": 18,
+        "balance_human": 0.04572787396995512,
+        "balance_raw": 45727873969955120,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "liquid_staking",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "stk GHO",
+          "symbol": "stkGHO"
+        }
+      },
+      {
+        "contractAddress": "0x24a3d725c37a8d1a66eb87f0e5d07fe67c120035",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000003a1836e1c36193e6",
+        "contract_address": "0x24a3d725c37a8d1a66eb87f0e5d07fe67c120035",
+        "symbol": "EDEN",
+        "name": "Eden Token",
+        "decimals": 18,
+        "balance_human": 4.18615619691437,
+        "balance_raw": 4186156196914369510,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Eden Token",
+          "symbol": "EDEN"
+        }
+      },
+      {
+        "contractAddress": "0x259338656198ec7a76c729514d3cb45dfbf768a1",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000005b36080f18d88fce",
+        "contract_address": "0x259338656198ec7a76c729514d3cb45dfbf768a1",
+        "symbol": "RESOLV",
+        "name": "Resolv",
+        "decimals": 18,
+        "balance_human": 6.572449567128195,
+        "balance_raw": 6572449567128195022,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Resolv",
+          "symbol": "RESOLV"
+        }
+      },
+      {
+        "contractAddress": "0x30ce6e5a75586f0e83bcac77c9135e980e6bc7a8",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000fec88d8607781a",
+        "contract_address": "0x30ce6e5a75586f0e83bcac77c9135e980e6bc7a8",
+        "symbol": "USDMcrvUSD",
+        "name": "USDM / crvUSD",
+        "decimals": 18,
+        "balance_human": 0.071715154249087,
+        "balance_raw": 71715154249087002,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "USDM / crvUSD",
+          "symbol": "USDMcrvUSD"
+        }
+      },
+      {
+        "contractAddress": "0x38b6088849e98115315bad2786f6490474158c33",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000d67e11cdd23864c00000",
+        "contract_address": "0x38b6088849e98115315bad2786f6490474158c33",
+        "symbol": "ETHf",
+        "name": "Ethereum Defi",
+        "decimals": 18,
+        "balance_human": 1012912.0,
+        "balance_raw": 1012912000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Ethereum Defi",
+          "symbol": "ETHf"
+        }
+      },
+      {
+        "contractAddress": "0x3b50805453023a91a8bf641e279401a0b23fa6f9",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000070df2ca14f3a74e0",
+        "contract_address": "0x3b50805453023a91a8bf641e279401a0b23fa6f9",
+        "symbol": "REZ",
+        "name": "Renzo",
+        "decimals": 18,
+        "balance_human": 8.133268523384993,
+        "balance_raw": 8133268523384992992,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/30843.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/30843.png",
+          "name": "Renzo",
+          "symbol": "REZ"
+        }
+      },
+      {
+        "contractAddress": "0x3f80b1c54ae920be41a77f8b902259d48cf24ccf",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000006fde6cb82fd12872",
+        "contract_address": "0x3f80b1c54ae920be41a77f8b902259d48cf24ccf",
+        "symbol": "KERNEL",
+        "name": "KERNEL",
+        "decimals": 18,
+        "balance_human": 8.060999921371785,
+        "balance_raw": 8060999921371785330,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "KERNEL",
+          "symbol": "KERNEL"
+        }
+      },
+      {
+        "contractAddress": "0x3fc29836e84e471a053d2d9e80494a867d670ead",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000000000b5e620f48000",
+        "contract_address": "0x3fc29836e84e471a053d2d9e80494a867d670ead",
+        "symbol": "ETHG",
+        "name": "Ethereum Games",
+        "decimals": 8,
+        "balance_human": 2000000.0,
+        "balance_raw": 200000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 8,
+          "logo": null,
+          "name": "Ethereum Games",
+          "symbol": "ETHG"
+        }
+      },
+      {
+        "contractAddress": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000040214c712ca999e8",
+        "contract_address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
+        "symbol": "GHO",
+        "name": "GHO",
+        "decimals": 18,
+        "balance_human": 4.621058741623168,
+        "balance_raw": 4621058741623167464,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/23508.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/23508.png",
+          "name": "GHO",
+          "symbol": "GHO"
+        }
+      },
+      {
+        "contractAddress": "0x4d1c297d39c5c1277964d0e3f8aa901493664530",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000001425813ef0ecd855",
+        "contract_address": "0x4d1c297d39c5c1277964d0e3f8aa901493664530",
+        "symbol": "PUFFER",
+        "name": "Puffer",
+        "decimals": 18,
+        "balance_human": 1.4517085622268622,
+        "balance_raw": 1451708562226862165,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/32325.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/32325.png",
+          "name": "Puffer",
+          "symbol": "PUFFER"
+        }
+      },
+      {
+        "contractAddress": "0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000215e4c014b9cbf7f",
+        "contract_address": "0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8",
+        "symbol": "aEthWETH",
+        "name": "Aave Ethereum WETH",
+        "decimals": 18,
+        "balance_human": 2.404442819509666,
+        "balance_raw": 2404442819509665663,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Aave Ethereum WETH",
+          "symbol": "aEthWETH"
+        }
+      },
+      {
+        "contractAddress": "0x5ee5bf7ae06d1be5997a1a72006fe6c607ec6de8",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000000000015d94d9",
+        "contract_address": "0x5ee5bf7ae06d1be5997a1a72006fe6c607ec6de8",
+        "symbol": "aEthWBTC",
+        "name": "Aave Ethereum WBTC",
+        "decimals": 8,
+        "balance_human": 0.22910169,
+        "balance_raw": 22910169,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 8,
+          "logo": null,
+          "name": "Aave Ethereum WBTC",
+          "symbol": "aEthWBTC"
+        }
+      },
+      {
+        "contractAddress": "0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000009eb2e4a9e100a8e",
+        "contract_address": "0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66",
+        "symbol": "SYRUP",
+        "name": "Maple Finance",
+        "decimals": 18,
+        "balance_human": 0.7147158638826646,
+        "balance_raw": 714715863882664590,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/33824.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/33824.png",
+          "name": "Maple Finance",
+          "symbol": "SYRUP"
+        }
+      },
+      {
+        "contractAddress": "0x66a3c2fa3e467aa586e90912f977e648589cabaf",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000000001977420dc00",
+        "contract_address": "0x66a3c2fa3e467aa586e90912f977e648589cabaf",
+        "symbol": "AICC",
+        "name": "AI Chain Coin",
+        "decimals": 8,
+        "balance_human": 17500.0,
+        "balance_raw": 1750000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 8,
+          "logo": null,
+          "name": "AI Chain Coin",
+          "symbol": "AICC"
+        }
+      },
+      {
+        "contractAddress": "0x68749665ff8d2d112fa859aa293f07a622782f38",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000000000000000271d",
+        "contract_address": "0x68749665ff8d2d112fa859aa293f07a622782f38",
+        "symbol": "XAUt",
+        "name": "Tether Gold",
+        "decimals": 6,
+        "balance_human": 0.010013,
+        "balance_raw": 10013,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/5176.png",
+        "metadata": {
+          "decimals": 6,
+          "logo": "https://static.alchemyapi.io/images/assets/5176.png",
+          "name": "Tether Gold",
+          "symbol": "XAUt"
+        }
+      },
+      {
+        "contractAddress": "0x6df1c1e379bc5a00a7b4c6e67a203333772f45a8",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000000000c5a02d58",
+        "contract_address": "0x6df1c1e379bc5a00a7b4c6e67a203333772f45a8",
+        "symbol": "variableDebtEthUSDT",
+        "name": "Aave Ethereum Variable Debt USDT",
+        "decimals": 6,
+        "balance_human": 3315.60892,
+        "balance_raw": 3315608920,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 6,
+          "logo": null,
+          "name": "Aave Ethereum Variable Debt USDT",
+          "symbol": "variableDebtEthUSDT"
+        }
+      },
+      {
+        "contractAddress": "0x7314cba93d98b1357519d765fbd0c59b62fb2be4",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000008ac7230489e80000",
+        "contract_address": "0x7314cba93d98b1357519d765fbd0c59b62fb2be4",
+        "symbol": "XenAI",
+        "name": "XenAI",
+        "decimals": 18,
+        "balance_human": 10.0,
+        "balance_raw": 10000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "XenAI",
+          "symbol": "XenAI"
+        }
+      },
+      {
+        "contractAddress": "0x77146784315ba81904d654466968e3a7c196d1f3",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000005b472bbff1e8286",
+        "contract_address": "0x77146784315ba81904d654466968e3a7c196d1f3",
+        "symbol": "TREE",
+        "name": "Treehouse Token",
+        "decimals": 18,
+        "balance_human": 0.41107961776219815,
+        "balance_raw": 411079617762198150,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Treehouse Token",
+          "symbol": "TREE"
+        }
+      },
+      {
+        "contractAddress": "0x8be3460a480c80728a8c4d7a5d5303c85ba7b3b9",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000037822747c2a10cc10",
+        "contract_address": "0x8be3460a480c80728a8c4d7a5d5303c85ba7b3b9",
+        "symbol": "sENA",
+        "name": "Staked ENA",
+        "decimals": 18,
+        "balance_human": 63.99684173151868,
+        "balance_raw": 63996841731518680080,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "governance",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Staked ENA",
+          "symbol": "sENA"
+        }
+      },
+      {
+        "contractAddress": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000000095b12ac103",
+        "contract_address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+        "symbol": "sUSDe",
+        "name": "Ethena Staked USDe",
+        "decimals": 18,
+        "balance_human": 6.42922496259e-7,
+        "balance_raw": 642922496259,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/29471.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/29471.png",
+          "name": "Ethena Staked USDe",
+          "symbol": "sUSDe"
+        }
+      },
+      {
+        "contractAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000000000000072b0122c",
+        "contract_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "symbol": "USDC",
+        "name": "USDC",
+        "decimals": 6,
+        "balance_human": 1924.141612,
+        "balance_raw": 1924141612,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/3408.png",
+        "metadata": {
+          "decimals": 6,
+          "logo": "https://static.alchemyapi.io/images/assets/3408.png",
+          "name": "USDC",
+          "symbol": "USDC"
+        }
+      },
+      {
+        "contractAddress": "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000725978a0671d405f",
+        "contract_address": "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        "symbol": "DRV",
+        "name": "Derive",
+        "decimals": 18,
+        "balance_human": 8.239749623571104,
+        "balance_raw": 8239749623571103839,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Derive",
+          "symbol": "DRV"
+        }
+      },
+      {
+        "contractAddress": "0xc20059e0317de91738d13af027dfc4a50781b066",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000024a020cc94ac01831",
+        "contract_address": "0xc20059e0317de91738d13af027dfc4a50781b066",
+        "symbol": "SPK",
+        "name": "Spark",
+        "decimals": 18,
+        "balance_human": 42.226327114861256,
+        "balance_raw": 42226327114861254705,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Spark",
+          "symbol": "SPK"
+        }
+      },
+      {
+        "contractAddress": "0xc26cdfca6999d2aa45ab09ae2e4e9458b2fa18a2",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000053444835ec580000",
+        "contract_address": "0xc26cdfca6999d2aa45ab09ae2e4e9458b2fa18a2",
+        "symbol": "AILife",
+        "name": "AILife",
+        "decimals": 18,
+        "balance_human": 6.0,
+        "balance_raw": 6000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "AILife",
+          "symbol": "AILife"
+        }
+      },
+      {
+        "contractAddress": "0xc4441c2be5d8fa8126822b9929ca0b81ea0de38e",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000019200ddcf2e723204",
+        "contract_address": "0xc4441c2be5d8fa8126822b9929ca0b81ea0de38e",
+        "symbol": "USUAL",
+        "name": "Usual",
+        "decimals": 18,
+        "balance_human": 28.967396685154235,
+        "balance_raw": 28967396685154234884,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/33979.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/33979.png",
+          "name": "Usual",
+          "symbol": "USUAL"
+        }
+      },
+      {
+        "contractAddress": "0xd3e8695d2bef061eab38b5ef526c0f714108119c",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000000005af3107a4000",
+        "contract_address": "0xd3e8695d2bef061eab38b5ef526c0f714108119c",
+        "symbol": "YFIVE",
+        "name": "YFIVE FINANCE",
+        "decimals": 18,
+        "balance_human": 0.0001,
+        "balance_raw": 100000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/6812.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/6812.png",
+          "name": "YFIVE FINANCE",
+          "symbol": "YFIVE"
+        }
+      },
+      {
+        "contractAddress": "0xd8f1200650fb2e28b8a068d4bc4d53c4d8984990",
+        "tokenBalance": "0x00000000000000000000000000000000000000000000000053444835ec580000",
+        "contract_address": "0xd8f1200650fb2e28b8a068d4bc4d53c4d8984990",
+        "symbol": "ChinaHorse",
+        "name": "ChinaHorse",
+        "decimals": 18,
+        "balance_human": 6.0,
+        "balance_raw": 6000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "ChinaHorse",
+          "symbol": "ChinaHorse"
+        }
+      },
+      {
+        "contractAddress": "0xd961cb2bfcbf8fae1bbc0f426600b426d5927e2f",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000000000012a05f200",
+        "contract_address": "0xd961cb2bfcbf8fae1bbc0f426600b426d5927e2f",
+        "symbol": "ZTC",
+        "name": "ZenChain",
+        "decimals": 9,
+        "balance_human": 5.0,
+        "balance_raw": 5000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 9,
+          "logo": null,
+          "name": "ZenChain",
+          "symbol": "ZTC"
+        }
+      },
+      {
+        "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000000000000000000230",
+        "contract_address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "symbol": "USDT",
+        "name": "Tether USDt",
+        "decimals": 6,
+        "balance_human": 0.00056,
+        "balance_raw": 560,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "stablecoin",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/825.png",
+        "metadata": {
+          "decimals": 6,
+          "logo": "https://static.alchemyapi.io/images/assets/825.png",
+          "name": "Tether USDt",
+          "symbol": "USDT"
+        }
+      },
+      {
+        "contractAddress": "0xe17c57af88d9c75ba43c810dad118c8a3ebc431a",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000008ac7230489e80000",
+        "contract_address": "0xe17c57af88d9c75ba43c810dad118c8a3ebc431a",
+        "symbol": "QAI",
+        "name": "QuantumAI",
+        "decimals": 18,
+        "balance_human": 10.0,
+        "balance_raw": 10000000000000000000,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "QuantumAI",
+          "symbol": "QAI"
+        }
+      },
+      {
+        "contractAddress": "0xfa1c09fc8b491b6a4d3ff53a10cad29381b3f949",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000016a342797aa11ee38",
+        "contract_address": "0xfa1c09fc8b491b6a4d3ff53a10cad29381b3f949",
+        "symbol": "FF",
+        "name": "Falcon Finance",
+        "decimals": 18,
+        "balance_human": 26.099529272865713,
+        "balance_raw": 26099529272865713720,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 18,
+          "logo": null,
+          "name": "Falcon Finance",
+          "symbol": "FF"
+        }
+      },
+      {
+        "contractAddress": "0xfe0c30065b384f05761f15d0cc899d4f9f9cc0eb",
+        "tokenBalance": "0x0000000000000000000000000000000000000000000000000c1fc75f9621193b",
+        "contract_address": "0xfe0c30065b384f05761f15d0cc899d4f9f9cc0eb",
+        "symbol": "ETHFI",
+        "name": "ether.fi",
+        "decimals": 18,
+        "balance_human": 0.8736360660877377,
+        "balance_raw": 873636066087737659,
+        "current_price_usd": 0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": "https://static.alchemyapi.io/images/assets/29814.png",
+        "metadata": {
+          "decimals": 18,
+          "logo": "https://static.alchemyapi.io/images/assets/29814.png",
+          "name": "ether.fi",
+          "symbol": "ETHFI"
+        }
+      }
+    ],
+    "concentration": {
+      "herfindahl_index": 0,
+      "top_1_concentration": 0,
+      "top_3_concentration": 0,
+      "top_5_concentration": 0,
+      "diversification_score": 0,
+      "num_tokens": 35
+    }
+  },
+  "eth_balance": 0.02090569078433137,
+  "defi_analysis": {
+    "protocol_interactions": {
+      "aave": false,
+      "compound": false,
+      "uniswap": false,
+      "curve": false,
+      "ethena": false,
+      "morpho": false,
+      "total_protocols": 0,
+      "staking_events": 0,
+      "protocol_details": []
+    },
+    "mixer_check": {
+      "has_mixer_interaction": true,
+      "mixer_tx_count": 54,
+      "unique_mixers": ["0x0000000000000000000000000000000000000000"],
+      "per_mixer_tx_count": {
+        "0x0000000000000000000000000000000000000000": 54
+      },
+      "incoming_mixer_txs": 41,
+      "outgoing_mixer_txs": 13,
+      "first_interaction_timestamp": "2024-09-04T11:11:35.000Z",
+      "last_interaction_timestamp": "2026-02-07T08:43:35.000Z",
+      "unique_counterparties": 1,
+      "tx_hashes": [
+        "0x3c4559614f0e68ce48c4ea7fc9446fd945f0013d5b74f90ec6acbf4ec0c60eb4",
+        "0x7c2754658635ed54fd8177ad4e8a1d0b63e8e4746347f34ca4485fa62a2df732",
+        "0x483adb77d8eb978e292563b7df4b8aaa2ac4f537c773b5025dbcee6129c0a7a4",
+        "0x43d9c78a6870dae147f4ad948bde0174e0e3af795624e6973dae853da35e462b",
+        "0xa6d3cc98938911e3d7c8b405bae97019dd904ece6b8533fcfc85621d5436c859",
+        "0x9eaed724df6478c995207ce4687d88c3200fdfc3a646b5833b8a7fe461fbeeb5",
+        "0x447f07a1491210b8e11f10f2b8547c2d91e769a61c6d9612ec3b7f18ab40005f",
+        "0xf79803050a116fc1e738707401604f8d437f7f203cd46b47f990fc56cb35971d",
+        "0x2e94cfc7cca54b452679edd0439adce737138f8f25fcaa5bacda42fe68d9b20b",
+        "0x8ded7f5b616ab4dcd4c9e6f9e1fe7c91233be0eb7aeba3dff1477d32c7f52eb2",
+        "0xb862d15234db51490cb328084ca107385167d4819df68a354a9b10bd23980356",
+        "0xce22b6612463b25d7c1579a55e18153305c7946a736acbaf09134e139ddfc087",
+        "0xed77fe09cb99f78191114e7891cecc2e3975005ae2569fa5288feb849ddeed39",
+        "0x92cc7096c947ba2a46ffecd3d182b64153b0afffcd4355e4fd012e95d622f404",
+        "0x1ee85a967b23c765fbda231aee617208499882f0895bea375fd8f0856a06012f",
+        "0xfa9abc9552badc2585632eac2a850b9b8063aae489a05b480b7dff9835378443",
+        "0x1f0fa0de7829bdb7153e9463d6ab0c1598516b1fada4986702b489b764c14e00",
+        "0x25f17de771df081c569e9fe7f9a7a4f6f879799ca9abc64ab249a25384e12dd9",
+        "0x6bffe30cd4f4797febe77f7df7baaf175c94bef919c4a1d4b6458df0b42bab3e",
+        "0x6210e7dcd71c79436ca7cbcd79c4b6fb125477104457ed1d3a666a46d0cb5ca1",
+        "0xb02740419ada9b95d11e978a8b7decb8b18b94ab018110770c46dd2a0eb8e6ad",
+        "0x5d20965666f093cc85fccb05f16ef57e92bbbee35eed77d5e864ac83f2b6b151",
+        "0xb58a6cdb26871134375ece65ce8c9ef4d4792c580146bdd945cd30a942882a26",
+        "0x3a9822e0b419b3f86288a6e8723c1205188f1b4b7a42864695ae655b880e825a",
+        "0xbf4a09a433895d5e8ac2e5b49e43fad8ba5cdb2ee298486074bc322b32dafda3",
+        "0xcc61592ea492f7e657c5d356a6624ac58b56edb995e806af5b8dabacbaafd372",
+        "0x9a2f4ad16e3ccb2ff64530ac921d6d443e9055cbc919b50f749a7e5a45f3310f",
+        "0x7bb6c2b8a0295a553e71e659a54c86c36db5754dcc5d9c1fa2a9966a187e33cd",
+        "0x343e142d6e690fde812f96baab136de4e8d07a7fd496a013cd7b7b3718d4b3da",
+        "0xb434a62e95af6f66c181bbb3c96474d63b0be4a7fd825028d717b9c98c85f4f3",
+        "0x9c112df93055602b5bd58d1f8c5f63abc16b45a9401158ffdf5c6a107c9df1de",
+        "0x10d07e321a3b088c2bd7ac7fd06bee739fccd6df41cdc1d03e47aad96a36641a",
+        "0x68709464f3e81bbed2efd61a6dfcb73687d1fffbde109e20a0cb7bb9c75105e6",
+        "0xb062f317289416b5fcd08eb912acce66ecf80a2149b4b1b734b00296120d45fc",
+        "0x6ba0cec813df88ddf53a56f7e6a7ebdecacf4f97544dd89025fa94b9133338af",
+        "0x99b0493b8a42217e5692f729ca930ed426104217ac638454475d8d987211f8a8",
+        "0x4fb8f881c58f17c1bf3b27fb829884f5acdae3734145f6151641a6fc8ae529fa",
+        "0x7111da9ccd190f8e367714cf7e8c882660d39639559c23b6848968a2a28adbbe",
+        "0x801af38263149d88e20495133e241939e60e638e40a7f3165e9ad8d1bbdc700e",
+        "0x7b7bde140b7168bf0496420b99d41796c33d58a45e6c01435ac6d025e1672317",
+        "0xf49789595848a7cd339774c2b9957a4a25ef13fe933f8141a74fd784987b6523",
+        "0x49872e72659ca0cafcd8ff9bc6d4b9e6728e4cd0c31cffd3d2fba591893f0d47",
+        "0x9b1a35087411f89446bda231b4c2062440a7b6bf884b430ddfdb0be6b962ac96",
+        "0x745e2014a1e056ff0bccb4116f660eae570d7d3559e2880ed29f84eee4330a14",
+        "0x309bb9e2984b9138b1cea33ab43e34cc3ce4aad113c3e8429ea2e472b41046ba",
+        "0xd4382ed218500384eaf8489a6d86e81ba71c7013311293eeb1e2a30a5de5bd22",
+        "0xcd90e3847c91b1ddd1de3bdf66a31a1e1569b495378576434f45c344ec13c3d1",
+        "0x569650fd9a1014ef53e6105d2003ca5bd4fd5d4325dbd49843e1f97148fa86f1",
+        "0xae5c091d209e3b78f97bb9a3fbc5c6441a904cb1425cced26b41bb4a70dcb0c4",
+        "0x5dac1ee7b6b45650f94ca287992915ac47c9c187cb4a5dbad5ea99805832663e",
+        "0x75b804fb162a0e1a85a8c03820a75fcf4521b85b9d33bb1a9ad30981a200bee1",
+        "0xd14c31a9f6a8d37dfcb288c7e969299c45a4464956f63846f258bc3ed808c0a1"
+      ]
+    },
+    "stablecoins": {
+      "total_stablecoin_usd": 0.0,
+      "has_stablecoins": false,
+      "stablecoin_breakdown": [
+        {
+          "symbol": "variableDebtEthUSDe",
+          "balance_usd": 0.0,
+          "balance_human": 4366.817049815636
+        },
+        {
+          "symbol": "USDMcrvUSD",
+          "balance_usd": 0.0,
+          "balance_human": 0.071715154249087
+        },
+        {
+          "symbol": "variableDebtEthUSDT",
+          "balance_usd": 0.0,
+          "balance_human": 3315.60892
+        },
+        {
+          "symbol": "sUSDe",
+          "balance_usd": 0.0,
+          "balance_human": 6.42922496259e-7
+        },
+        { "symbol": "USDC", "balance_usd": 0.0, "balance_human": 1924.141612 },
+        { "symbol": "USDT", "balance_usd": 0.0, "balance_human": 0.00056 }
+      ]
+    }
+  },
+  "wallet_metadata": {
+    "first_transaction_date": "2024-09-04T11:11:35+00:00",
+    "last_transaction_date": "2026-02-07T19:54:47+00:00",
+    "wallet_age_days": 521,
+    "total_transactions": 419,
+    "incoming_transactions": 228,
+    "outgoing_transactions": 191,
+    "unique_counterparties": 109,
+    "average_txs_per_month": 24.126679462571975
+  },
+  "lending_history": {
+    "error": "'str' object has no attribute 'get'",
+    "protocol_analysis": {
+      "protocols": {},
+      "summary": {},
+      "risk_indicators": {}
+    }
+  }
+}

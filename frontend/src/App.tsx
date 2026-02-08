@@ -11,7 +11,6 @@ import { config } from '@/lib/wagmi';
 import { networkConfig } from '@/lib/suiNetwork';
 import '@mysten/dapp-kit/dist/index.css';
 import Landing from "./pages/Landing";
-import AddressInput from "./pages/AddressInput";
 import Questionnaire from "./pages/Questionnaire";
 import Analyzing from "./pages/Analyzing";
 import ScoreReview from "./pages/ScoreReview";
@@ -43,9 +42,8 @@ const App = () => (
                   <BrowserRouter>
                     <Routes>
                       <Route path="/" element={<Landing />} />
-                      <Route path="/analyze" element={<AddressInput />} />
                       <Route path="/questionnaire" element={<Questionnaire />} />
-                      <Route path="/analyzing" element={<Analyzing />} />
+                      <Route path="/analyze" element={<Analyzing />} />
                       <Route path="/score" element={<ScoreReview />} />
                       <Route path="/record" element={<WalletConnect />} />
                       <Route path="/success" element={<Success />} />

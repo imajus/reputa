@@ -98,14 +98,14 @@ const Questionnaire = () => {
   const handleNext = () => {
     if (isLastQuestion) {
       updateQuestionnaire(answers);
-      navigate('/analyzing');
+      navigate('/analyze');
     } else {
       setCurrentQuestion(prev => prev + 1);
     }
   };
   const handleBack = () => {
     if (currentQuestion === 0) {
-      navigate('/analyze');
+      navigate('/');
     } else {
       setCurrentQuestion(prev => prev - 1);
     }
@@ -114,7 +114,7 @@ const Questionnaire = () => {
   return (
     <Layout>
       <div className="container max-w-2xl py-8">
-        <ProgressIndicator currentStep={2} />
+        <ProgressIndicator currentStep={1} />
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
@@ -157,15 +157,10 @@ const Questionnaire = () => {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={handleNext}>
-                  Skip
-                </Button>
-                <Button onClick={handleNext}>
-                  {isLastQuestion ? 'Submit' : 'Next'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+              <Button onClick={handleNext}>
+                {isLastQuestion ? 'Submit' : 'Next'}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>

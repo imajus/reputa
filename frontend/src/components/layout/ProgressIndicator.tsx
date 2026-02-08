@@ -12,10 +12,9 @@ interface ProgressIndicatorProps {
 }
 
 const defaultSteps: Step[] = [
-  { id: 1, label: 'Address' },
-  { id: 2, label: 'Survey' },
-  { id: 3, label: 'Score' },
-  { id: 4, label: 'Record' },
+  { id: 1, label: 'Survey' },
+  { id: 2, label: 'Score' },
+  { id: 3, label: 'Record' },
 ];
 
 const ProgressIndicator = ({ currentStep, steps = defaultSteps }: ProgressIndicatorProps) => {

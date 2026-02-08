@@ -25,6 +25,11 @@ if ! command -v oyster-cvm &> /dev/null; then
     exit 1
 fi
 
+# Constants
+AWS_INSTANCE=c6a.2xlarge
+PORT=8880
+DURATION=30
+
 # Store deployment info
 DEPLOYMENT_FILE="deployment.env"
 rm -f "$DEPLOYMENT_FILE"
@@ -102,13 +107,9 @@ echo "Detected architecture: $ARCH (building for $BUILD_ARCH)"
 
 # Check for Docker registry username
 if [ -z "$DOCKER_REGISTRY" ]; then
-    echo ""
-    echo "Docker registry username not set."
-    read -p "Enter your Docker Hub username (or registry): " DOCKER_REGISTRY
-    if [ -z "$DOCKER_REGISTRY" ]; then
-        echo "Error: Docker registry username is required"
-        exit 1
-    fi
+    echo "Error: DOCKER_REGISTRY environment variable is not set"
+    echo "Set it with: export DOCKER_REGISTRY=your_dockerhub_username"
+    exit 1
 fi
 
 echo ""
@@ -150,23 +151,34 @@ sed -i "/^  evm-score-oracle:/,/^[^ ]/ { /^    image:/ s|^    image:.*|    image
 echo ""
 echo "Deploying to Oyster..."
 
-# Deploy with oyster-cvm
-DEPLOY_OUTPUT=$(oyster-cvm deploy \
+# Deploy with oyster-cvm (show output in real-time and capture it)
+DEPLOY_OUTPUT_FILE=$(mktemp)
+if ! oyster-cvm deploy \
     --wallet-private-key "$PRIVATE_KEY" \
     --docker-compose ./app/docker-compose.yml \
-    --instance-type c6a.xlarge \
-    --duration-in-minutes 60 \
+    --instance-type $AWS_INSTANCE \
+    --duration-in-minutes $DURATION \
     --arch amd64 \
-    --deployment sui 2>&1)
+    --deployment sui 2>&1 | tee "$DEPLOY_OUTPUT_FILE"; then
+    echo ""
+    echo "Error: oyster-cvm deploy command failed"
+    echo "Output was:"
+    cat "$DEPLOY_OUTPUT_FILE"
+    rm -f "$DEPLOY_OUTPUT_FILE"
+    exit 1
+fi
 
-echo "$DEPLOY_OUTPUT"
+DEPLOY_OUTPUT=$(cat "$DEPLOY_OUTPUT_FILE")
+rm -f "$DEPLOY_OUTPUT_FILE"
 
 # Parse OYSTER_JOB_ID from output
 JOB_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Job created with ID: "\K[0-9]+' | head -1)
 
 if [ -z "$JOB_ID" ]; then
     echo ""
-    echo "Warning: Could not extract JOB_ID from output"
+    echo "Error: Could not extract JOB_ID from deployment output"
+    echo "Deployment may have failed. Check the output above for errors."
+    exit 1
 fi
 
 # Parse PUBLIC_IP from output
@@ -184,13 +196,8 @@ fi
 
 if [ -z "$PUBLIC_IP" ]; then
     echo ""
-    echo "Warning: Could not automatically extract PUBLIC_IP from output"
-    read -p "Enter the PUBLIC_IP from the deployment output: " PUBLIC_IP
-fi
-
-# Validate PUBLIC_IP
-if [ -z "$PUBLIC_IP" ]; then
-    echo "Error: PUBLIC_IP is required"
+    echo "Error: Could not extract PUBLIC_IP from deployment output"
+    echo "Deployment may have failed. Check the output above for errors."
     exit 1
 fi
 
@@ -198,6 +205,7 @@ echo ""
 echo "Enclave deployed successfully!"
 echo "  JOB_ID: $JOB_ID"
 echo "  PUBLIC_IP: $PUBLIC_IP"
+echo "  PORT: $PORT"
 
 # Append to deployment file
 cat >> "$DEPLOYMENT_FILE" << EOF
@@ -224,7 +232,7 @@ sleep 10
 
 # Test enclave health
 echo "Testing enclave health endpoint..."
-if ! curl -sf "http://${PUBLIC_IP}:3000/health" > /dev/null; then
+if ! curl -sf "http://${PUBLIC_IP}:$PORT/health" > /dev/null; then
     echo "Warning: Enclave health check failed. Waiting 20 more seconds..."
     sleep 20
 fi
@@ -233,7 +241,7 @@ echo "Waiting for Ollama to be ready..."
 MAX_OLLAMA_RETRIES=30
 OLLAMA_RETRY_COUNT=0
 while [ $OLLAMA_RETRY_COUNT -lt $MAX_OLLAMA_RETRIES ]; do
-    HEALTH_RESPONSE=$(curl -sf "http://${PUBLIC_IP}:3000/health" 2>/dev/null || echo "{}")
+    HEALTH_RESPONSE=$(curl -sf "http://${PUBLIC_IP}:$PORT/health" 2>/dev/null || echo "{}")
     OLLAMA_STATUS=$(echo "$HEALTH_RESPONSE" | grep -o '"ollama":"connected"' || echo "")
     if [ -n "$OLLAMA_STATUS" ]; then
         echo "Ollama is ready and connected!"
@@ -330,13 +338,8 @@ ENCLAVE_ID=$(echo "$REGISTER_OUTPUT" | grep -oP 'ObjectID:\s*\K0x[a-f0-9]+' | gr
 
 if [ -z "$ENCLAVE_ID" ]; then
     echo ""
-    echo "Warning: Could not automatically extract ENCLAVE_ID from output"
-    read -p "Enter the ENCLAVE_ID from the registration output: " ENCLAVE_ID
-fi
-
-# Validate ENCLAVE_ID
-if [ -z "$ENCLAVE_ID" ]; then
-    echo "Error: ENCLAVE_ID is required"
+    echo "Error: Could not extract ENCLAVE_ID from registration output"
+    echo "Check the output above for errors."
     exit 1
 fi
 
@@ -373,33 +376,28 @@ echo "$INIT_OUTPUT"
 
 cd ../..
 
-# Extract ORACLE_ID (shared object with ScoreOracle type)
-ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "ScoreOracle" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
+# Extract REGISTRY_ID (shared object with ScoreRegistry type)
+REGISTRY_ID=$(echo "$INIT_OUTPUT" | grep -B 3 "ScoreRegistry" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
 
-if [ -z "$ORACLE_ID" ]; then
+if [ -z "$REGISTRY_ID" ]; then
     # Alternative: look for "Shared(" in Created Objects section
-    ORACLE_ID=$(echo "$INIT_OUTPUT" | grep -A 10 "Created Objects:" | grep -B 3 "Shared(" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
+    REGISTRY_ID=$(echo "$INIT_OUTPUT" | grep -A 10 "Created Objects:" | grep -B 3 "Shared(" | grep "ObjectID:" | sed 's/.*ObjectID: //' | sed 's/[│ ]//g' | head -1)
 fi
 
-if [ -z "$ORACLE_ID" ]; then
+if [ -z "$REGISTRY_ID" ]; then
     echo ""
-    echo "Warning: Could not automatically extract ORACLE_ID from output"
-    read -p "Enter the ORACLE_ID (shared ScoreOracle object) from the output: " ORACLE_ID
-fi
-
-# Validate ORACLE_ID
-if [ -z "$ORACLE_ID" ]; then
-    echo "Error: ORACLE_ID is required"
+    echo "Error: Could not extract REGISTRY_ID from initialization output"
+    echo "Check the output above for errors."
     exit 1
 fi
 
 echo ""
-echo "Oracle initialized successfully!"
-echo "  ORACLE_ID: $ORACLE_ID"
+echo "Registry initialized successfully!"
+echo "  REGISTRY_ID: $REGISTRY_ID"
 
 # Append to deployment file
 cat >> "$DEPLOYMENT_FILE" << EOF
-ORACLE_ID=$ORACLE_ID
+REGISTRY_ID=$REGISTRY_ID
 EOF
 
 echo ""
@@ -416,7 +414,7 @@ echo "Fetching and submitting initial score..."
 cd contracts/script
 
 TEST_ADDRESS="0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
-UPDATE_OUTPUT=$(bash update_score.sh "$PUBLIC_IP" "$PACKAGE_ID" "$ORACLE_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
+UPDATE_OUTPUT=$(bash update_score.sh "http://${PUBLIC_IP}:$PORT" "$PACKAGE_ID" "$REGISTRY_ID" "$ENCLAVE_ID" "$TEST_ADDRESS" 2>&1)
 
 echo "$UPDATE_OUTPUT"
 
@@ -443,6 +441,6 @@ echo ""
 cat "$DEPLOYMENT_FILE"
 echo ""
 echo "You can now:"
-echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $ORACLE_ID"
-echo "  - Update score: cd contracts/script && sh update_score.sh $PUBLIC_IP $PACKAGE_ID $ORACLE_ID $ENCLAVE_ID <ADDRESS>"
+echo "  - Query score: cd contracts/script && sh get_score.sh $PACKAGE_ID $REGISTRY_ID"
+echo "  - Update score: cd contracts/script && sh update_score.sh http://$PUBLIC_IP:$PORT $PACKAGE_ID $REGISTRY_ID $ENCLAVE_ID <ADDRESS>"
 echo ""

@@ -72,9 +72,9 @@ After deployment, `deployment.env` contains all object IDs and IP addresses.
    - AI scoring via Ollama (llama3.2:1b model)
 
 3. **Deployment Scripts** (`contracts/script/`)
-   - `initialize_oracle.sh` - Create shared ScoreOracle object
+   - `initialize_oracle.sh` - Create shared ScoreRegistry object
    - `update_score.sh` - Fetch signed score from enclave and submit to blockchain
-   - `get_score.sh` - Query latest score from blockchain state
+   - `get_score.sh` - Query owned WalletScore objects from blockchain
    - `register_enclave.sh` - Register enclave with PCR attestation
 
 ### Critical: BCS Serialization
@@ -141,7 +141,7 @@ These are extracted from Oyster deployment and stored in the smart contract. Onl
 3. Deploy to Oyster CVM → get PUBLIC_IP and PCR values
 4. Update PCRs in EnclaveConfig on-chain
 5. Register enclave with attestation document → get ENCLAVE_ID
-6. Initialize oracle → get ORACLE_ID
+6. Initialize registry → get REGISTRY_ID
 7. Submit test score to verify end-to-end flow
 
 All IDs saved to `deployment.env` for subsequent operations.
@@ -246,15 +246,23 @@ Response format:
 
 ### On-Chain Storage
 ```move
-public struct ScoreOracle<phantom T> has key {
-    scores: Table<u64, ScoreData>,  // timestamp → score data
-    latest_score: u64,               // Cached latest
-    latest_wallet_address: String,
-    latest_timestamp: u64,
+// User-owned score object (created per wallet per user)
+public struct WalletScore has key, store {
+    id: UID,
+    score: u64,
+    wallet_address: String,  // EVM address
+    timestamp_ms: u64,
+    version: u64,
+}
+
+// Shared registry for wallet → score_object_id lookups
+public struct ScoreRegistry<phantom T> has key {
+    id: UID,
+    // Dynamic fields: wallet_address (String) → ID (object ID)
 }
 ```
 
-Historical scores stored by timestamp; latest values cached for cheap queries.
+Each user owns their WalletScore object(s). Registry provides efficient lookup by EVM wallet address. Updates create new versions.
 
 ### Nix Build Configuration
 
@@ -286,10 +294,10 @@ source deployment.env
 curl "http://${PUBLIC_IP}:3000/score?address=0x..."
 
 # Query blockchain state
-./contracts/script/get_score.sh $PACKAGE_ID $ORACLE_ID
+./contracts/script/get_score.sh $PACKAGE_ID $REGISTRY_ID
 
 # Submit new score
-./contracts/script/update_score.sh $PUBLIC_IP $PACKAGE_ID $ORACLE_ID $ENCLAVE_ID 0x...
+./contracts/script/update_score.sh $PUBLIC_IP $PACKAGE_ID $REGISTRY_ID $ENCLAVE_ID 0x...
 ```
 
 ## Common Issues

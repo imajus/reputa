@@ -18,7 +18,6 @@ from src.services.defi_service import (
     analyze_stablecoin_holdings,
 )
 
-
 api_router = APIRouter()
 
 @api_router.post("/assets/nfts")

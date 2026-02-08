@@ -1,3 +1,4 @@
-/deployment.env
+deployment.env
 /result
+/contracts/build
 *.tar.gz

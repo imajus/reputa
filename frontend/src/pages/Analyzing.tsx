@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, Loader2, AlertCircle } from 'lucide-react';
-import { useAccount } from 'wagmi';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Layout from '@/components/layout/Layout';
-import ProgressIndicator from '@/components/layout/ProgressIndicator';
-import { useReputa } from '@/contexts/ReputaContext';
-import { cn } from '@/lib/utils';
-import { submitQuestionnaireForScoring } from '@/lib/api';
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Loader2, AlertCircle, Lightbulb } from "lucide-react";
+import { useAccount, useEnsName, useSignMessage } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Layout from "@/components/layout/Layout";
+import ProgressIndicator from "@/components/layout/ProgressIndicator";
+import { useReputa } from "@/contexts/ReputaContext";
+import { cn } from "@/lib/utils";
+import { submitQuestionnaireForScoring } from "@/lib/api";
 
 interface Step {
   id: string;
@@ -17,71 +18,193 @@ interface Step {
 }
 
 const steps: Step[] = [
-  { id: 'fetch', label: 'Fetching transaction history', duration: 2000 },
-  { id: 'analyze', label: 'Analyzing DeFi positions', duration: 2500 },
-  { id: 'scoring', label: 'Running AI scoring model', duration: 3000 },
-  { id: 'proof', label: 'Generating proof', duration: 2000 },
+  { id: "fetch", label: "Fetching transaction history", duration: 5000 },
+  { id: "analyze", label: "Analyzing DeFi positions", duration: 10000 },
+  { id: "scoring", label: "Running AI scoring model", duration: 18000 },
+  { id: "proof", label: "Generating proof", duration: 60000 },
 ];
 
 const Analyzing = () => {
   const navigate = useNavigate();
   const { state, setScore, setOracleData } = useReputa();
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { data: ensName } = useEnsName({ address });
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef(false);
+  const [authSignature, setAuthSignature] = useState<string | null>(null);
+  const [authTimestamp, setAuthTimestamp] = useState<number | null>(null);
+  const { signMessage } = useSignMessage();
 
   const handleRetry = () => {
     setError(null);
     setCurrentStep(0);
     setCompletedSteps([]);
+    fetchedRef.current = false;
+    setAuthSignature(null);
+    setAuthTimestamp(null);
   };
 
   useEffect(() => {
+    if (!isConnected || !address || authSignature) {
+      return;
+    }
+    const timestamp = Date.now();
+    const message = `Reputa Score Authorization\nTimestamp: ${timestamp}\nAddress: ${address}`;
+    signMessage(
+      {
+        account: address,
+        message,
+      },
+      {
+        onSuccess: (signature) => {
+          setAuthSignature(signature);
+          setAuthTimestamp(timestamp);
+        },
+        onError: (error) => {
+          console.error("Failed to sign message:", error);
+          setError("Failed to sign authorization message. Please try again.");
+        },
+      },
+    );
+  }, [isConnected, address, authSignature, signMessage, setError]);
+
+  useEffect(() => {
+    if (!authSignature || !isConnected || !address) {
+      return;
+    }
+    if (fetchedRef.current) {
+      return;
+    }
+    fetchedRef.current = true;
     const fetchScore = async () => {
-      if (!isConnected) {
-        return;
-      }
       try {
         const response = await submitQuestionnaireForScoring(
-          state.resolvedAddress || state.evmAddress,
-          state.questionnaire
+          address,
+          state.questionnaire,
+          authSignature,
+          authTimestamp!,
         );
-        console.log('Oracle response:', response);
+        console.log("Oracle response:", response);
         const scoreBreakdown = response.metadata?.scoreBreakdown || {
           activity: 50,
           maturity: 50,
           diversity: 50,
           riskBehavior: 50,
-          surveyMatch: 50
+          surveyMatch: 50,
         };
         if (response.metadata?.reasoning) {
-          console.log('Score reasoning:', response.metadata.reasoning);
+          console.log("Score reasoning:", response.metadata.reasoning);
         }
         if (response.metadata?.risk_factors) {
-          console.log('Risk factors:', response.metadata.risk_factors);
+          console.log("Risk factors:", response.metadata.risk_factors);
         }
         if (response.metadata?.strengths) {
-          console.log('Strengths:', response.metadata.strengths);
+          console.log("Strengths:", response.metadata.strengths);
         }
         setOracleData(response.signature, response.timestamp_ms);
         setScore(response.score, scoreBreakdown);
-        setTimeout(() => navigate('/score'), 500);
+        navigate("/score");
       } catch (err) {
-        console.error('Failed to get score:', err);
-        setError('Failed to analyze your data. Please try again.');
+        console.error("Failed to get score:", err);
+        setError("Failed to analyze your data. Please try again.");
+        fetchedRef.current = false;
       }
     };
-    if (currentStep >= steps.length) {
-      fetchScore();
+    fetchScore();
+  }, [
+    navigate,
+    setScore,
+    setOracleData,
+    state.questionnaire,
+    isConnected,
+    address,
+    authSignature,
+    authTimestamp,
+  ]);
+
+  useEffect(() => {
+    if (!authSignature || currentStep >= steps.length) {
       return;
     }
     const timer = setTimeout(() => {
-      setCompletedSteps(prev => [...prev, steps[currentStep].id]);
-      setCurrentStep(prev => prev + 1);
+      setCompletedSteps((prev) => [...prev, steps[currentStep].id]);
+      setCurrentStep((prev) => prev + 1);
     }, steps[currentStep].duration);
     return () => clearTimeout(timer);
-  }, [currentStep, navigate, setScore, setOracleData, state.evmAddress, state.resolvedAddress, state.questionnaire, isConnected]);
+  }, [authSignature, currentStep]);
+
+  if (!isConnected || !address) {
+    return (
+      <Layout>
+        <div className="container max-w-2xl py-8">
+          <ProgressIndicator currentStep={2} />
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">
+                Connect Your Ethereum Wallet
+              </CardTitle>
+              <p className="text-muted-foreground">
+                We'll analyze your on-chain history to calculate your reputation
+                score
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-center">
+                <ConnectButton />
+              </div>
+
+              <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
+                <Lightbulb className="h-5 w-5 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  After connecting, you'll need to sign an authorization message
+                  to verify wallet ownership. Then we'll analyze your
+                  transaction history across Ethereum, Arbitrum, Optimism, and
+                  other major L2s.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!authSignature) {
+    return (
+      <Layout>
+        <div className="container max-w-2xl py-8">
+          <ProgressIndicator currentStep={2} />
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">
+                Sign Authorization Message
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Please sign the message in your wallet to verify ownership
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              </div>
+
+              <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
+                <Lightbulb className="h-5 w-5 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Check your wallet for a signature request. This authorization
+                  is needed to securely access your on-chain data.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -91,10 +214,10 @@ const Analyzing = () => {
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {error ? 'Analysis Failed' : 'Analyzing Your Data...'}
+              {error ? "Analysis Failed" : "Analyzing Your Data..."}
             </CardTitle>
             <p className="text-muted-foreground">
-              {error ? '' : 'This may take 30-60 seconds'}
+              {error ? "" : "This may take 1-2 minutes"}
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -112,11 +235,42 @@ const Analyzing = () => {
               </div>
             ) : (
               <>
-                {/* Loading Animation */}
-                <div className="flex justify-center py-8">
-                  <div className="relative h-24 w-24">
-                    <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-                    <div className="absolute inset-2 animate-spin rounded-full border-4 border-primary/10 border-b-primary/60" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                {/* Loading Animation with Chain Icons */}
+                <div className="flex items-center justify-between gap-8 py-12 px-4">
+                  {/* Ethereum Side */}
+                  <div className="flex flex-col items-center gap-3 animate-float">
+                    <img
+                      src="/ethereum.png"
+                      alt="Ethereum"
+                      className="h-16 w-16 object-contain"
+                    />
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {ensName ||
+                        (address
+                          ? address.slice(0, 6) + "..." + address.slice(-4)
+                          : "")}
+                    </div>
+                  </div>
+
+                  {/* Data Transfer Animation */}
+                  <div className="flex-1 relative h-2">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-full" />
+                    <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-primary to-transparent rounded-full animate-slide-right" />
+                  </div>
+
+                  {/* Sui Side */}
+                  <div
+                    className="flex flex-col items-center gap-3 animate-float"
+                    style={{ animationDelay: "0.5s" }}
+                  >
+                    <img
+                      src="/sui.png"
+                      alt="Sui"
+                      className="h-16 w-16 object-contain"
+                    />
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Sui Network
+                    </div>
                   </div>
                 </div>
 
@@ -131,10 +285,10 @@ const Analyzing = () => {
                       <div
                         key={step.id}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg p-3 transition-all',
-                          isCompleted && 'text-foreground',
-                          isCurrent && 'bg-primary/5 text-foreground',
-                          isPending && 'text-muted-foreground'
+                          "flex items-center gap-3 rounded-lg p-3 transition-all",
+                          isCompleted && "text-foreground",
+                          isCurrent && "bg-primary/5 text-foreground",
+                          isPending && "text-muted-foreground",
                         )}
                       >
                         {isCompleted ? (
@@ -144,7 +298,7 @@ const Analyzing = () => {
                         ) : (
                           <div className="h-5 w-5 rounded-full border-2 border-muted" />
                         )}
-                        <span className={cn(isCurrent && 'font-medium')}>
+                        <span className={cn(isCurrent && "font-medium")}>
                           {step.label}
                         </span>
                       </div>

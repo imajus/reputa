@@ -1,20 +1,17 @@
-import { ReactNode } from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import WalletBar from './WalletBar';
+import { ReactNode } from "react";
+import Header from "./Header";
+import WalletBar from "./WalletBar";
 
 interface LayoutProps {
   children: ReactNode;
-  showFooter?: boolean;
 }
 
-const Layout = ({ children, showFooter = true }: LayoutProps) => {
+const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <WalletBar />
+      {/* <WalletBar /> */}
       <main className="flex-1">{children}</main>
-      {showFooter && <Footer />}
     </div>
   );
 };

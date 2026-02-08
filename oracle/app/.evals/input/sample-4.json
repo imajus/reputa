@@ -1,0 +1,69 @@
+{
+  "wallet": "0xB28750EcbFAaEC4cEB723CA22D5F1578dE57488d",
+  "nfts": {
+    "poaps": [],
+    "legit_nfts": [],
+    "ens_domains": [],
+    "counts": { "total": 0, "poaps": 0, "legit": 0, "spam": 0, "ens": 0 }
+  },
+  "tokens": {
+    "holdings": [],
+    "concentration": {
+      "herfindahl_index": 0,
+      "top_1_concentration": 0,
+      "top_3_concentration": 0,
+      "top_5_concentration": 0,
+      "diversification_score": 0,
+      "num_tokens": 0
+    }
+  },
+  "eth_balance": 0.000111562855641054,
+  "defi_analysis": {
+    "protocol_interactions": {
+      "aave": false,
+      "compound": false,
+      "uniswap": false,
+      "curve": false,
+      "ethena": false,
+      "morpho": false,
+      "total_protocols": 0,
+      "staking_events": 0,
+      "protocol_details": []
+    },
+    "mixer_check": {
+      "has_mixer_interaction": false,
+      "mixer_tx_count": 0,
+      "unique_mixers": [],
+      "per_mixer_tx_count": {},
+      "incoming_mixer_txs": 0,
+      "outgoing_mixer_txs": 0,
+      "first_interaction_timestamp": null,
+      "last_interaction_timestamp": null,
+      "unique_counterparties": 0,
+      "tx_hashes": []
+    },
+    "stablecoins": {
+      "total_stablecoin_usd": 0.0,
+      "has_stablecoins": false,
+      "stablecoin_breakdown": []
+    }
+  },
+  "wallet_metadata": {
+    "first_transaction_date": "2026-02-06T16:17:23+00:00",
+    "last_transaction_date": "2026-02-06T16:20:35+00:00",
+    "wallet_age_days": 1,
+    "total_transactions": 2,
+    "incoming_transactions": 2,
+    "outgoing_transactions": 0,
+    "unique_counterparties": 2,
+    "average_txs_per_month": 2.0
+  },
+  "lending_history": {
+    "error": "'str' object has no attribute 'get'",
+    "protocol_analysis": {
+      "protocols": {},
+      "summary": {},
+      "risk_indicators": {}
+    }
+  }
+}

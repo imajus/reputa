@@ -33,7 +33,7 @@ const ScoreReview = () => {
   return (
     <Layout>
       <div className="container max-w-2xl py-8">
-        <ProgressIndicator currentStep={3} />
+        <ProgressIndicator currentStep={2} />
         
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
