@@ -271,7 +271,7 @@ async function fetchEVMData(address) {
         'Content-Type': 'application/json',
         'User-Agent': 'EVM-Score-Oracle/1.0'
       },
-      timeout: 10000
+      timeout: 120000
     });
     if (!response.data) {
       throw new Error('Invalid API response structure');
