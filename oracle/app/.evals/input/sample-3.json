@@ -1,0 +1,1016 @@
+{
+  "wallet": "0xCa5a940E87cC4D4cC9F5F749c58a4DDcA79a3328",
+  "nfts": {
+    "poaps": [],
+    "legit_nfts": [
+      {
+        "contract": {
+          "address": "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+          "name": null,
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC721",
+          "contractDeployer": "0x4Fe4e666Be5752f1FdD210F4Ab5DE2Cc26e3E0e8",
+          "deployedBlockNumber": 9380410,
+          "openSeaMetadata": {
+            "floorPrice": 2.96e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-01T02:03:13.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "56394731134023984708443380527556440496763952924456666577108550328725420402534",
+        "tokenType": "ERC721",
+        "name": "defiopa.eth",
+        "description": "defiopa.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "contentType": "image/svg+xml",
+          "size": 101092,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/defiopa.eth",
+            "image": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image",
+            "last_request_date": 1770395048211,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image",
+            "name": "defiopa.eth",
+            "description": "defiopa.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1754218271000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 7, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 7,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "date",
+                "value": 1754218271000,
+                "trait_type": "Registration Date"
+              },
+              {
+                "display_type": "date",
+                "value": 1785754271000,
+                "trait_type": "Expiration Date"
+              }
+            ],
+            "version": 0,
+            "url": "https://app.ens.domains/name/defiopa.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.335Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      },
+      {
+        "contract": {
+          "address": "0xC841c73b278912260b39f4F2fA264940D9a8D16b",
+          "name": "yield-eth.com",
+          "symbol": "claim rewards on yield-eth.com",
+          "totalSupply": "1500",
+          "tokenType": "ERC1155",
+          "contractDeployer": "0x083C9973110Bf45b628668646f26Cb31A78D0d83",
+          "deployedBlockNumber": 22121466,
+          "openSeaMetadata": {
+            "floorPrice": null,
+            "collectionName": "Visit yield-eth.com to claim rewards",
+            "collectionSlug": "visit-yield-eth-com-to-claim-rewards-49",
+            "safelistRequestStatus": "not_requested",
+            "imageUrl": "https://i2c.seadn.io/ethereum/c9b298c735cd42d68820e7475b949608/d938efb2b524f9265ba87de126b153/41d938efb2b524f9265ba87de126b153.png",
+            "description": "Visit yield-eth.com to claim rewards",
+            "externalUrl": null,
+            "twitterUsername": null,
+            "discordUrl": null,
+            "bannerImageUrl": null,
+            "lastIngestedAt": "2026-02-02T07:13:22.000Z"
+          },
+          "isSpam": true,
+          "spamClassifications": ["EmptyMetadata", "SpammyMetadata"]
+        },
+        "tokenId": "0",
+        "tokenType": "ERC1155",
+        "name": "Visit yield-eth.com to claim rewards",
+        "description": "Visit yield-eth.com to claim rewards",
+        "tokenUri": "https://alchemy.mypinata.cloud/ipfs/QmXjyXPm5LMcyB842c8QoGN5Tvb3xDeyDWdcpV4xpsDWsD/0000000000000000000000000000000000000000000000000000000000000000.json",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/0b47a89e7ca1a4bbc1f0c916a3aa713e",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/0b47a89e7ca1a4bbc1f0c916a3aa713e",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/0b47a89e7ca1a4bbc1f0c916a3aa713e",
+          "contentType": "image/png",
+          "size": 1420621,
+          "originalUrl": "https://ipfs.io/ipfs/QmeTAazmYyHgw2TBgRjH52vSoPMkgd79YdUgqJzBu6wsnx"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://ipfs.io/ipfs/QmXjyXPm5LMcyB842c8QoGN5Tvb3xDeyDWdcpV4xpsDWsD/{id}.json",
+          "metadata": {
+            "name": "Visit yield-eth.com to claim rewards",
+            "description": "Visit yield-eth.com to claim rewards",
+            "image": "https://ipfs.io/ipfs/QmeTAazmYyHgw2TBgRjH52vSoPMkgd79YdUgqJzBu6wsnx"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "Visit yield-eth.com to claim rewards",
+          "slug": "visit-yield-eth-com-to-claim-rewards-49",
+          "externalUrl": null,
+          "bannerImageUrl": null
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2025-03-25T04:15:03.941Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "not_requested",
+          "is_ens": false
+        }
+      },
+      {
+        "contract": {
+          "address": "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+          "name": "NameWrapper",
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC1155",
+          "contractDeployer": "0x0904Dac3347eA47d208F3Fd67402D039a3b99859",
+          "deployedBlockNumber": 16925608,
+          "openSeaMetadata": {
+            "floorPrice": 3.9e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-07T21:33:12.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "1629024342227438846500892439521655784884568222979351708182142801840120262996",
+        "tokenType": "ERC1155",
+        "name": "perov.eth",
+        "description": "perov.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "contentType": "image/svg+xml",
+          "size": 101090,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/perov.eth",
+            "image": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image",
+            "last_request_date": 1770546089420,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image",
+            "name": "perov.eth",
+            "description": "perov.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1701140507000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 5, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 5,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "object",
+                "value": {
+                  "parent": {
+                    "PARENT_CANNOT_CONTROL": true,
+                    "unnamed": {
+                      "524288": false,
+                      "1048576": false,
+                      "2097152": false,
+                      "4194304": false,
+                      "8388608": false,
+                      "16777216": false,
+                      "33554432": false,
+                      "67108864": false,
+                      "134217728": false,
+                      "268435456": false,
+                      "536870912": false,
+                      "1073741824": false,
+                      "2147483648": false
+                    },
+                    "CAN_EXTEND_EXPIRY": false,
+                    "IS_DOT_ETH": true
+                  },
+                  "child": {
+                    "CANNOT_APPROVE": false,
+                    "CANNOT_SET_RESOLVER": false,
+                    "CANNOT_CREATE_SUBDOMAIN": false,
+                    "CAN_DO_EVERYTHING": true,
+                    "CANNOT_UNWRAP": false,
+                    "unnamed": {
+                      "128": false,
+                      "256": false,
+                      "512": false,
+                      "1024": false,
+                      "2048": false,
+                      "4096": false,
+                      "8192": false,
+                      "16384": false,
+                      "32768": false
+                    },
+                    "CANNOT_BURN_FUSES": false,
+                    "CANNOT_TRANSFER": false,
+                    "CANNOT_SET_TTL": false
+                  }
+                },
+                "trait_type": "Namewrapper Fuse States"
+              },
+              {
+                "display_type": "date",
+                "value": 1740452507000,
+                "trait_type": "Namewrapper Expiry Date"
+              },
+              {
+                "display_type": "string",
+                "value": "Emancipated",
+                "trait_type": "Namewrapper State"
+              }
+            ],
+            "version": 2,
+            "url": "https://app.ens.domains/name/perov.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.698Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      },
+      {
+        "contract": {
+          "address": "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+          "name": "NameWrapper",
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC1155",
+          "contractDeployer": "0x0904Dac3347eA47d208F3Fd67402D039a3b99859",
+          "deployedBlockNumber": 16925608,
+          "openSeaMetadata": {
+            "floorPrice": 3.9e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-07T21:33:12.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "100306788858936657886470437784892263551069901116978269278452313949238264163798",
+        "tokenType": "ERC1155",
+        "name": "imajus.eth",
+        "description": "imajus.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "contentType": "image/svg+xml",
+          "size": 206012,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/imajus.eth",
+            "image": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image",
+            "last_request_date": 1770546089693,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image",
+            "name": "imajus.eth",
+            "description": "imajus.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1695192995000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 6, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 6,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "object",
+                "value": {
+                  "parent": {
+                    "PARENT_CANNOT_CONTROL": true,
+                    "unnamed": {
+                      "524288": false,
+                      "1048576": false,
+                      "2097152": false,
+                      "4194304": false,
+                      "8388608": false,
+                      "16777216": false,
+                      "33554432": false,
+                      "67108864": false,
+                      "134217728": false,
+                      "268435456": false,
+                      "536870912": false,
+                      "1073741824": false,
+                      "2147483648": false
+                    },
+                    "CAN_EXTEND_EXPIRY": false,
+                    "IS_DOT_ETH": true
+                  },
+                  "child": {
+                    "CANNOT_APPROVE": false,
+                    "CANNOT_SET_RESOLVER": false,
+                    "CANNOT_CREATE_SUBDOMAIN": false,
+                    "CAN_DO_EVERYTHING": true,
+                    "CANNOT_UNWRAP": false,
+                    "unnamed": {
+                      "128": false,
+                      "256": false,
+                      "512": false,
+                      "1024": false,
+                      "2048": false,
+                      "4096": false,
+                      "8192": false,
+                      "16384": false,
+                      "32768": false
+                    },
+                    "CANNOT_BURN_FUSES": false,
+                    "CANNOT_TRANSFER": false,
+                    "CANNOT_SET_TTL": false
+                  }
+                },
+                "trait_type": "Namewrapper Fuse States"
+              },
+              {
+                "display_type": "date",
+                "value": 1734504995000,
+                "trait_type": "Namewrapper Expiry Date"
+              },
+              {
+                "display_type": "string",
+                "value": "Emancipated",
+                "trait_type": "Namewrapper State"
+              }
+            ],
+            "version": 2,
+            "url": "https://app.ens.domains/name/imajus.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.949Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      }
+    ],
+    "ens_domains": [
+      {
+        "contract": {
+          "address": "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+          "name": null,
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC721",
+          "contractDeployer": "0x4Fe4e666Be5752f1FdD210F4Ab5DE2Cc26e3E0e8",
+          "deployedBlockNumber": 9380410,
+          "openSeaMetadata": {
+            "floorPrice": 2.96e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-01T02:03:13.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "56394731134023984708443380527556440496763952924456666577108550328725420402534",
+        "tokenType": "ERC721",
+        "name": "defiopa.eth",
+        "description": "defiopa.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/ec170a7f82d1a426caafe0250b7a1e94",
+          "contentType": "image/svg+xml",
+          "size": 101092,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/defiopa.eth",
+            "image": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image",
+            "last_request_date": 1770395048211,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0x7cae4963e308b8a303a164a2e9922a29fcbda4e361fbc7cebad8c9e5db306766/image",
+            "name": "defiopa.eth",
+            "description": "defiopa.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1754218271000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 7, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 7,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "date",
+                "value": 1754218271000,
+                "trait_type": "Registration Date"
+              },
+              {
+                "display_type": "date",
+                "value": 1785754271000,
+                "trait_type": "Expiration Date"
+              }
+            ],
+            "version": 0,
+            "url": "https://app.ens.domains/name/defiopa.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.335Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      },
+      {
+        "contract": {
+          "address": "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+          "name": "NameWrapper",
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC1155",
+          "contractDeployer": "0x0904Dac3347eA47d208F3Fd67402D039a3b99859",
+          "deployedBlockNumber": 16925608,
+          "openSeaMetadata": {
+            "floorPrice": 3.9e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-07T21:33:12.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "1629024342227438846500892439521655784884568222979351708182142801840120262996",
+        "tokenType": "ERC1155",
+        "name": "perov.eth",
+        "description": "perov.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/9cb700b75743a3d46c2f048222a7b1ca",
+          "contentType": "image/svg+xml",
+          "size": 101090,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/perov.eth",
+            "image": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image",
+            "last_request_date": 1770546089420,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0x0399febf191cc8e53506156cd9cc7fbc03dba17baef7594abc16a9c7843bf154/image",
+            "name": "perov.eth",
+            "description": "perov.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1701140507000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 5, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 5,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "object",
+                "value": {
+                  "parent": {
+                    "PARENT_CANNOT_CONTROL": true,
+                    "unnamed": {
+                      "524288": false,
+                      "1048576": false,
+                      "2097152": false,
+                      "4194304": false,
+                      "8388608": false,
+                      "16777216": false,
+                      "33554432": false,
+                      "67108864": false,
+                      "134217728": false,
+                      "268435456": false,
+                      "536870912": false,
+                      "1073741824": false,
+                      "2147483648": false
+                    },
+                    "CAN_EXTEND_EXPIRY": false,
+                    "IS_DOT_ETH": true
+                  },
+                  "child": {
+                    "CANNOT_APPROVE": false,
+                    "CANNOT_SET_RESOLVER": false,
+                    "CANNOT_CREATE_SUBDOMAIN": false,
+                    "CAN_DO_EVERYTHING": true,
+                    "CANNOT_UNWRAP": false,
+                    "unnamed": {
+                      "128": false,
+                      "256": false,
+                      "512": false,
+                      "1024": false,
+                      "2048": false,
+                      "4096": false,
+                      "8192": false,
+                      "16384": false,
+                      "32768": false
+                    },
+                    "CANNOT_BURN_FUSES": false,
+                    "CANNOT_TRANSFER": false,
+                    "CANNOT_SET_TTL": false
+                  }
+                },
+                "trait_type": "Namewrapper Fuse States"
+              },
+              {
+                "display_type": "date",
+                "value": 1740452507000,
+                "trait_type": "Namewrapper Expiry Date"
+              },
+              {
+                "display_type": "string",
+                "value": "Emancipated",
+                "trait_type": "Namewrapper State"
+              }
+            ],
+            "version": 2,
+            "url": "https://app.ens.domains/name/perov.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.698Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      },
+      {
+        "contract": {
+          "address": "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+          "name": "NameWrapper",
+          "symbol": null,
+          "totalSupply": null,
+          "tokenType": "ERC1155",
+          "contractDeployer": "0x0904Dac3347eA47d208F3Fd67402D039a3b99859",
+          "deployedBlockNumber": 16925608,
+          "openSeaMetadata": {
+            "floorPrice": 3.9e-5,
+            "collectionName": "ENS: Ethereum Name Service",
+            "collectionSlug": "ens",
+            "safelistRequestStatus": "verified",
+            "imageUrl": "https://i2c.seadn.io/collection/ens/image/2389b989ec47442bc2c714bcdf3e19/b02389b989ec47442bc2c714bcdf3e19.png",
+            "description": "Ethereum Name Service (ENS) domains are secure domain names for the decentralized world. ENS domains provide a way for users to map human readable names to blockchain and non-blockchain resources, like Ethereum addresses, IPFS hashes, or website URLs. ENS domains can be bought and sold on secondary markets.",
+            "externalUrl": null,
+            "twitterUsername": "ensdomains",
+            "discordUrl": null,
+            "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside",
+            "lastIngestedAt": "2026-02-07T21:33:12.000Z"
+          },
+          "isSpam": false,
+          "spamClassifications": []
+        },
+        "tokenId": "100306788858936657886470437784892263551069901116978269278452313949238264163798",
+        "tokenType": "ERC1155",
+        "name": "imajus.eth",
+        "description": "imajus.eth, an ENS name.",
+        "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6",
+        "image": {
+          "cachedUrl": "https://nft-cdn.alchemy.com/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "thumbnailUrl": "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "pngUrl": "https://res.cloudinary.com/alchemyapi/image/upload/convert-png/eth-mainnet/d909d06a81a4ed625e02a5d2d8175586",
+          "contentType": "image/svg+xml",
+          "size": 206012,
+          "originalUrl": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image"
+        },
+        "animation": {
+          "cachedUrl": null,
+          "contentType": null,
+          "size": null,
+          "originalUrl": null
+        },
+        "raw": {
+          "tokenUri": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6",
+          "metadata": {
+            "background_image": "https://metadata.ens.domains/mainnet/avatar/imajus.eth",
+            "image": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image",
+            "last_request_date": 1770546089693,
+            "is_normalized": true,
+            "image_url": "https://metadata.ens.domains/mainnet/0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401/0xddc3a16de9a841f09cf8ba5aab7f1f117b377a5fd4afa8eff00ee8c6038d6dd6/image",
+            "name": "imajus.eth",
+            "description": "imajus.eth, an ENS name.",
+            "attributes": [
+              {
+                "display_type": "date",
+                "value": 1695192995000,
+                "trait_type": "Created Date"
+              },
+              { "display_type": "number", "value": 6, "trait_type": "Length" },
+              {
+                "display_type": "number",
+                "value": 6,
+                "trait_type": "Segment Length"
+              },
+              {
+                "display_type": "string",
+                "value": "letter",
+                "trait_type": "Character Set"
+              },
+              {
+                "display_type": "object",
+                "value": {
+                  "parent": {
+                    "PARENT_CANNOT_CONTROL": true,
+                    "unnamed": {
+                      "524288": false,
+                      "1048576": false,
+                      "2097152": false,
+                      "4194304": false,
+                      "8388608": false,
+                      "16777216": false,
+                      "33554432": false,
+                      "67108864": false,
+                      "134217728": false,
+                      "268435456": false,
+                      "536870912": false,
+                      "1073741824": false,
+                      "2147483648": false
+                    },
+                    "CAN_EXTEND_EXPIRY": false,
+                    "IS_DOT_ETH": true
+                  },
+                  "child": {
+                    "CANNOT_APPROVE": false,
+                    "CANNOT_SET_RESOLVER": false,
+                    "CANNOT_CREATE_SUBDOMAIN": false,
+                    "CAN_DO_EVERYTHING": true,
+                    "CANNOT_UNWRAP": false,
+                    "unnamed": {
+                      "128": false,
+                      "256": false,
+                      "512": false,
+                      "1024": false,
+                      "2048": false,
+                      "4096": false,
+                      "8192": false,
+                      "16384": false,
+                      "32768": false
+                    },
+                    "CANNOT_BURN_FUSES": false,
+                    "CANNOT_TRANSFER": false,
+                    "CANNOT_SET_TTL": false
+                  }
+                },
+                "trait_type": "Namewrapper Fuse States"
+              },
+              {
+                "display_type": "date",
+                "value": 1734504995000,
+                "trait_type": "Namewrapper Expiry Date"
+              },
+              {
+                "display_type": "string",
+                "value": "Emancipated",
+                "trait_type": "Namewrapper State"
+              }
+            ],
+            "version": 2,
+            "url": "https://app.ens.domains/name/imajus.eth"
+          },
+          "error": null
+        },
+        "collection": {
+          "name": "ENS: Ethereum Name Service",
+          "slug": "ens",
+          "externalUrl": null,
+          "bannerImageUrl": "https://i2c.seadn.io/collection/ens/desktopHeroMedia/dd03416d9fdbfa8469940079031f9e/dcdd03416d9fdbfa8469940079031f9e.png?fit=inside"
+        },
+        "mint": {
+          "mintAddress": null,
+          "blockNumber": null,
+          "timestamp": null,
+          "transactionHash": null
+        },
+        "owners": null,
+        "timeLastUpdated": "2026-02-08T10:21:29.949Z",
+        "balance": "1",
+        "acquiredAt": { "blockTimestamp": null, "blockNumber": null },
+        "classification": {
+          "is_poap": false,
+          "safelist": "verified",
+          "is_ens": true
+        }
+      }
+    ],
+    "counts": { "total": 4, "poaps": 0, "legit": 4, "spam": 0, "ens": 3 }
+  },
+  "tokens": {
+    "holdings": [
+      {
+        "contractAddress": "0x66a3c2fa3e467aa586e90912f977e648589cabaf",
+        "tokenBalance": "0x000000000000000000000000000000000000000000000000000001977420dc00",
+        "contract_address": "0x66a3c2fa3e467aa586e90912f977e648589cabaf",
+        "symbol": "AICC",
+        "name": "AI Chain Coin",
+        "decimals": 8,
+        "balance_human": 17500.0,
+        "balance_raw": 1750000000000,
+        "current_price_usd": 0.0,
+        "value_usd": 0.0,
+        "category": "unknown",
+        "volatility_30d": null,
+        "logo": null,
+        "metadata": {
+          "decimals": 8,
+          "logo": null,
+          "name": "AI Chain Coin",
+          "symbol": "AICC"
+        }
+      }
+    ],
+    "concentration": {
+      "herfindahl_index": 0,
+      "top_1_concentration": 0,
+      "top_3_concentration": 0,
+      "top_5_concentration": 0,
+      "diversification_score": 0,
+      "num_tokens": 1
+    }
+  },
+  "eth_balance": 0.000128454527028901,
+  "defi_analysis": {
+    "protocol_interactions": {
+      "aave": false,
+      "compound": false,
+      "uniswap": false,
+      "curve": false,
+      "ethena": false,
+      "morpho": false,
+      "total_protocols": 0,
+      "staking_events": 0,
+      "protocol_details": []
+    },
+    "mixer_check": {
+      "has_mixer_interaction": true,
+      "mixer_tx_count": 5,
+      "unique_mixers": ["0x0000000000000000000000000000000000000000"],
+      "per_mixer_tx_count": { "0x0000000000000000000000000000000000000000": 5 },
+      "incoming_mixer_txs": 3,
+      "outgoing_mixer_txs": 2,
+      "first_interaction_timestamp": "2023-09-20T06:56:35.000Z",
+      "last_interaction_timestamp": "2026-01-27T15:40:23.000Z",
+      "unique_counterparties": 1,
+      "tx_hashes": [
+        "0xfbd9284baabbc3cd9f3e2e3bdeca303f836c1e201af23714879c87a793af4913",
+        "0xe1587d84603ba308ab03cecc587cfae1a1df9e81b36e4e833df6ce121a198d15",
+        "0xafc6c92e526b0e394e5619eac6f552e892f40efc6bccd78aa6a6869bb63cc0f9",
+        "0x77bc29756f23c2ccf88f5a6d5876401ea481dfab8de4b4e1f4d8e0f3be32f8d8",
+        "0xcca0b0c92d2533def430dfc77347633850579fa0c783f68ef7ea96d0442b57b9"
+      ]
+    },
+    "stablecoins": {
+      "total_stablecoin_usd": 0.0,
+      "has_stablecoins": false,
+      "stablecoin_breakdown": []
+    }
+  },
+  "wallet_metadata": {
+    "first_transaction_date": "2023-01-21T12:22:47+00:00",
+    "last_transaction_date": "2026-02-06T16:17:23+00:00",
+    "wallet_age_days": 1113,
+    "total_transactions": 89,
+    "incoming_transactions": 36,
+    "outgoing_transactions": 53,
+    "unique_counterparties": 47,
+    "average_txs_per_month": 2.398921832884097
+  },
+  "lending_history": {
+    "error": "'str' object has no attribute 'get'",
+    "protocol_analysis": {
+      "protocols": {},
+      "summary": {},
+      "risk_indicators": {}
+    }
+  }
+}
