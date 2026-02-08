@@ -254,13 +254,18 @@ Analyze and respond with JSON only.`;
 }
 
 /**
- * Fetch EVM data from n8n webhook API
+ * Fetch EVM data from aggregate API
  */
 async function fetchEVMData(address) {
-  const url = `https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address=${address}`;
+  const url = 'https://reputa-data.majus.app/aggregate';
   try {
-    const response = await httpClient.get(url, {
-      headers: { 'User-Agent': 'EVM-Score-Oracle/1.0' },
+    const response = await httpClient.post(url, {
+      wallet_address: address
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'EVM-Score-Oracle/1.0'
+      },
       timeout: 10000
     });
     if (!response.data) {
