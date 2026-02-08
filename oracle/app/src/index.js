@@ -8,7 +8,7 @@ import { createHash } from 'crypto';
 import fs from 'fs';
 import { bcs } from '@mysten/bcs';
 import { Ollama } from 'ollama';
-import { validateAIResponseData, calculateTotalScore } from './validation.js';
+import { validateAIResponseData } from './validation.js';
 
 // Configure @noble/secp256k1 to use @noble/hashes for SHA-256
 hashes.sha256 = sha256;
@@ -65,15 +65,14 @@ function formatQuestionnaireForAI(questionnaire) {
 }
 
 /**
- * Generate fallback scoreBreakdown from transaction count
+ * Generate fallback scoreBreakdown from total score
  */
-function generateFallbackBreakdown(totalTransactions) {
-  const baseScore = Math.min(100, Math.floor(totalTransactions / 30));
+function generateFallbackBreakdown(totalScore) {
   return {
-    activity: baseScore,
-    maturity: Math.floor(baseScore * 0.8),
-    diversity: Math.floor(baseScore * 0.6),
-    riskBehavior: 50,
+    activity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    maturity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    diversity: Math.round(Math.max(0, Math.min(100, totalScore * 0.20 / 10))),
+    riskBehavior: Math.round(Math.max(0, Math.min(100, totalScore * 0.25 / 10))),
     surveyMatch: 50
   };
 }
@@ -187,8 +186,12 @@ Provide a detailed breakdown across 5 dimensions (each 0-100):
 4. **Risk Behavior / Financial Health** (0-100): Liquidation history, borrow/repay ratio, concentration risk, liability disclosure from questionnaire
 5. **Questionnaire Coherence** (0-100): Alignment between stated intent and on-chain behavior. If no questionnaire provided, default to 50 (neutral)
 
+Calculate total score as weighted average:
+Total Score (0-1000) = (Activity*2 + Maturity*2 + Diversity*2 + RiskBehavior*2.5 + Coherence*1.5)
+
 Output Format (JSON only):
 {
+  "score": <integer 0-1000>,
   "scoreBreakdown": {
     "activity": <integer 0-100>,
     "maturity": <integer 0-100>,
@@ -196,14 +199,14 @@ Output Format (JSON only):
     "riskBehavior": <integer 0-100>,
     "surveyMatch": <integer 0-100>
   },
-  "reasoning": "<2-3 sentence explanation of overall assessment>",
+  "reasoning": "<2-3 sentence explanation of overall score>",
   "risk_factors": ["<factor1>", "<factor2>"],
   "strengths": ["<strength1>", "<strength2>"]
 }
 
 Analyze and respond with JSON only.`;
-  const temperatures = [0.3, 0.2, 0.1];
-  const maxRetries = 3;
+  const temperatures = [0.2, 0.1, 0.05];
+  const maxRetries = temperatures.length;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     const temperature = temperatures[attempt];
     console.log(`AI scoring attempt ${attempt + 1}/${maxRetries} with temperature ${temperature}`);
@@ -227,10 +230,9 @@ Analyze and respond with JSON only.`;
         }
         continue;
       }
-      const score = calculateTotalScore(analysis.scoreBreakdown);
       console.log(`AI scoring succeeded on attempt ${attempt + 1}`);
       return {
-        score,
+        score: analysis.score,
         scoreBreakdown: analysis.scoreBreakdown,
         reasoning: analysis.reasoning,
         riskFactors: analysis.risk_factors,
@@ -241,8 +243,8 @@ Analyze and respond with JSON only.`;
       console.error(`AI scoring attempt ${attempt + 1} failed:`, error.message);
       if (attempt === maxRetries - 1) {
         console.error('All AI scoring attempts exhausted, falling back to simple count');
-        const scoreBreakdown = generateFallbackBreakdown(features.totalTransactions);
-        const fallbackScore = calculateTotalScore(scoreBreakdown);
+        const fallbackScore = Math.min(1000, features.totalTransactions * 10);
+        const scoreBreakdown = generateFallbackBreakdown(fallbackScore);
         return {
           score: fallbackScore,
           scoreBreakdown,
