@@ -8,6 +8,7 @@ import { createHash } from 'crypto';
 import fs from 'fs';
 import { bcs } from '@mysten/bcs';
 import { Ollama } from 'ollama';
+import { validateAIResponseData } from './validation.js';
 
 // Configure @noble/secp256k1 to use @noble/hashes for SHA-256
 hashes.sha256 = sha256;
@@ -61,32 +62,6 @@ function formatQuestionnaireForAI(questionnaire) {
     const answerText = answer === '' ? '(not answered)' : answer;
     return `Q${index + 1}: ${item.question}\nA${index + 1}: ${answerText}`;
   }).join('\n\n');
-}
-
-/**
- * Validate and sanitize scoreBreakdown object
- */
-function validateScoreBreakdown(breakdown) {
-  const defaults = {
-    activity: 50,
-    maturity: 50,
-    diversity: 50,
-    riskBehavior: 50,
-    surveyMatch: 50
-  };
-  if (!breakdown || typeof breakdown !== 'object') {
-    return defaults;
-  }
-  const validated = {};
-  for (const key of Object.keys(defaults)) {
-    const value = parseInt(breakdown[key]);
-    if (isNaN(value)) {
-      validated[key] = defaults[key];
-    } else {
-      validated[key] = Math.max(0, Math.min(100, value));
-    }
-  }
-  return validated;
 }
 
 /**
@@ -156,7 +131,7 @@ function generateSeedFromAddress(address) {
 }
 
 /**
- * Generate AI-powered reputation score using Ollama
+ * Generate AI score with validation and retry logic
  */
 async function generateAIScore(evmData, questionnaire = [], walletAddress = '') {
   const features = extractWalletFeatures(evmData);
@@ -165,8 +140,7 @@ async function generateAIScore(evmData, questionnaire = [], walletAddress = '') 
   if (seed !== undefined) {
     console.log(`Using deterministic seed: ${seed} for address: ${walletAddress}`);
   }
-  try {
-    const prompt = `You are a DeFi creditworthiness analyzer. Analyze this Ethereum wallet's on-chain activity and questionnaire responses to provide a detailed reputation score.
+  const prompt = `You are a DeFi creditworthiness analyzer. Analyze this Ethereum wallet's on-chain activity and questionnaire responses to provide a detailed reputation score.
 
 ## On-Chain Activity
 
@@ -231,39 +205,56 @@ Output Format (JSON only):
 }
 
 Analyze and respond with JSON only.`;
-    const response = await ollamaClient.generate({
-      model: 'llama3.2:1b',
-      prompt,
-      format: 'json',
-      options: {
-        temperature: 0.1,
-        num_predict: 800,
-        seed
+  const temperatures = [0.3, 0.2, 0.1];
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const temperature = temperatures[attempt];
+    console.log(`AI scoring attempt ${attempt + 1}/${maxRetries} with temperature ${temperature}`);
+    try {
+      const response = await ollamaClient.generate({
+        model: 'llama3.2:1b',
+        prompt,
+        format: 'json',
+        options: {
+          temperature,
+          num_predict: 800,
+          seed
+        }
+      });
+      const analysis = JSON.parse(response.response);
+      const validation = validateAIResponseData(analysis);
+      if (!validation.valid) {
+        console.error(`Attempt ${attempt + 1} validation failed:`, validation.error, validation.details);
+        if (attempt === maxRetries - 1) {
+          throw new Error(`All ${maxRetries} validation attempts failed`);
+        }
+        continue;
       }
-    });
-    const analysis = JSON.parse(response.response);
-    const score = Math.max(0, Math.min(1000, parseInt(analysis.score || 0)));
-    const scoreBreakdown = validateScoreBreakdown(analysis.scoreBreakdown);
-    return {
-      score,
-      scoreBreakdown,
-      reasoning: analysis.reasoning || 'AI analysis complete',
-      riskFactors: analysis.risk_factors || [],
-      strengths: analysis.strengths || [],
-      features
-    };
-  } catch (error) {
-    console.error('AI scoring failed, falling back to simple count:', error.message);
-    const fallbackScore = Math.min(1000, features.totalTransactions * 10);
-    const scoreBreakdown = generateFallbackBreakdown(fallbackScore);
-    return {
-      score: fallbackScore,
-      scoreBreakdown,
-      reasoning: 'Fallback scoring: AI unavailable',
-      riskFactors: ['AI scoring unavailable'],
-      strengths: [],
-      features
-    };
+      console.log(`AI scoring succeeded on attempt ${attempt + 1}`);
+      return {
+        score: analysis.score,
+        scoreBreakdown: analysis.scoreBreakdown,
+        reasoning: analysis.reasoning,
+        riskFactors: analysis.risk_factors,
+        strengths: analysis.strengths,
+        features
+      };
+    } catch (error) {
+      console.error(`AI scoring attempt ${attempt + 1} failed:`, error.message);
+      if (attempt === maxRetries - 1) {
+        console.error('All AI scoring attempts exhausted, falling back to simple count');
+        const fallbackScore = Math.min(1000, features.totalTransactions * 10);
+        const scoreBreakdown = generateFallbackBreakdown(fallbackScore);
+        return {
+          score: fallbackScore,
+          scoreBreakdown,
+          reasoning: 'Fallback scoring: AI unavailable',
+          riskFactors: ['AI scoring unavailable'],
+          strengths: [],
+          features
+        };
+      }
+    }
   }
 }
 

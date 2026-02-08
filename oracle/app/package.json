@@ -2,13 +2,20 @@
   "name": "evm-score-oracle-node",
   "version": "0.2.0",
   "type": "module",
+  "scripts": {
+    "test": "vitest"
+  },
   "dependencies": {
     "@mysten/bcs": "^1.9.2",
     "@noble/secp256k1": "^3.0.0",
     "@noble/hashes": "^2.0.1",
+    "ajv": "^8.17.1",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "ollama": "^0.6.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
   }
 }
