@@ -10,7 +10,9 @@ EVM Transaction Score Oracle - A Trusted Execution Environment (TEE) oracle that
 ```
 Frontend → POST /score (address + questionnaire) → Enclave API
                                                         ↓
-                                            n8n Webhook (rich EVM data)
+                           POST https://reputa-data.majus.app/aggregate
+                           Body: { wallet_address: "0x..." }
+                           (aggregated EVM analytics across protocols)
                                                         ↓
                             extractWalletFeatures() + formatQuestionnaireForAI()
                                                         ↓
@@ -68,7 +70,7 @@ After deployment, `deployment.env` contains all object IDs and IP addresses.
      - `GET /public-key` - Get enclave's secp256k1 public key
      - `GET /score?address=0x...` - Get score without questionnaire (backward compatible)
      - `POST /score` - Get score with optional questionnaire data
-   - Fetches data from: `https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address={ADDRESS}`
+   - Fetches data from: `POST https://reputa-data.majus.app/aggregate` with `{ wallet_address: "0x..." }`
    - AI scoring via Ollama (llama3.2:1b model)
 
 3. **Deployment Scripts** (`contracts/script/`)
@@ -148,9 +150,9 @@ All IDs saved to `deployment.env` for subsequent operations.
 
 ## Key Technical Details
 
-### n8n API Response Format
+### Aggregate API Response Format
 
-The n8n webhook returns rich analytical data with pre-calculated metrics:
+The aggregate API (`POST https://reputa-data.majus.app/aggregate`) returns rich analytical data with pre-calculated metrics:
 
 ```json
 {
@@ -276,8 +278,10 @@ Each user owns their WalletScore object(s). Registry provides efficient lookup b
 
 ### Local Testing (without TEE)
 ```bash
-# Test n8n API
-curl "https://n8n.majus.org/webhook/c1b4be31-8022-4d48-94a6-7d27a7565440?address=0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"
+# Test aggregation API
+curl -X POST https://reputa-data.majus.app/aggregate \
+  -H "Content-Type: application/json" \
+  -d '{"wallet_address": "0xebd69ba1ee65c712db335a2ad4b6cb60d2fa94ba"}'
 
 # Build contracts
 cd contracts && sui move build
@@ -321,4 +325,4 @@ curl "http://${PUBLIC_IP}:3000/score?address=0x..."
 - **Sui Framework**: testnet branch for Move contracts
 - **Oyster CVM**: TEE deployment platform (AWS Nitro Enclaves)
 - **Nautilus Framework**: Enclave attestation pattern (enclave.move)
-- **n8n Webhook**: EVM transaction data source
+- **Reputa Data API** (`https://reputa-data.majus.app/aggregate`): Aggregated EVM transaction analytics
