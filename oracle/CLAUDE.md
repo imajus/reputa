@@ -326,3 +326,8 @@ curl "http://${PUBLIC_IP}:3000/score?address=0x..."
 - **Oyster CVM**: TEE deployment platform (AWS Nitro Enclaves)
 - **Nautilus Framework**: Enclave attestation pattern (enclave.move)
 - **Reputa Data API** (`https://reputa-data.majus.app/aggregate`): Aggregated EVM transaction analytics
+
+## References
+
+- In-depth Marlin Oyster plarform guide: @../docs/oyster.md
+- Detailed breakdown of scoring framework: @../docs/scoring.md
