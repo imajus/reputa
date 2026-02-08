@@ -246,6 +246,37 @@ Response format:
 
 **Note:** Only the `score`, `wallet_address`, and `timestamp_ms` are signed and stored on-chain. The `metadata` (including scoreBreakdown) is unsigned and returned for frontend display only.
 
+### Deterministic Seeding for Reproducibility
+
+The oracle uses deterministic seeding based on wallet addresses to improve score consistency:
+
+**Seed Generation:**
+```javascript
+function generateSeedFromAddress(address) {
+  const normalized = address.toLowerCase().replace(/^0x/, '');
+  const hash = createHash('sha256').update(normalized).digest();
+  return hash.readUInt32BE(0);
+}
+```
+
+**Ollama Configuration:**
+- Temperature: 0.1 (reduced from 0.3 for better determinism)
+- Seed: SHA-256 hash of normalized wallet address (first 4 bytes as u32)
+
+**Characteristics:**
+- Same wallet always gets the same seed
+- Different wallets get different seeds (SHA-256 prevents collisions)
+- Improves reproducibility when scoring the same wallet multiple times
+- First-run inconsistencies still possible due to Ollama/LLM platform quirks
+- Subsequent runs for same wallet are highly consistent (>90% reproducibility target)
+
+**Limitations:**
+- Not 100% deterministic due to floating-point precision and GPU non-determinism
+- Temperature 0.1 balances determinism with quality (0.0 can degrade reasoning)
+- Seed changes score distribution across wallets but maintains fairness
+
+**Logging:** Seed value is logged in debug output for each scoring request.
+
 ### On-Chain Storage
 ```move
 // User-owned score object (created per wallet per user)

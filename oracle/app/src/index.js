@@ -147,11 +147,24 @@ function extractWalletFeatures(evmData) {
 }
 
 /**
+ * Generate deterministic seed from wallet address
+ */
+function generateSeedFromAddress(address) {
+  const normalized = address.toLowerCase().replace(/^0x/, '');
+  const hash = createHash('sha256').update(normalized).digest();
+  return hash.readUInt32BE(0);
+}
+
+/**
  * Generate AI-powered reputation score using Ollama
  */
-async function generateAIScore(evmData, questionnaire = []) {
+async function generateAIScore(evmData, questionnaire = [], walletAddress = '') {
   const features = extractWalletFeatures(evmData);
   const questionnaireText = formatQuestionnaireForAI(questionnaire);
+  const seed = walletAddress ? generateSeedFromAddress(walletAddress) : undefined;
+  if (seed !== undefined) {
+    console.log(`Using deterministic seed: ${seed} for address: ${walletAddress}`);
+  }
   try {
     const prompt = `You are a DeFi creditworthiness analyzer. Analyze this Ethereum wallet's on-chain activity and questionnaire responses to provide a detailed reputation score.
 
@@ -223,8 +236,9 @@ Analyze and respond with JSON only.`;
       prompt,
       format: 'json',
       options: {
-        temperature: 0.3,
-        num_predict: 800
+        temperature: 0.1,
+        num_predict: 800,
+        seed
       }
     });
     const analysis = JSON.parse(response.response);
@@ -363,7 +377,7 @@ app.get('/score', async (req, res) => {
     }
     console.log(`GET /score - Fetching EVM data for address: ${address}`);
     const evmData = await fetchEVMData(address);
-    const aiResult = await generateAIScore(evmData, []);
+    const aiResult = await generateAIScore(evmData, [], address);
     const timestampMs = Date.now();
     console.log(`AI Score for ${address}: ${aiResult.score}`);
     console.log(`Reasoning: ${aiResult.reasoning}`);
@@ -405,7 +419,7 @@ app.post('/score', async (req, res) => {
       console.log('Questionnaire data:', JSON.stringify(questionnaire, null, 2));
     }
     const evmData = await fetchEVMData(address);
-    const aiResult = await generateAIScore(evmData, questionnaire);
+    const aiResult = await generateAIScore(evmData, questionnaire, address);
     const timestampMs = Date.now();
     console.log(`AI Score for ${address}: ${aiResult.score}`);
     console.log(`Reasoning: ${aiResult.reasoning}`);
