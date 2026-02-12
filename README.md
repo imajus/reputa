@@ -2,13 +2,6 @@
 
 🐡 Reputa -- omni-chain credit scoring with verifiable off-chain logic.
 
-Cooked for ETHGlobal [HackMoney 2026 hackathon](https://ethglobal.com/events/hackmoney2026).
-
-Builders:
-- Mark Verhoeven: Research/Presentation
-- [Alex Naskidashvili](https://github.com/AlexNaskida): Data Aggregator
-- [Denis Perov](https://github.com/imajus): Smart Contracts/Oracle/Scoring Framework
-
 ## Problem
 
 DeFi protocols **lack reliable reputation data**, preventing them from offering trustless personalized terms to anonymous users. DeFi users **lose their blockchain activity data** when moving between blockchains. Meanwhile, **current credit scoring is expensive** (high gas fees for on-chain computation) **and limited** (centralized, backward-looking frameworks).
@@ -54,9 +47,3 @@ A **cross-chain reputation bridge** that:
 - **Reputation Signals:** POAPs, ENS, verified/blue-chip NFTs, clean lending history.
 - **Risk Signals:**: Tornado Cash, span NFTs, drainer patterns, high portfolio concentration.
 - **Protocol Coverage:** Aave V2/V3, Compound V2/V3, Uniswap V2/V3, Curve Finance, Ethena (USDe, deUSD), Lido (stETH).
-
-## Links
-
-- [Project page](https://ethglobal.com/showcase/reputa-wda0t) @ ETHGlobal.
-- [Presentation](https://www.canva.com/design/DAHAXlWJGDk/YDdKRy8GO015gLjuMasXDw/edit) @ Canva.
-- [Live demo](https://reputa.pages.dev)

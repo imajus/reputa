@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "sui-stack-dev@sui-stack-plugins": true
+  }
+}

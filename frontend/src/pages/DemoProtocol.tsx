@@ -1,18 +1,19 @@
-import { Sparkles, Info, ArrowRight, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Layout from '@/components/layout/Layout';
-import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useSuiScore } from '@/hooks/useSuiScore';
-import { useAccount } from 'wagmi';
+import { Sparkles, Info, ArrowRight, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Layout from "@/components/layout/Layout";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { useSuiScore } from "@/hooks/useSuiScore";
+import { useAccount } from "wagmi";
+import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit-react";
 
 const tiers = [
-  { name: 'Premium', minScore: 800, apy: 4.5 },
-  { name: 'Standard', minScore: 600, apy: 6.0 },
-  { name: 'Basic', minScore: 0, apy: 8.0 },
+  { name: "Premium", minScore: 800, apy: 4.5 },
+  { name: "Standard", minScore: 600, apy: 6.0 },
+  { name: "Basic", minScore: 0, apy: 8.0 },
 ];
 
 const DemoProtocol = () => {
@@ -23,7 +24,9 @@ const DemoProtocol = () => {
 
   const hasScore = onChainScore !== null && onChainScore !== undefined;
   const score = onChainScore?.score ?? null;
-  const currentTier = hasScore ? (tiers.find(t => score >= t.minScore) || tiers[2]) : tiers[2];
+  const currentTier = hasScore
+    ? tiers.find((t) => score >= t.minScore) || tiers[2]
+    : tiers[2];
   const borrowRate = currentTier.apy;
 
   return (
@@ -31,15 +34,27 @@ const DemoProtocol = () => {
       <div className="container max-w-2xl py-8">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reputa Demo Lending Protocol</CardTitle>
-            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
-              <span className="text-muted-foreground">Your Tier:</span>
-              <span className="font-semibold text-primary">
-                {currentTier.name}
-              </span>
-              <span className="text-muted-foreground">
-                (Score: {hasScore ? score : 'N/A'})
-              </span>
+            <CardTitle className="text-2xl">
+              Reputa Demo Lending Protocol
+            </CardTitle>
+
+            <div className="mt-4 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Sui Wallet:
+                </span>
+                <ConnectButton />
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
+                <span className="text-muted-foreground">Your Tier:</span>
+                <span className="font-semibold text-primary">
+                  {currentTier.name}
+                </span>
+                <span className="text-muted-foreground">
+                  (Score: {hasScore ? score : "N/A"})
+                </span>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -57,12 +72,13 @@ const DemoProtocol = () => {
                 <Info className="h-4 w-4" />
                 <AlertDescription className="flex items-center justify-between">
                   <span>
-                    Complete the reputation scoring flow to see your personalized tier and borrowing rate.
+                    Complete the reputation scoring flow to see your
+                    personalized tier and borrowing rate.
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/questionnaire')}
+                    onClick={() => navigate("/questionnaire")}
                     className="ml-2"
                   >
                     Get Score <ArrowRight className="ml-1 h-3 w-3" />
@@ -87,7 +103,9 @@ const DemoProtocol = () => {
                     Borrowing Rate: {borrowRate.toFixed(1)}%
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {hasScore ? 'Better reputation = lower rates' : 'Default rate - get scored for better rates'}
+                    {hasScore
+                      ? "Better reputation = lower rates"
+                      : "Default rate - get scored for better rates"}
                   </p>
                 </div>
               </CardContent>
@@ -95,36 +113,47 @@ const DemoProtocol = () => {
 
             {/* Tier Comparison */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">Borrowing Rate Tiers</h3>
+              <h3 className="text-sm font-medium text-foreground">
+                Borrowing Rate Tiers
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Higher reputation scores unlock lower borrowing rates across integrated lending protocols.
+                Higher reputation scores unlock lower borrowing rates across
+                integrated lending protocols.
               </p>
               <div className="space-y-2">
                 {tiers.map((tier) => (
                   <div
                     key={tier.name}
                     className={cn(
-                      'flex items-center justify-between rounded-lg border p-3 transition-all',
+                      "flex items-center justify-between rounded-lg border p-3 transition-all",
                       tier.name === currentTier?.name
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border/50'
+                        ? "border-primary bg-primary/5"
+                        : "border-border/50",
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        'font-medium',
-                        tier.name === currentTier?.name ? 'text-primary' : 'text-foreground'
-                      )}>
+                      <span
+                        className={cn(
+                          "font-medium",
+                          tier.name === currentTier?.name
+                            ? "text-primary"
+                            : "text-foreground",
+                        )}
+                      >
                         {tier.name}
                       </span>
                       <span className="text-sm text-muted-foreground">
                         ({tier.minScore}+)
                       </span>
                     </div>
-                    <span className={cn(
-                      'font-semibold',
-                      tier.name === currentTier?.name ? 'text-primary' : 'text-foreground'
-                    )}>
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        tier.name === currentTier?.name
+                          ? "text-primary"
+                          : "text-foreground",
+                      )}
+                    >
                       {tier.apy.toFixed(1)}%
                     </span>
                   </div>

@@ -5,11 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
-import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+import { DAppKitProvider } from '@mysten/dapp-kit-react';
 import { ReputaProvider } from "@/contexts/ReputaContext";
 import { config } from '@/lib/wagmi';
-import { networkConfig } from '@/lib/suiNetwork';
-import '@mysten/dapp-kit/dist/index.css';
+import { dAppKit } from '@/lib/dapp-kit';
 import Landing from "./pages/Landing";
 import Questionnaire from "./pages/Questionnaire";
 import Analyzing from "./pages/Analyzing";
@@ -31,32 +30,28 @@ const customTheme = lightTheme({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={customTheme}>
-          <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-            <WalletProvider>
-              <TooltipProvider>
-                <ReputaProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/" element={<Landing />} />
-                      <Route path="/questionnaire" element={<Questionnaire />} />
-                      <Route path="/analyze" element={<Analyzing />} />
-                      <Route path="/score" element={<ScoreReview />} />
-                      <Route path="/record" element={<WalletConnect />} />
-                      <Route path="/success" element={<Success />} />
-                      <Route path="/demo" element={<DemoProtocol />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </ReputaProvider>
-              </TooltipProvider>
-            </WalletProvider>
-          </SuiClientProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
+      <RainbowKitProvider theme={customTheme}>
+        <DAppKitProvider dAppKit={dAppKit}>
+          <TooltipProvider>
+            <ReputaProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/questionnaire" element={<Questionnaire />} />
+                  <Route path="/analyze" element={<Analyzing />} />
+                  <Route path="/score" element={<ScoreReview />} />
+                  <Route path="/record" element={<WalletConnect />} />
+                  <Route path="/success" element={<Success />} />
+                  <Route path="/demo" element={<DemoProtocol />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </ReputaProvider>
+          </TooltipProvider>
+        </DAppKitProvider>
+      </RainbowKitProvider>
     </WagmiProvider>
   </QueryClientProvider>
 );

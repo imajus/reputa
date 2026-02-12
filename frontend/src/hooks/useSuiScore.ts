@@ -1,4 +1,4 @@
-import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
+import { useCurrentAccount, useCurrentClient } from '@mysten/dapp-kit-react';
 import { useQuery } from '@tanstack/react-query';
 
 const PACKAGE_ID = import.meta.env.VITE_ORACLE_PACKAGE_ID;
@@ -13,7 +13,7 @@ interface ParsedWalletScore {
 
 export function useSuiScore(evmAddress?: string) {
   const account = useCurrentAccount();
-  const client = useSuiClient();
+  const client = useCurrentClient();
 
   return useQuery({
     queryKey: ['wallet-score', account?.address, evmAddress],
@@ -22,33 +22,31 @@ export function useSuiScore(evmAddress?: string) {
         return null;
       }
 
-      const ownedObjects = await client.getOwnedObjects({
+      const ownedObjects = await client.core.listOwnedObjects({
         owner: account.address,
-        filter: {
-          StructType: `${PACKAGE_ID}::score_oracle::WalletScore`,
-        },
-        options: {
-          showContent: true,
+        type: `${PACKAGE_ID}::score_oracle::WalletScore`,
+        include: {
+          json: true,
         },
       });
 
-      if (!ownedObjects.data || ownedObjects.data.length === 0) {
+      if (!ownedObjects.objects || ownedObjects.objects.length === 0) {
         return null;
       }
 
-      const scoreObjects = ownedObjects.data
+      const scoreObjects = ownedObjects.objects
         .map((obj) => {
-          if (!obj.data?.content || obj.data.content.dataType !== 'moveObject') {
+          if (!obj.json) {
             return null;
           }
 
-          const fields = obj.data.content.fields as any;
+          const fields = obj.json as any;
           return {
             score: parseInt(fields.score),
             walletAddress: fields.wallet_address,
             timestampMs: parseInt(fields.timestamp_ms),
             version: parseInt(fields.version),
-            objectId: obj.data.objectId,
+            objectId: obj.objectId,
           };
         })
         .filter((obj): obj is ParsedWalletScore => obj !== null);

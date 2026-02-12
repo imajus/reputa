@@ -4,8 +4,8 @@ import { Check, Loader2, AlertCircle } from "lucide-react";
 import {
   ConnectButton,
   useCurrentAccount,
-  useSignAndExecuteTransaction,
-} from "@mysten/dapp-kit";
+  useDAppKit,
+} from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
 import { useAccount } from "wagmi";
@@ -26,11 +26,8 @@ const WalletConnect = () => {
   const { state, setSuiAddress, setTxHash } = useReputa();
   const { address } = useAccount();
   const currentAccount = useCurrentAccount();
-  const {
-    mutate: signAndExecute,
-    isPending,
-    error,
-  } = useSignAndExecuteTransaction();
+  const dAppKit = useDAppKit();
+  const [isExecuting, setIsExecuting] = useState(false);
   const [txError, setTxError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,6 +44,7 @@ const WalletConnect = () => {
 
   const handleSign = async () => {
     if (!currentAccount || !address) return;
+    setIsExecuting(true);
     setTxError(null);
     try {
       const walletAddressBytes = new TextEncoder().encode(address);
@@ -65,23 +63,18 @@ const WalletConnect = () => {
           tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(signatureBytes))),
         ],
       });
-      signAndExecute(
-        { transaction: tx },
-        {
-          onSuccess: (result) => {
-            console.log("Transaction successful:", result);
-            setTxHash(result.digest);
-            setTimeout(() => navigate("/success"), 1000);
-          },
-          onError: (err) => {
-            console.error("Transaction error:", err);
-            setTxError(err.message || "Transaction failed");
-          },
-        },
-      );
+      const result = await dAppKit.signAndExecuteTransaction({ transaction: tx });
+      if (result.FailedTransaction) {
+        throw new Error(result.FailedTransaction.status.error?.message || 'Transaction failed');
+      }
+      console.log("Transaction successful:", result);
+      setTxHash(result.Transaction.digest);
+      setTimeout(() => navigate("/success"), 1000);
     } catch (err: any) {
-      console.error("Failed to build transaction:", err);
-      setTxError(err.message || "Failed to build transaction");
+      console.error("Transaction error:", err);
+      setTxError(err.message || "Transaction failed");
+    } finally {
+      setIsExecuting(false);
     }
   };
 
@@ -137,11 +130,11 @@ const WalletConnect = () => {
                   </span>
                 </div>
 
-                {(txError || error) && (
+                {txError && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {txError || error?.message || "Transaction failed"}
+                      {txError}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -180,9 +173,9 @@ const WalletConnect = () => {
                   className="w-full"
                   size="lg"
                   onClick={handleSign}
-                  disabled={isPending}
+                  disabled={isExecuting}
                 >
-                  {isPending ? (
+                  {isExecuting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Signing...
