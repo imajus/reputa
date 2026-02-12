@@ -3,12 +3,12 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { WagmiProvider } from 'wagmi';
-import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
-import { DAppKitProvider } from '@mysten/dapp-kit-react';
+import { WagmiProvider } from "wagmi";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
+import { DAppKitProvider } from "@mysten/dapp-kit-react";
 import { ReputaProvider } from "@/contexts/ReputaContext";
-import { config } from '@/lib/wagmi';
-import { dAppKit } from '@/lib/dapp-kit';
+import { config } from "@/lib/wagmi";
+import { dAppKit } from "@/lib/dapp-kit";
 import Landing from "./pages/Landing";
 import Questionnaire from "./pages/Questionnaire";
 import Analyzing from "./pages/Analyzing";
@@ -21,10 +21,10 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const customTheme = lightTheme({
-  accentColor: 'hsl(var(--primary))',
-  accentColorForeground: 'hsl(var(--primary-foreground))',
-  borderRadius: 'medium',
-  fontStack: 'system',
+  accentColor: "var(--primary)",
+  accentColorForeground: "var(--primary-foreground)",
+  borderRadius: "medium",
+  fontStack: "system",
 });
 
 const App = () => (

@@ -87,7 +87,7 @@ const MigrationVisualization = () => {
       <div
         className="absolute inset-0 opacity-30"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--muted)) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, var(--muted) 1px, transparent 0)`,
           backgroundSize: "40px 40px",
         }}
       />
@@ -132,7 +132,7 @@ const MigrationVisualization = () => {
         <path
           d="M 20 50 Q 50 30 80 50"
           fill="none"
-          stroke="hsl(var(--muted))"
+          stroke="var(--muted)"
           strokeWidth="2"
           strokeDasharray="4 4"
           className={cn(
@@ -143,14 +143,14 @@ const MigrationVisualization = () => {
         {/* Animated particle along path */}
         {particlesActive && (
           <>
-            <circle r="4" fill="hsl(var(--primary))">
+            <circle r="4" fill="var(--primary)">
               <animateMotion
                 dur="2s"
                 repeatCount="indefinite"
                 path="M 20 50 Q 50 30 80 50"
               />
             </circle>
-            <circle r="3" fill="hsl(var(--chart-2))" opacity="0.7">
+            <circle r="3" fill="var(--chart-2)" opacity="0.7">
               <animateMotion
                 dur="2s"
                 repeatCount="indefinite"
@@ -158,7 +158,7 @@ const MigrationVisualization = () => {
                 begin="0.5s"
               />
             </circle>
-            <circle r="2" fill="hsl(var(--primary))" opacity="0.5">
+            <circle r="2" fill="var(--primary)" opacity="0.5">
               <animateMotion
                 dur="2s"
                 repeatCount="indefinite"
